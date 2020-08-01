@@ -76,7 +76,7 @@ AGE_RESULT game_add_actor (size_t x, size_t y)
 
     std::srand (std::rand ());
 
-    game_actors_positions.emplace_back (vec2 (((float)std::rand () / (float)RAND_MAX) * 2 - 1, ((float)std::rand () / (float)RAND_MAX) * 2 - 1));
+    game_actors_positions.emplace_back (((float)std::rand () / (float)RAND_MAX) * 2 - 1, ((float)std::rand () / (float)RAND_MAX) * 2 - 1);
     game_actors_rotations.emplace_back (((float)std::rand () / (float)RAND_MAX) * 360.f, ((float)std::rand () / (float)RAND_MAX) * 10.f);
 
     ++game_live_actor_count;
@@ -92,7 +92,12 @@ AGE_RESULT game_process_left_mouse_click (const size_t x, const size_t y)
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     age_result = game_add_actor (x, y);
+    if (age_result != AGE_RESULT::SUCCESS)
+    {
+        goto exit;
+    }
 
+    age_result = graphics_update_command_buffers ();
     if (age_result != AGE_RESULT::SUCCESS)
     {
         goto exit;
@@ -106,6 +111,12 @@ AGE_RESULT game_update (void)
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
+    age_result = graphics_update_transforms_buffer ();
+    if (age_result != AGE_RESULT::SUCCESS)
+    {
+        goto exit;
+    }
+
 exit:
     return age_result;
 }
@@ -113,6 +124,12 @@ exit:
 AGE_RESULT game_submit_present (void)
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
+
+    age_result = graphics_submit_present();
+    if (age_result != AGE_RESULT::SUCCESS)
+    {
+        goto exit;
+    }
 
 exit:
     return age_result;

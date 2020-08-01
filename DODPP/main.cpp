@@ -82,7 +82,7 @@ int WINAPI wWinMain (_In_ HINSTANCE h_instance, _In_opt_ HINSTANCE previous_inst
     wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
     wc.lpfnWndProc = WindowProc;
     wc.hInstance = h_instance;
-    wc.lpszClassName = L"DOD";
+    wc.lpszClassName = L"DODPP";
     wc.hCursor = LoadCursor (h_instance, IDC_ARROW);
 
     if (!RegisterClass (&wc))
@@ -93,7 +93,7 @@ int WINAPI wWinMain (_In_ HINSTANCE h_instance, _In_opt_ HINSTANCE previous_inst
     HWND h_wnd = CreateWindow (
         L"DOD", 
         L"DOD",
-        WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX,
+        WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU,
         CW_USEDEFAULT,
         CW_USEDEFAULT,
         1280,
