@@ -87,12 +87,12 @@ int WINAPI wWinMain (_In_ HINSTANCE h_instance, _In_opt_ HINSTANCE previous_inst
 
     if (!RegisterClass (&wc))
     {
-        return EXIT_FAILURE;
+        goto exit;
     }
 
     HWND h_wnd = CreateWindow (
-        L"DOD", 
-        L"DOD",
+        L"DODPP", 
+        L"DODPP",
         WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU,
         CW_USEDEFAULT,
         CW_USEDEFAULT,
@@ -106,7 +106,7 @@ int WINAPI wWinMain (_In_ HINSTANCE h_instance, _In_opt_ HINSTANCE previous_inst
 
     if (!h_wnd)
     {
-        return EXIT_FAILURE;
+        goto exit;
     }
 
     ShowWindow (h_wnd, cmd_show);
@@ -128,7 +128,7 @@ int WINAPI wWinMain (_In_ HINSTANCE h_instance, _In_opt_ HINSTANCE previous_inst
         msg.message != WM_QUIT && 
         msg.message != WM_CLOSE && 
         msg.message != WM_DESTROY
-        )
+    )
     {
         if (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE))
         {
