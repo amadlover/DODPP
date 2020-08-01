@@ -1,17 +1,17 @@
 #include <Windows.h>
 #include <Windowsx.h>
 #include <conio.h>
-#include <cstdio>
-#include <cstdlib>
-#include <ctime>
+#include <iostream>
 
 #include "error.hpp"
+#include "log.hpp"
+#include "game.hpp"
 
 #define ID_GAME_TICK 1237
 
 LRESULT CALLBACK WindowProc (HWND h_wnd, UINT msg, WPARAM w_param, LPARAM l_param)
 {
-    AGE_RESULT age_result = AGE_SUCCESS;
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     switch (msg)
     {
@@ -35,24 +35,23 @@ LRESULT CALLBACK WindowProc (HWND h_wnd, UINT msg, WPARAM w_param, LPARAM l_para
 
         case WM_TIMER:
             age_result = game_update ();
-            if (age_result != AGE_SUCCESS)
+            if (age_result != AGE_RESULT::SUCCESS)
             {
                 log_error (age_result);
-                PostQuitMessage (age_result);
+                PostQuitMessage (0);
             }
             break;
 
         case WM_LBUTTONDOWN:
             age_result = game_process_left_mouse_click (GET_X_LPARAM (l_param), GET_Y_LPARAM (l_param));
-            if (age_result != AGE_SUCCESS)
+            if (age_result != AGE_RESULT::SUCCESS)
             {
                 log_error (age_result);
-                PostQuitMessage (age_result);
+                PostQuitMessage (0);
             }
             break;
 
         case WM_RBUTTONDOWN:
-            game_process_right_mouse_click (GET_X_LPARAM (l_param), GET_Y_LPARAM (l_param));
             break;
 
         case WM_MOUSEMOVE:
@@ -70,7 +69,7 @@ int WINAPI wWinMain (_In_ HINSTANCE h_instance, _In_opt_ HINSTANCE previous_inst
 {
     AllocConsole ();
     freopen ("CONOUT$", "w", stdout);
-    printf ("%s %s %d Hello Console\n", __FILE__, __FUNCTION__, __LINE__);
+    std::cout << "Hello Console\n";
 
     HANDLE con_hnd = GetStdHandle (STD_OUTPUT_HANDLE);
     CONSOLE_FONT_INFOEX font = { sizeof (font) };
@@ -114,7 +113,7 @@ int WINAPI wWinMain (_In_ HINSTANCE h_instance, _In_opt_ HINSTANCE previous_inst
     UpdateWindow (h_wnd);
 
     AGE_RESULT result = game_init (h_instance, h_wnd);
-    if (result != AGE_SUCCESS)
+    if (result != AGE_RESULT::SUCCESS)
     {
         log_error (result);
         goto exit;
@@ -143,7 +142,7 @@ int WINAPI wWinMain (_In_ HINSTANCE h_instance, _In_opt_ HINSTANCE previous_inst
         else
         {
             result = game_submit_present ();
-            if (result != AGE_SUCCESS)
+            if (result != AGE_RESULT::SUCCESS)
             {
                 log_error (result);
                 goto exit;

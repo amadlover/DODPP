@@ -11,8 +11,8 @@ include_directories (${CMAKE_SOURCE_DIR}/External/stb)
 
 link_directories ($ENV{VULKAN_SDK}/Lib32)
 
-set (HPP error.hpp)
-set (CPP main.cpp)
+set (HPP error.hpp game.hpp log.hpp graphics.hpp types.h)
+set (CPP main.cpp game.cpp log.cpp graphics.cpp)
 
 add_executable (DODPP WIN32 ${HPP} ${CPP})
 target_link_libraries (DODPP vulkan-1)
