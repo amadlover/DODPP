@@ -3,11 +3,6 @@
 #include "error.hpp"
 #include <Windows.h>
 
-struct common_graphics
-{
-
-};
-
 AGE_RESULT graphics_common_graphics_init (HINSTANCE h_instance, HWND h_wnd);
 AGE_RESULT graphics_init (void);
 AGE_RESULT graphics_update_command_buffers (void);

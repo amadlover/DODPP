@@ -1,4 +1,5 @@
 #include "graphics.hpp"
+#include "vulkan_interface.hpp"
 
 AGE_RESULT graphics_common_graphics_init (HINSTANCE h_instance, HWND h_wnd)
 {

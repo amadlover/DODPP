@@ -1,9 +1,11 @@
 #include "game.hpp"
 #include "graphics.hpp"
-#include "types.h"
+#include "types.hpp"
+#include "vulkan_interface.hpp"
 
 #include <vector>
 #include <iostream>
+#include <ctime>
 
 /*
  * OOP struct
@@ -32,6 +34,8 @@ std::vector<position_inputs> game_actors_positions_inputs;
 AGE_RESULT game_init (HINSTANCE h_instance, HWND h_wnd)
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
+
+    srand (time (nullptr));
 
     game_current_max_actor_count = game_ACTORS_BATCH_SIZE;
 
