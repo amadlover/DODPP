@@ -23,8 +23,8 @@ VkPhysicalDeviceMemoryProperties physical_device_memory_properties;
 VkPhysicalDeviceLimits physical_device_limits;
 VkExtent2D surface_extent;
 VkSwapchainKHR swapchain;
-VkImage* swapchain_images;
-VkImageView* swapchain_image_views;
+std::vector<VkImage> swapchain_images;
+std::vector<VkImageView> swapchain_image_views;
 size_t swapchain_image_count;
 VkExtent2D current_extent;
 VkSurfaceFormatKHR chosen_surface_format;
@@ -534,9 +534,9 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 	}
 
 	vkGetSwapchainImagesKHR (device, swapchain, &swapchain_image_count, NULL);
-	swapchain_images = (VkImage*)utils_calloc (swapchain_image_count, sizeof (VkImage));
-	vkGetSwapchainImagesKHR (device, swapchain, &swapchain_image_count, swapchain_images);
-	swapchain_image_views = (VkImageView*)utils_calloc (swapchain_image_count, sizeof (VkImageView));
+	swapchain_images.resize (swapchain_image_count);
+	vkGetSwapchainImagesKHR (device, swapchain, &swapchain_image_count, swapchain_images.data ());
+	swapchain_image_views.resize (swapchain_image_count);
 
 	VkImageSubresourceRange subresource_range = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
 	VkComponentMapping component_mapping = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
@@ -554,7 +554,7 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 	for (size_t i = 0; i < swapchain_image_count; ++i)
 	{
 		image_view_create_info.image = swapchain_images[i];
-		vk_result = vkCreateImageView (device, &image_view_create_info, NULL, swapchain_image_views + i);
+		vk_result = vkCreateImageView (device, &image_view_create_info, NULL, &swapchain_image_views[i]);
 
 		if (vk_result != VK_SUCCESS)
 		{
@@ -654,25 +654,21 @@ void vulkan_interface_shutdown (void)
 		vkDestroySampler (device, common_sampler, NULL);
 	}
 
-	if (swapchain_image_views)
+	for (auto& swapchain_image_view : swapchain_image_views)
 	{
-		for (size_t i = 0; i < swapchain_image_count; ++i)
+		if (swapchain_image_view != VK_NULL_HANDLE)
 		{
-			if (swapchain_image_views[i] != VK_NULL_HANDLE)
-			{
-				vkDestroyImageView (device, swapchain_image_views[i], NULL);
-			}
+			vkDestroyImageView (device, swapchain_image_view, NULL);
 		}
-
-		utils_free (swapchain_image_views);
 	}
+	swapchain_image_views.clear ();
 
 	if (swapchain != VK_NULL_HANDLE)
 	{
 		vkDestroySwapchainKHR (device, swapchain, NULL);
 	}
 
-	utils_free (swapchain_images);
+	swapchain_images.clear ();
 
 	if (device != VK_NULL_HANDLE)
 	{

@@ -5,6 +5,7 @@
 #include <Windows.h>
 #include <vulkan/vulkan.h>
 
+#include <vector>
 
 extern VkInstance instance;
 extern VkPhysicalDevice physical_device;
@@ -19,8 +20,8 @@ extern VkPhysicalDeviceMemoryProperties physical_device_memory_properties;
 extern VkPhysicalDeviceLimits physical_device_limits;
 extern VkExtent2D surface_extent;
 extern VkSwapchainKHR swapchain;
-extern VkImage* swapchain_images;
-extern VkImageView* swapchain_image_views;
+extern std::vector<VkImage> swapchain_images;
+extern std::vector<VkImageView> swapchain_image_views;
 extern size_t swapchain_image_count;
 extern VkExtent2D current_extent;
 extern VkSurfaceFormatKHR chosen_surface_format;

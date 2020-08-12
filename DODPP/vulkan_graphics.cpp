@@ -1207,7 +1207,7 @@ AGE_RESULT graphics_create_swapchain_render_pass_framebuffers (void)
 
 	for (size_t i = 0; i < swapchain_image_count; ++i)
 	{
-		framebuffer_create_info.pAttachments = swapchain_image_views + i;
+		framebuffer_create_info.pAttachments = &swapchain_image_views[i];
 
 		vk_result = vkCreateFramebuffer (device, &framebuffer_create_info, NULL, swapchain_framebuffers + i);
 
