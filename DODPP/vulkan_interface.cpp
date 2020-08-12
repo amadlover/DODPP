@@ -1,15 +1,35 @@
-#include "vulkan_interface.h"
-#include "utils.h"
+#include "vulkan_interface.hpp"
+#include "utils.hpp"
 
-#include <stdio.h>
+#include <cstdio>
 #include <vulkan/vulkan_win32.h>
 
 bool is_validation_needed = false;
 VkDebugUtilsMessengerEXT debug_utils_messenger = VK_NULL_HANDLE;
 VkSurfaceKHR surface = VK_NULL_HANDLE;
 VkSurfaceCapabilitiesKHR surface_capabilities = { 0 };
-VkSurfaceFormatKHR chosen_surface_format;
 VkPresentModeKHR chosen_present_mode;
+
+VkInstance instance;
+VkPhysicalDevice physical_device;
+VkDevice device;
+uint32_t graphics_queue_family_index;
+uint32_t compute_queue_family_index;
+uint32_t transfer_queue_family_index;
+VkQueue graphics_queue;
+VkQueue compute_queue;
+VkQueue transfer_queue;
+VkPhysicalDeviceMemoryProperties physical_device_memory_properties;
+VkPhysicalDeviceLimits physical_device_limits;
+VkExtent2D surface_extent;
+VkSwapchainKHR swapchain;
+VkImage* swapchain_images;
+VkImageView* swapchain_image_views;
+size_t swapchain_image_count;
+VkExtent2D current_extent;
+VkSurfaceFormatKHR chosen_surface_format;
+VkCommandPool transfer_command_pool;
+VkSampler common_sampler;
 
 VkResult create_debug_utils_messenger (VkInstance instance,
 	const VkDebugUtilsMessengerCreateInfoEXT* debug_utils_messenger_create_info,
@@ -61,7 +81,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL debug_messenger_callback (
 
 AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 {
-    AGE_RESULT age_result = AGE_SUCCESS;
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 	VkResult vk_result = VK_SUCCESS;
 
 #ifdef _DEBUG 
@@ -210,7 +230,7 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 		vk_result = vkCreateInstance (&instance_create_info, NULL, &instance);
 		if (vk_result != VK_SUCCESS)
 		{
-			age_result = AGE_ERROR_GRAPHICS_CREATE_INSTANCE;
+			age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_INSTANCE;
 			goto exit;
 		}
 
@@ -233,7 +253,7 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 
 		if (vk_result != VK_SUCCESS)
 		{
-			age_result = AGE_ERROR_GRAPHICS_CREATE_DEBUG_UTILS_MESSENGER;
+			age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_DEBUG_UTILS_MESSENGER;
 			goto exit;
 		}
 	}
@@ -250,11 +270,11 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 			requested_instance_extensions
 		};
 
-		AGE_RESULT age_result = AGE_SUCCESS;
+		AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 		VkResult vk_result = vkCreateInstance (&instance_create_info, NULL, &instance);
 		if (vk_result != VK_SUCCESS)
 		{
-			age_result = AGE_ERROR_GRAPHICS_CREATE_INSTANCE;
+			age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_INSTANCE;
 			goto exit;
 		}
 	}
@@ -264,7 +284,7 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 
 	if (physical_device_count == 0)
 	{
-		age_result = AGE_ERROR_GRAPHICS_GET_PHYSICAL_DEVICE;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_GET_PHYSICAL_DEVICE;
 		goto exit;
 	}
 
@@ -344,7 +364,7 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_CREATE_SURFACE;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_SURFACE;
 		goto exit;
 	}
 
@@ -353,7 +373,7 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 
 	if (!is_surface_supported)
 	{
-		age_result = AGE_ERROR_GRAPHICS_SURFACE_SUPPORT;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_SURFACE_SUPPORT;
 		goto exit;
 	}
 
@@ -429,7 +449,7 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 
 	float priorities[3] = { 1.f, 1.f, 1.f };
 
-	VkDeviceQueueCreateInfo queue_create_infos[3] = { 0,0,0 };
+	VkDeviceQueueCreateInfo queue_create_infos[3] = { };
 	size_t unique_queue_family_indices[3] = { 0,0,0 };
 	size_t unique_queue_count[3] = { 1,1,1 };
 	size_t unique_queue_family_index_count = 0;
@@ -480,7 +500,7 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_CREATE_GRAPHICS_DEVICE;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_GRAPHICS_DEVICE;
 		goto exit;
 	}
 
@@ -509,7 +529,7 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_CREATE_SWAPCHAIN;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_SWAPCHAIN;
 		goto exit;
 	}
 
@@ -519,6 +539,7 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 	swapchain_image_views = (VkImageView*)utils_calloc (swapchain_image_count, sizeof (VkImageView));
 
 	VkImageSubresourceRange subresource_range = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+	VkComponentMapping component_mapping = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
 	VkImageViewCreateInfo image_view_create_info = {
 		VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
 		NULL,
@@ -526,7 +547,7 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 		VK_NULL_HANDLE,
 		VK_IMAGE_VIEW_TYPE_2D,
 		chosen_surface_format.format,
-		{0},
+		component_mapping,
 		subresource_range
 	};
 
@@ -537,7 +558,7 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 
 		if (vk_result != VK_SUCCESS)
 		{
-			age_result = AGE_ERROR_GRAPHICS_CREATE_IMAGE_VIEW;
+			age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_IMAGE_VIEW;
 			goto exit;
 		}
 	}
@@ -560,7 +581,7 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 	vk_result = vkCreateCommandPool (device, &transfer_command_pool_create_info, NULL, &transfer_command_pool);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_CREATE_COMMAND_POOL;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_COMMAND_POOL;
 		goto exit;
 	}
 
@@ -588,7 +609,7 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 	vk_result = vkCreateSampler (device, &sampler_create_info, NULL, &common_sampler);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_CREATE_SAMPLER;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_SAMPLER;
 		goto exit;
 	}
 

@@ -1,12 +1,12 @@
 #include <Windows.h>
 #include <Windowsx.h>
 #include <conio.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 
-#include "error.h"
-#include "log.h"
-#include "game.h"
+#include "error.hpp"
+#include "log.hpp"
+#include "game.hpp"
 
 #define ID_GAME_TICK 1237
 
@@ -14,7 +14,7 @@ unsigned long long last_tick_count = 0;
 
 LRESULT CALLBACK WindowProc (HWND h_wnd, UINT msg, WPARAM w_param, LPARAM l_param)
 {
-    AGE_RESULT age_result = AGE_SUCCESS;
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     unsigned long long current_tick_count = 0;
 
@@ -34,19 +34,19 @@ LRESULT CALLBACK WindowProc (HWND h_wnd, UINT msg, WPARAM w_param, LPARAM l_para
 
     case WM_KEYDOWN:
         age_result = game_process_key_down (w_param);
-        if (age_result != AGE_SUCCESS)
+        if (age_result != AGE_RESULT::SUCCESS)
         {
             log_error (age_result);
-            PostQuitMessage (age_result);
+            PostQuitMessage (0);
         }
         break;
 
     case WM_KEYUP:
         age_result = game_process_key_up (w_param);
-        if (age_result != AGE_SUCCESS)
+        if (age_result != AGE_RESULT::SUCCESS)
         {
             log_error (age_result);
-            PostQuitMessage (age_result);
+            PostQuitMessage (0);
         }
         break;
 
@@ -56,38 +56,38 @@ LRESULT CALLBACK WindowProc (HWND h_wnd, UINT msg, WPARAM w_param, LPARAM l_para
         age_result = game_update ((size_t)(current_tick_count - last_tick_count));
         last_tick_count = current_tick_count;
 
-        if (age_result != AGE_SUCCESS)
+        if (age_result != AGE_RESULT::SUCCESS)
         {
             log_error (age_result);
-            PostQuitMessage (age_result);
+            PostQuitMessage (0);
         }
 
         break;
 
     case WM_LBUTTONDOWN:
         age_result = game_process_left_mouse_click (GET_X_LPARAM (l_param), GET_Y_LPARAM (l_param));
-        if (age_result != AGE_SUCCESS)
+        if (age_result != AGE_RESULT::SUCCESS)
         {
             log_error (age_result);
-            PostQuitMessage (age_result);
+            PostQuitMessage (0);
         }
         break;
 
     case WM_RBUTTONDOWN:
         age_result = game_process_right_mouse_click (GET_X_LPARAM (l_param), GET_Y_LPARAM (l_param));
-        if (age_result != AGE_SUCCESS)
+        if (age_result != AGE_RESULT::SUCCESS)
         {
             log_error (age_result);
-            PostQuitMessage (age_result);
+            PostQuitMessage (0);
         }
         break;
 
     case WM_MOUSEMOVE:
         age_result = game_process_mouse_move (GET_X_LPARAM (l_param), GET_Y_LPARAM (l_param));
-        if (age_result != AGE_SUCCESS)
+        if (age_result != AGE_RESULT::SUCCESS)
         {
             log_error (age_result);
-            PostQuitMessage (age_result);
+            PostQuitMessage (0);
         }
         break;
 
@@ -147,7 +147,7 @@ int WINAPI wWinMain (_In_ HINSTANCE h_instance, _In_opt_ HINSTANCE previous_inst
     UpdateWindow (h_wnd);
 
     AGE_RESULT result = game_init (h_instance, h_wnd);
-    if (result != AGE_SUCCESS)
+    if (result != AGE_RESULT::SUCCESS)
     {
         log_error (result);
         goto exit;
@@ -174,7 +174,7 @@ int WINAPI wWinMain (_In_ HINSTANCE h_instance, _In_opt_ HINSTANCE previous_inst
         else
         {
             result = game_submit_present ();
-            if (result != AGE_SUCCESS)
+            if (result != AGE_RESULT::SUCCESS)
             {
                 log_error (result);
                 goto exit;

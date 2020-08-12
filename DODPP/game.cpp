@@ -1,14 +1,14 @@
-#include "game.h"
-#include "vulkan_graphics.h"
-#include "types.h"
-#include "vulkan_interface.h"
+#include "game.hpp"
+#include "vulkan_graphics.hpp"
+#include "types.hpp"
+#include "vulkan_interface.hpp"
 
-#include "utils.h"
+#include "utils.hpp"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <time.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cmath>
+#include <ctime>
 
 
 bool is_w_pressed = false;
@@ -53,7 +53,7 @@ size_t game_delta_time = 0;
 
 AGE_RESULT game_reserve_memory_for_asteroids_bullets ()
 {
-    AGE_RESULT age_result = AGE_SUCCESS;
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     game_asteroid_current_max_count += game_ASTEROID_BATCH_SIZE;
     game_asteroids_transform_inputs = (asteroid_transform_inputs*)utils_calloc (game_asteroid_current_max_count, sizeof (asteroid_transform_inputs));
@@ -73,7 +73,7 @@ exit: // clean up allocations done in this function
 
 AGE_RESULT game_init (const HINSTANCE h_instance, const HWND h_wnd)
 {
-    AGE_RESULT age_result = AGE_SUCCESS;
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     game_player_transform_inputs.time_msecs_to_come_to_rest = 500.f;
     game_player_transform_inputs.forward_vector.x = 0;
@@ -85,22 +85,22 @@ AGE_RESULT game_init (const HINSTANCE h_instance, const HWND h_wnd)
 
     GetClientRect (h_wnd, &window_rect);
 
-    srand (time (NULL));
+    srand (time_t (NULL));
 
     age_result = game_reserve_memory_for_asteroids_bullets ();
-    if (age_result != AGE_SUCCESS)
+    if (age_result != AGE_RESULT::SUCCESS)
     {
         goto exit;
     }
 
     age_result = vulkan_interface_init (h_instance, h_wnd);
-    if (age_result != AGE_SUCCESS)
+    if (age_result != AGE_RESULT::SUCCESS)
     {
         goto exit;
     }
 
     age_result = graphics_init (game_asteroid_current_max_count, game_asteroid_live_count, game_bullet_current_max_count, game_bullet_live_count);
-    if (age_result != AGE_SUCCESS)
+    if (age_result != AGE_RESULT::SUCCESS)
     {
         goto exit;
     }
@@ -111,7 +111,7 @@ exit:  // place to clean up local allocations
 
 AGE_RESULT game_asteroid_add (void)
 {
-    AGE_RESULT age_result = AGE_SUCCESS;
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     if (game_asteroid_live_count == game_asteroid_current_max_count)
     {
@@ -122,7 +122,7 @@ AGE_RESULT game_asteroid_add (void)
         game_asteroids_ids = (actor_id*) utils_realloc (game_asteroids_ids, game_asteroid_current_max_count);
         
         age_result = graphics_create_transforms_buffer (game_asteroid_current_max_count + game_bullet_current_max_count);
-        if (age_result != AGE_SUCCESS)
+        if (age_result != AGE_RESULT::SUCCESS)
         {
             goto exit;
         }
@@ -144,7 +144,7 @@ AGE_RESULT game_asteroid_add (void)
     ++game_asteroid_live_count;
 
     age_result = graphics_update_command_buffers (game_asteroid_live_count, game_bullet_live_count);
-    if (age_result != AGE_SUCCESS)
+    if (age_result != AGE_RESULT::SUCCESS)
     {
         goto exit;
     }
@@ -155,10 +155,10 @@ exit:
 
 AGE_RESULT game_process_left_mouse_click (const int32_t x, const int32_t y)
 {
-    AGE_RESULT age_result = AGE_SUCCESS;
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     age_result = game_asteroid_add ();
-    if (age_result != AGE_SUCCESS)
+    if (age_result != AGE_RESULT::SUCCESS)
     {
         goto exit;
     }
@@ -169,7 +169,7 @@ exit:
 
 AGE_RESULT game_asteroid_remove (size_t index_to_remove)
 {
-    AGE_RESULT age_result = AGE_SUCCESS;
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     srand (rand ());
     //size_t actor_index_to_remove = (size_t)(((float)rand () / (float)RAND_MAX) * game_asteroid_live_count);
@@ -195,7 +195,7 @@ AGE_RESULT game_asteroid_remove (size_t index_to_remove)
     }
 
     age_result = graphics_update_command_buffers (game_asteroid_live_count, game_bullet_live_count);
-    if (age_result != AGE_SUCCESS)
+    if (age_result != AGE_RESULT::SUCCESS)
     {
         goto exit;
     }
@@ -206,10 +206,10 @@ exit:
 
 AGE_RESULT game_process_right_mouse_click (const int32_t x, const int32_t y)
 {
-    AGE_RESULT age_result = AGE_SUCCESS;
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     age_result = game_asteroid_remove ((size_t)(((float)rand () / (float)RAND_MAX) * game_asteroid_live_count));
-    if (age_result != AGE_SUCCESS)
+    if (age_result != AGE_RESULT::SUCCESS)
     {
         goto exit;
     }
@@ -220,7 +220,7 @@ exit:
 
 AGE_RESULT game_update_player_vectors (void)
 {
-    AGE_RESULT age_result = AGE_SUCCESS;
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     float new_vector_x = -sinf (game_player_transform_inputs.rotation);
     float new_vector_y = cosf (game_player_transform_inputs.rotation);
@@ -234,7 +234,7 @@ exit:
 
 AGE_RESULT game_process_mouse_move (const int32_t x, const int32_t y)
 {
-    AGE_RESULT age_result = AGE_SUCCESS;
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     if (x < 0 || y < 0)
     {
@@ -250,7 +250,7 @@ exit:
 
 AGE_RESULT game_player_increase_speed (void)
 {
-    AGE_RESULT age_result = AGE_SUCCESS;
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     if (hypot (game_player_transform_inputs.v.x, game_player_transform_inputs.v.y) > game_player_transform_inputs.max_velocity)
     {
@@ -273,7 +273,7 @@ exit:
 
 AGE_RESULT game_player_decrease_speed (void)
 {
-    AGE_RESULT age_result = AGE_SUCCESS;
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     if (hypot (game_player_transform_inputs.v.x, game_player_transform_inputs.v.y) > game_player_transform_inputs.max_velocity)
     {
@@ -296,13 +296,13 @@ exit:
 
 AGE_RESULT game_player_turn_right (void)
 {
-    AGE_RESULT age_result = AGE_SUCCESS;
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     game_player_transform_inputs.rotation -= (game_player_transform_inputs.rotation_speed * game_delta_time);
     game_player_transform_outputs.rotation = game_player_transform_inputs.rotation;
 
     age_result = game_update_player_vectors ();
-    if (age_result != AGE_SUCCESS)
+    if (age_result != AGE_RESULT::SUCCESS)
     {
         goto exit;
     }
@@ -313,13 +313,13 @@ exit:
 
 AGE_RESULT game_player_turn_left (void)
 {
-    AGE_RESULT age_result = AGE_SUCCESS;
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
     
     game_player_transform_inputs.rotation += (game_player_transform_inputs.rotation_speed * game_delta_time);
     game_player_transform_outputs.rotation = game_player_transform_inputs.rotation;
 
     age_result = game_update_player_vectors ();
-    if (age_result != AGE_SUCCESS)
+    if (age_result != AGE_RESULT::SUCCESS)
     {
         goto exit;
     }
@@ -329,7 +329,7 @@ exit:
 
 AGE_RESULT game_bullet_add (void)
 {
-    AGE_RESULT age_result = AGE_SUCCESS;
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     if (game_bullet_live_count == game_bullet_current_max_count)
     {
@@ -341,7 +341,7 @@ AGE_RESULT game_bullet_add (void)
         game_bullets_ids = (actor_id*)utils_realloc (game_bullets_ids, sizeof (actor_id) * game_bullet_current_max_count);
 
         age_result = graphics_create_transforms_buffer (game_asteroid_current_max_count + game_bullet_current_max_count);
-        if (age_result != AGE_SUCCESS)
+        if (age_result != AGE_RESULT::SUCCESS)
         {
             goto exit;
         }
@@ -363,7 +363,7 @@ AGE_RESULT game_bullet_add (void)
     ++game_bullet_live_count;
 
     age_result = graphics_update_command_buffers (game_asteroid_live_count, game_bullet_live_count);
-    if (age_result != AGE_SUCCESS)
+    if (age_result != AGE_RESULT::SUCCESS)
     {
         goto exit;
     }
@@ -373,7 +373,7 @@ exit:
 
 AGE_RESULT game_bullet_remove (size_t index_to_remove)
 {
-    AGE_RESULT age_result = AGE_SUCCESS;
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     if (game_bullet_live_count > 0)
     {
@@ -401,7 +401,7 @@ AGE_RESULT game_bullet_remove (size_t index_to_remove)
     }
 
     age_result = graphics_update_command_buffers (game_asteroid_live_count, game_bullet_live_count);
-    if (age_result != AGE_SUCCESS)
+    if (age_result != AGE_RESULT::SUCCESS)
     {
         goto exit;
     }
@@ -412,12 +412,12 @@ exit:
 
 AGE_RESULT game_player_attempt_to_shoot (void)
 {
-    AGE_RESULT age_result = AGE_SUCCESS;
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     if (game_secs_since_last_shot > game_player_shooting_interval_msecs)
     {
         age_result = game_bullet_add ();
-        if (age_result != AGE_SUCCESS)
+        if (age_result != AGE_RESULT::SUCCESS)
         {
             goto exit;
         }
@@ -431,7 +431,7 @@ exit:
 
 AGE_RESULT game_bullets_check_life (void)
 {
-    AGE_RESULT age_result = AGE_SUCCESS;
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     for (size_t b = 0; b < game_bullet_live_count; ++b)
     {
@@ -443,7 +443,7 @@ AGE_RESULT game_bullets_check_life (void)
         if (game_bullets_current_lifetimes_msecs[b] > game_bullets_max_lifetime_msecs)
         {
             age_result = game_bullet_remove (b);
-            if (age_result != AGE_SUCCESS)
+            if (age_result != AGE_RESULT::SUCCESS)
             {
                 goto exit;
             }
@@ -456,7 +456,7 @@ exit:
 
 AGE_RESULT game_process_key_down (const WPARAM w_param)
 {
-    AGE_RESULT age_result = AGE_SUCCESS;
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
     
     switch (w_param) 
     {
@@ -506,7 +506,7 @@ exit:
 
 AGE_RESULT game_process_key_up (const WPARAM w_param)
 {
-    AGE_RESULT age_result = AGE_SUCCESS;
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     switch (w_param) 
     {
@@ -556,7 +556,7 @@ exit:
 
 AGE_RESULT game_update_player_asteroids_bullets_output_positions (void)
 {
-    AGE_RESULT age_result = AGE_SUCCESS;
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     game_player_transform_outputs.position.x += game_player_transform_inputs.v.x;
     game_player_transform_outputs.position.y += game_player_transform_inputs.v.y;
@@ -617,7 +617,7 @@ AGE_RESULT game_update_player_asteroids_bullets_output_positions (void)
         if (game_bullets_transform_outputs[b].position.x > 1.f)
         {
             age_result = game_bullet_remove (b);
-            if (age_result != AGE_SUCCESS)
+            if (age_result != AGE_RESULT::SUCCESS)
             {
                 goto exit;
             }
@@ -626,7 +626,7 @@ AGE_RESULT game_update_player_asteroids_bullets_output_positions (void)
         if (game_bullets_transform_outputs[b].position.x < -1.f)
         {
             age_result = game_bullet_remove (b);
-            if (age_result != AGE_SUCCESS)
+            if (age_result != AGE_RESULT::SUCCESS)
             {
                 goto exit;
             }
@@ -635,7 +635,7 @@ AGE_RESULT game_update_player_asteroids_bullets_output_positions (void)
         if (game_bullets_transform_outputs[b].position.y > 1.f)
         {
             age_result = game_bullet_remove (b);
-            if (age_result != AGE_SUCCESS)
+            if (age_result != AGE_RESULT::SUCCESS)
             {
                 goto exit;
             }
@@ -644,7 +644,7 @@ AGE_RESULT game_update_player_asteroids_bullets_output_positions (void)
         if (game_bullets_transform_outputs[b].position.y < -1.f)
         {
             age_result = game_bullet_remove (b);
-            if (age_result != AGE_SUCCESS)
+            if (age_result != AGE_RESULT::SUCCESS)
             {
                 goto exit;
             }
@@ -657,7 +657,7 @@ exit:
 
 AGE_RESULT game_player_apply_damping (void)
 {
-    AGE_RESULT age_result = AGE_SUCCESS;
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     float damping_value = 1;
 
@@ -678,12 +678,12 @@ exit:
 
 AGE_RESULT game_process_player_input (void)
 {
-    AGE_RESULT age_result = AGE_SUCCESS;
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     if (is_w_pressed)
     {
         age_result = game_player_increase_speed ();
-        if (age_result != AGE_SUCCESS)
+        if (age_result != AGE_RESULT::SUCCESS)
         {
             goto exit;
         }
@@ -692,7 +692,7 @@ AGE_RESULT game_process_player_input (void)
     if (is_up_arrow_pressed)
     {
         age_result = game_player_increase_speed ();
-        if (age_result != AGE_SUCCESS)
+        if (age_result != AGE_RESULT::SUCCESS)
         {
             goto exit;
         }
@@ -701,7 +701,7 @@ AGE_RESULT game_process_player_input (void)
     if (is_s_pressed)
     {
         age_result = game_player_decrease_speed ();
-        if (age_result != AGE_SUCCESS)
+        if (age_result != AGE_RESULT::SUCCESS)
         {
             goto exit;
         }
@@ -710,7 +710,7 @@ AGE_RESULT game_process_player_input (void)
     if (is_down_arrow_pressed)
     {
         age_result = game_player_decrease_speed ();
-        if (age_result != AGE_SUCCESS)
+        if (age_result != AGE_RESULT::SUCCESS)
         {
             goto exit;
         }
@@ -719,7 +719,7 @@ AGE_RESULT game_process_player_input (void)
     if (is_d_pressed)
     {
         age_result = game_player_turn_right ();
-        if (age_result != AGE_SUCCESS)
+        if (age_result != AGE_RESULT::SUCCESS)
         {
             goto exit;
         }
@@ -728,7 +728,7 @@ AGE_RESULT game_process_player_input (void)
     if (is_right_arrow_pressed)
     {
         age_result = game_player_turn_right ();
-        if (age_result != AGE_SUCCESS)
+        if (age_result != AGE_RESULT::SUCCESS)
         {
             goto exit;
         }
@@ -737,7 +737,7 @@ AGE_RESULT game_process_player_input (void)
     if (is_a_pressed)
     {
         age_result = game_player_turn_left ();
-        if (age_result != AGE_SUCCESS)
+        if (age_result != AGE_RESULT::SUCCESS)
         {
             goto exit;
         }
@@ -746,7 +746,7 @@ AGE_RESULT game_process_player_input (void)
     if (is_left_arrow_pressed)
     {
         age_result = game_player_turn_left ();
-        if (age_result != AGE_SUCCESS)
+        if (age_result != AGE_RESULT::SUCCESS)
         {
             goto exit;
         }
@@ -755,7 +755,7 @@ AGE_RESULT game_process_player_input (void)
     if (is_space_bar_pressed)
     {
         age_result = game_player_attempt_to_shoot ();
-        if (age_result != AGE_SUCCESS)
+        if (age_result != AGE_RESULT::SUCCESS)
         {
             goto exit;
         }
@@ -767,7 +767,7 @@ exit:
 
 AGE_RESULT game_collision_checks (void)
 {
-    AGE_RESULT age_result = AGE_SUCCESS;
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     for (size_t b = 0; b < game_bullet_live_count; ++b)
     {
@@ -781,13 +781,13 @@ AGE_RESULT game_collision_checks (void)
             if (hypotf (diff.x, diff.y) < 0.1f)
             {
                 age_result = game_bullet_remove (b);
-                if (age_result != AGE_SUCCESS)
+                if (age_result != AGE_RESULT::SUCCESS)
                 {
                     goto exit;
                 }
 
                 age_result = game_asteroid_remove (a);
-                if (age_result != AGE_SUCCESS)
+                if (age_result != AGE_RESULT::SUCCESS)
                 {
                     goto exit;
                 }                
@@ -801,38 +801,38 @@ exit:
 
 AGE_RESULT game_update (size_t delta_msecs)
 {
-    AGE_RESULT age_result = AGE_SUCCESS;
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     game_delta_time = delta_msecs;
 
     game_secs_since_last_shot += game_delta_time;;
 
     age_result = game_process_player_input ();
-    if (age_result != AGE_SUCCESS)
+    if (age_result != AGE_RESULT::SUCCESS)
     {
         goto exit;
     }
 
     age_result = game_update_player_asteroids_bullets_output_positions ();
-    if (age_result != AGE_SUCCESS)
+    if (age_result != AGE_RESULT::SUCCESS)
     {
         goto exit;
     }
 
     age_result = game_player_apply_damping ();
-    if (age_result != AGE_SUCCESS)
+    if (age_result != AGE_RESULT::SUCCESS)
     {
         goto exit;
     }
 
     age_result = game_bullets_check_life ();
-    if (age_result != AGE_SUCCESS)
+    if (age_result != AGE_RESULT::SUCCESS)
     {
         goto exit;
     }
 
     age_result = game_collision_checks ();
-    if (age_result != AGE_SUCCESS)
+    if (age_result != AGE_RESULT::SUCCESS)
     {
         goto exit;
     }
@@ -846,7 +846,7 @@ AGE_RESULT game_update (size_t delta_msecs)
         game_bullet_live_count,
         game_bullet_current_max_count
     );
-    if (age_result != AGE_SUCCESS)
+    if (age_result != AGE_RESULT::SUCCESS)
     {
         goto exit;
     }
@@ -857,10 +857,10 @@ exit: // clear function specific allocations
 
 AGE_RESULT game_submit_present (void)
 {
-    AGE_RESULT age_result = AGE_SUCCESS;
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     age_result = graphics_submit_present ();
-    if (age_result != AGE_SUCCESS)
+    if (age_result != AGE_RESULT::SUCCESS)
     {
         goto exit;
     }

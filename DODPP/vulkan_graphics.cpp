@@ -80,7 +80,7 @@ VkDeviceMemory images_memory = VK_NULL_HANDLE;
 
 AGE_RESULT graphics_create_geometry_buffers (void)
 {
-	AGE_RESULT age_result = AGE_SUCCESS;
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 	VkResult vk_result = VK_SUCCESS;
 
 	VkBuffer staging_vertex_index_buffer = VK_NULL_HANDLE;
@@ -106,7 +106,7 @@ AGE_RESULT graphics_create_geometry_buffers (void)
 
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_CREATE_BUFFER;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_BUFFER;
 		goto exit;
 	}
 
@@ -135,14 +135,14 @@ AGE_RESULT graphics_create_geometry_buffers (void)
 	vk_result = vkAllocateMemory (device, &memory_allocate_info, NULL, &staging_vertex_index_memory);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_ALLOCATE_MEMORY;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_ALLOCATE_MEMORY;
 		goto exit;
 	}
 
 	vk_result = vkBindBufferMemory (device, staging_vertex_index_buffer, staging_vertex_index_memory, 0);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_BIND_BUFFER_MEMORY;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_BIND_BUFFER_MEMORY;
 		goto exit;
 	}
 
@@ -164,7 +164,7 @@ AGE_RESULT graphics_create_geometry_buffers (void)
 
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_MAP_MEMORY;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_MAP_MEMORY;
 		goto exit;
 	}
 
@@ -182,7 +182,7 @@ AGE_RESULT graphics_create_geometry_buffers (void)
 	vk_result = vkCreateBuffer (device, &vertex_index_buffer_create_info, NULL, &vertex_index_buffer);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_CREATE_BUFFER;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_BUFFER;
 		goto exit;
 	}
 
@@ -206,14 +206,14 @@ AGE_RESULT graphics_create_geometry_buffers (void)
 	vk_result = vkAllocateMemory (device, &memory_allocate_info, NULL, &vertex_index_buffer_memory);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_ALLOCATE_MEMORY;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_ALLOCATE_MEMORY;
 		goto exit;
 	}
 
 	vk_result = vkBindBufferMemory (device, vertex_index_buffer, vertex_index_buffer_memory, 0);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_BIND_BUFFER_MEMORY;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_BIND_BUFFER_MEMORY;
 		goto exit;
 	}
 
@@ -228,7 +228,7 @@ AGE_RESULT graphics_create_geometry_buffers (void)
 	vk_result = vkAllocateCommandBuffers (device, &copy_cmd_buffer_allocate_info, &copy_command_buffer);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_ALLOCATE_COMMAND_BUFFER;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_ALLOCATE_COMMAND_BUFFER;
 		goto exit;
 	}
 
@@ -242,7 +242,7 @@ AGE_RESULT graphics_create_geometry_buffers (void)
 	vk_result = vkBeginCommandBuffer (copy_command_buffer, &copy_cmd_buffer_begin_info);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_BEGIN_COMMAND_BUFFER;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_BEGIN_COMMAND_BUFFER;
 		goto exit;
 	}
 
@@ -262,7 +262,7 @@ AGE_RESULT graphics_create_geometry_buffers (void)
 	vk_result = vkEndCommandBuffer (copy_command_buffer);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_END_COMMAND_BUFFER;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_END_COMMAND_BUFFER;
 		goto exit;
 	}
 
@@ -281,7 +281,7 @@ AGE_RESULT graphics_create_geometry_buffers (void)
 	vk_result = vkQueueSubmit (graphics_queue, 1, &submit_info, VK_NULL_HANDLE);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_QUEUE_SUBMIT;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_QUEUE_SUBMIT;
 		goto exit;
 	}
 
@@ -308,7 +308,7 @@ exit:
 
 AGE_RESULT graphics_create_image_buffers (void)
 {
-	AGE_RESULT age_result = AGE_SUCCESS;
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 	VkResult vk_result = VK_SUCCESS;
 
 	int background_image_width = 0;
@@ -363,7 +363,7 @@ AGE_RESULT graphics_create_image_buffers (void)
 	vk_result = vkCreateBuffer (device, &staging_image_buffer_create_info, NULL, &staging_image_buffer);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_CREATE_BUFFER;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_BUFFER;
 		goto exit;
 	}
 
@@ -391,14 +391,14 @@ AGE_RESULT graphics_create_image_buffers (void)
 	vk_result = vkAllocateMemory (device, &memory_allocate_info, NULL, &staging_image_memory);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_ALLOCATE_MEMORY;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_ALLOCATE_MEMORY;
 		goto exit;
 	}
 
 	vk_result = vkBindBufferMemory (device, staging_image_buffer, staging_image_memory, 0);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_BIND_BUFFER_MEMORY;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_BIND_BUFFER_MEMORY;
 		goto exit;
 	}
 
@@ -417,7 +417,7 @@ AGE_RESULT graphics_create_image_buffers (void)
 	);
 
 	if (vk_result != VK_SUCCESS) {
-		age_result = AGE_ERROR_GRAPHICS_MAP_MEMORY;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_MAP_MEMORY;
 		goto exit;
 	}
 
@@ -449,7 +449,7 @@ AGE_RESULT graphics_create_image_buffers (void)
 	vk_result = vkCreateImage (device, &background_image_create_info, NULL, &background_image);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_CREATE_IMAGE;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_IMAGE;
 		goto exit;
 	}
 
@@ -460,7 +460,7 @@ AGE_RESULT graphics_create_image_buffers (void)
 	vk_result = vkCreateImage (device, &player_image_create_info, NULL, &player_image);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_CREATE_IMAGE;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_IMAGE;
 		goto exit;
 	}
 
@@ -471,7 +471,7 @@ AGE_RESULT graphics_create_image_buffers (void)
 	vk_result = vkCreateImage (device, &asteroid_image_create_info, NULL, &asteroid_image);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_CREATE_IMAGE;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_IMAGE;
 		goto exit;
 	}
 
@@ -482,7 +482,7 @@ AGE_RESULT graphics_create_image_buffers (void)
 	vk_result = vkCreateImage (device, &bullet_image_create_info, NULL, &bullet_image);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_CREATE_IMAGE;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_IMAGE;
 		goto exit;
 	}
 
@@ -515,35 +515,35 @@ AGE_RESULT graphics_create_image_buffers (void)
 	vk_result = vkAllocateMemory (device, &memory_allocate_info, NULL, &images_memory);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_ALLOCATE_MEMORY;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_ALLOCATE_MEMORY;
 		goto exit;
 	}
 
 	vk_result = vkBindImageMemory (device, background_image, images_memory, 0);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_BIND_IMAGE_MEMORY;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_BIND_IMAGE_MEMORY;
 		goto exit;
 	}
 
 	vk_result = vkBindImageMemory (device, player_image, images_memory, (VkDeviceSize)background_image_size);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_BIND_IMAGE_MEMORY;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_BIND_IMAGE_MEMORY;
 		goto exit;
 	}
 
 	vk_result = vkBindImageMemory (device, asteroid_image, images_memory, (VkDeviceSize)background_image_size + (VkDeviceSize)player_image_size);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_BIND_IMAGE_MEMORY;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_BIND_IMAGE_MEMORY;
 		goto exit;
 	}
 
 	vk_result = vkBindImageMemory (device, bullet_image, images_memory, (VkDeviceSize)background_image_size + (VkDeviceSize)player_image_size + (VkDeviceSize)asteroid_image_size);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_BIND_IMAGE_MEMORY;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_BIND_IMAGE_MEMORY;
 		goto exit;
 	}
 
@@ -595,7 +595,7 @@ AGE_RESULT graphics_create_image_buffers (void)
 	vk_result = vkAllocateCommandBuffers (device, &change_image_layout_cmd_buffer_allocate_info, &change_image_layout_cmd_buffer);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_ALLOCATE_COMMAND_BUFFER;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_ALLOCATE_COMMAND_BUFFER;
 		goto exit;
 	}
 
@@ -609,7 +609,7 @@ AGE_RESULT graphics_create_image_buffers (void)
 	vk_result = vkBeginCommandBuffer (change_image_layout_cmd_buffer, &change_image_layout_cmd_buffer_begin_info);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_BEGIN_COMMAND_BUFFER;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_BEGIN_COMMAND_BUFFER;
 		goto exit;
 	}
 
@@ -629,7 +629,7 @@ AGE_RESULT graphics_create_image_buffers (void)
 	vk_result = vkEndCommandBuffer (change_image_layout_cmd_buffer);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_END_COMMAND_BUFFER;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_END_COMMAND_BUFFER;
 		goto exit;
 	}
 
@@ -658,7 +658,7 @@ AGE_RESULT graphics_create_image_buffers (void)
 	vk_result = vkAllocateCommandBuffers (device, &copy_buffer_to_image_cmd_buffer_allocate_info, &copy_buffer_to_image_cmd_buffer);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_ALLOCATE_COMMAND_BUFFER;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_ALLOCATE_COMMAND_BUFFER;
 		goto exit;
 	}
 
@@ -667,7 +667,7 @@ AGE_RESULT graphics_create_image_buffers (void)
 	vk_result = vkBeginCommandBuffer (copy_buffer_to_image_cmd_buffer, &copy_buffer_to_image_cmd_buffer_begin_info);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_BEGIN_COMMAND_BUFFER;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_BEGIN_COMMAND_BUFFER;
 		goto exit;
 	}
 
@@ -744,7 +744,7 @@ AGE_RESULT graphics_create_image_buffers (void)
 	vk_result = vkEndCommandBuffer (copy_buffer_to_image_cmd_buffer);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_END_COMMAND_BUFFER;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_END_COMMAND_BUFFER;
 		goto exit;
 	}
 
@@ -763,7 +763,7 @@ AGE_RESULT graphics_create_image_buffers (void)
 	vk_result = vkQueueSubmit (graphics_queue, 1, &copy_buffer_to_image_cmd_submit_info, VK_NULL_HANDLE);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_QUEUE_SUBMIT;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_QUEUE_SUBMIT;
 		goto exit;
 	}
 	vkQueueWaitIdle (graphics_queue);
@@ -797,14 +797,14 @@ AGE_RESULT graphics_create_image_buffers (void)
 	vk_result = vkAllocateCommandBuffers (device, &change_image_layout_cmd_buffer_allocate_info, &change_image_layout_cmd_buffer);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_ALLOCATE_COMMAND_BUFFER;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_ALLOCATE_COMMAND_BUFFER;
 		goto exit;
 	}
 
 	vk_result = vkBeginCommandBuffer (change_image_layout_cmd_buffer, &change_image_layout_cmd_buffer_begin_info);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_BEGIN_COMMAND_BUFFER;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_BEGIN_COMMAND_BUFFER;
 		goto exit;
 	}
 
@@ -824,7 +824,7 @@ AGE_RESULT graphics_create_image_buffers (void)
 	vk_result = vkEndCommandBuffer (change_image_layout_cmd_buffer);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_END_COMMAND_BUFFER;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_END_COMMAND_BUFFER;
 		goto exit;
 	}
 
@@ -838,7 +838,7 @@ AGE_RESULT graphics_create_image_buffers (void)
 	);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_QUEUE_SUBMIT;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_QUEUE_SUBMIT;
 		goto exit;
 	}
 
@@ -858,7 +858,7 @@ AGE_RESULT graphics_create_image_buffers (void)
 	vk_result = vkCreateImageView (device, &background_image_view_create_info, NULL, &background_image_view);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_CREATE_IMAGE_VIEW;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_IMAGE_VIEW;
 		goto exit;
 	}
 
@@ -868,7 +868,7 @@ AGE_RESULT graphics_create_image_buffers (void)
 	vk_result = vkCreateImageView (device, &player_image_view_create_info, NULL, &player_image_view);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_CREATE_IMAGE_VIEW;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_IMAGE_VIEW;
 		goto exit;
 	}
 
@@ -878,7 +878,7 @@ AGE_RESULT graphics_create_image_buffers (void)
 	vk_result = vkCreateImageView (device, &asteroid_image_view_create_info, NULL, &asteroid_image_view);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_CREATE_IMAGE_VIEW;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_IMAGE_VIEW;
 		goto exit;
 	}
 
@@ -888,7 +888,7 @@ AGE_RESULT graphics_create_image_buffers (void)
 	vk_result = vkCreateImageView (device, &bullet_image_view_create_info, NULL, &bullet_image_view);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_CREATE_IMAGE_VIEW;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_IMAGE_VIEW;
 		goto exit;
 	}
 
@@ -924,7 +924,7 @@ exit:
 
 AGE_RESULT graphics_create_pipeline (void)
 {
-	AGE_RESULT age_result = AGE_SUCCESS;
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 	VkResult vk_result = VK_SUCCESS;
 
 	VkShaderModule vertex_shader_module = VK_NULL_HANDLE;
@@ -940,7 +940,7 @@ AGE_RESULT graphics_create_pipeline (void)
 
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_CREATE_SHADER_MODULE;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_SHADER_MODULE;
 		goto exit;
 	}
 
@@ -956,7 +956,7 @@ AGE_RESULT graphics_create_pipeline (void)
 	vk_result = vkCreateShaderModule (device, &fragment_shader_module_create_info, NULL, &fragment_shader_module);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_CREATE_SHADER_MODULE;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_SHADER_MODULE;
 		goto exit;
 	}
 
@@ -1118,7 +1118,7 @@ AGE_RESULT graphics_create_pipeline (void)
 	vk_result = vkCreateGraphicsPipelines (device, VK_NULL_HANDLE, 1, &graphics_pipeline_create_info, NULL, &graphics_pipeline);
 	if (vk_result)
 	{
-		age_result = AGE_ERROR_GRAPHICS_CREATE_GRAPHICS_PIPELINE;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_GRAPHICS_PIPELINE;
 		goto exit;
 	}
 
@@ -1138,7 +1138,7 @@ exit:
 
 AGE_RESULT graphics_create_swapchain_render_pass_framebuffers (void)
 {
-	AGE_RESULT age_result = AGE_SUCCESS;
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 	VkResult vk_result = VK_SUCCESS;
 
 	VkAttachmentDescription color_attachment_description = {
@@ -1187,7 +1187,7 @@ AGE_RESULT graphics_create_swapchain_render_pass_framebuffers (void)
 
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_CREATE_RENDER_PASS;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_RENDER_PASS;
 		goto exit;
 	}
 
@@ -1213,7 +1213,7 @@ AGE_RESULT graphics_create_swapchain_render_pass_framebuffers (void)
 
 		if (vk_result != VK_SUCCESS)
 		{
-			age_result = AGE_ERROR_GRAPHICS_CREATE_FRAMEBUFFER;
+			age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_FRAMEBUFFER;
 			goto exit;
 		}
 	}
@@ -1224,7 +1224,7 @@ exit:
 
 AGE_RESULT graphics_create_swapchain_command_buffers (void)
 {
-	AGE_RESULT age_result = AGE_SUCCESS;
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 	VkResult vk_result = VK_SUCCESS;
 
 	VkCommandPoolCreateInfo command_pool_create_info = {
@@ -1238,7 +1238,7 @@ AGE_RESULT graphics_create_swapchain_command_buffers (void)
 
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_CREATE_COMMAND_POOL;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_COMMAND_POOL;
 		goto exit;
 	}
 
@@ -1256,7 +1256,7 @@ AGE_RESULT graphics_create_swapchain_command_buffers (void)
 
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_ALLOCATE_COMMAND_BUFFER;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_ALLOCATE_COMMAND_BUFFER;
 		goto exit;
 	}
 
@@ -1266,7 +1266,7 @@ exit:
 
 AGE_RESULT graphics_create_swapchain_semaphores_fences (void)
 {
-	AGE_RESULT age_result = AGE_SUCCESS;
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 	VkResult vk_result = VK_SUCCESS;
 
 	VkSemaphoreCreateInfo semaphore_create_info = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO, NULL, 0 };
@@ -1274,7 +1274,7 @@ AGE_RESULT graphics_create_swapchain_semaphores_fences (void)
 
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_CREATE_SEMAPHORE;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_SEMAPHORE;
 		goto exit;
 	}
 
@@ -1285,7 +1285,7 @@ AGE_RESULT graphics_create_swapchain_semaphores_fences (void)
 
 		if (vk_result != VK_SUCCESS)
 		{
-			age_result = AGE_ERROR_GRAPHICS_CREATE_SEMAPHORE;
+			age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_SEMAPHORE;
 			goto exit;
 		}
 	}
@@ -1303,7 +1303,7 @@ AGE_RESULT graphics_create_swapchain_semaphores_fences (void)
 		
 		if (vk_result != VK_SUCCESS)
 		{
-			age_result = AGE_ERROR_GRAPHICS_CREATE_FENCE;
+			age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_FENCE;
 			goto exit;
 		}
 	}
@@ -1315,7 +1315,7 @@ exit:
 
 AGE_RESULT graphics_create_descriptor_sets (void)
 {
-	AGE_RESULT age_result = AGE_SUCCESS;
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 	VkResult vk_result = VK_SUCCESS;
 	
 	VkDescriptorPoolSize descriptor_pool_sizes[] = {
@@ -1340,7 +1340,7 @@ AGE_RESULT graphics_create_descriptor_sets (void)
 	vk_result = vkCreateDescriptorPool (device, &descriptor_pool_create_info, NULL, &descriptor_pool);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_CREATE_DESCRIPTOR_POOL;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_DESCRIPTOR_POOL;
 		goto exit;
 	}
 
@@ -1372,7 +1372,7 @@ AGE_RESULT graphics_create_descriptor_sets (void)
 	vk_result = vkCreateDescriptorSetLayout (device, &transform_descriptor_set_layout_create_info, NULL, &transform_descriptor_set_layout);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_CREATE_DESCRIPTOR_SET_LAYOUT;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_DESCRIPTOR_SET_LAYOUT;
 		goto exit;
 	}
 
@@ -1382,7 +1382,7 @@ AGE_RESULT graphics_create_descriptor_sets (void)
 	vk_result = vkCreateDescriptorSetLayout (device, &texture_descriptor_set_layout_create_info, NULL, &texture_descriptor_set_layout);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_CREATE_DESCRIPTOR_SET_LAYOUT;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_DESCRIPTOR_SET_LAYOUT;
 		goto exit;
 	}
 
@@ -1397,7 +1397,7 @@ AGE_RESULT graphics_create_descriptor_sets (void)
 	vk_result = vkAllocateDescriptorSets (device, &transform_descriptor_set_allocate_info, &transform_descriptor_set);
 	if (vk_result)
 	{
-		age_result = AGE_ERROR_GRAPHICS_ALLOCATE_DESCRIPTOR_SETS;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_ALLOCATE_DESCRIPTOR_SETS;
 		goto exit;
 	}
 
@@ -1412,7 +1412,7 @@ AGE_RESULT graphics_create_descriptor_sets (void)
 	vk_result = vkAllocateDescriptorSets (device, &texture_descriptor_set_allocate_info, &texture_descriptor_set);
 	if (vk_result)
 	{
-		age_result = AGE_ERROR_GRAPHICS_ALLOCATE_DESCRIPTOR_SETS;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_ALLOCATE_DESCRIPTOR_SETS;
 		goto exit;
 	}
 
@@ -1478,7 +1478,7 @@ AGE_RESULT graphics_create_descriptor_sets (void)
 	vk_result = vkCreatePipelineLayout (device, &pipeline_layout_create_info, NULL, &graphics_pipeline_layout);
 	if (vk_result)
 	{
-		age_result = AGE_ERROR_GRAPHICS_CREATE_PIPELINE_LAYOUT;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_PIPELINE_LAYOUT;
 		goto exit;
 	}
 
@@ -1503,7 +1503,7 @@ AGE_RESULT graphics_create_transforms_buffer (const size_t game_current_max_aste
 		vkFreeMemory (device, transforms_buffer_memory, NULL);
 	}
 
-	AGE_RESULT age_result = AGE_SUCCESS;
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 	VkResult vk_result = VK_SUCCESS;
 
 	size_t raw_size_per_transform = sizeof (actor_transform_outputs);
@@ -1533,7 +1533,7 @@ AGE_RESULT graphics_create_transforms_buffer (const size_t game_current_max_aste
 	vk_result = vkCreateBuffer (device, &transforms_buffer_create_info, NULL, &transforms_buffer);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_CREATE_BUFFER;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_BUFFER;
 		goto exit;
 	}
 
@@ -1562,14 +1562,14 @@ AGE_RESULT graphics_create_transforms_buffer (const size_t game_current_max_aste
 	vk_result = vkAllocateMemory (device, &memory_allocate_info, NULL, &transforms_buffer_memory);
 	if (vk_result != VK_SUCCESS) 
 	{
-		age_result = AGE_ERROR_SYSTEM_ALLOCATE_MEMORY;
+		age_result = AGE_RESULT::ERROR_SYSTEM_ALLOCATE_MEMORY;
 		goto exit;
 	}
 
 	vk_result = vkBindBufferMemory (device, transforms_buffer, transforms_buffer_memory, 0);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_BIND_BUFFER_MEMORY;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_BIND_BUFFER_MEMORY;
 		goto exit;
 	}
 
@@ -1611,7 +1611,7 @@ AGE_RESULT graphics_update_transforms_buffer_data (
 	const size_t game_bullet_current_max_count
 )
 {
-	AGE_RESULT age_result = AGE_SUCCESS;
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
 	memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform), game_player_transform_outputs, sizeof (actor_transform_outputs)); 
 	
@@ -1633,7 +1633,7 @@ exit:
 
 AGE_RESULT graphics_update_command_buffers (const size_t game_asteroid_live_count, const size_t game_bullet_live_count)
 {
-	AGE_RESULT age_result = AGE_SUCCESS;
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 	VkResult vk_result = VK_SUCCESS;
 
 	VkCommandBufferBeginInfo command_buffer_begin_info = {
@@ -1656,7 +1656,7 @@ AGE_RESULT graphics_update_command_buffers (const size_t game_asteroid_live_coun
 	vk_result = vkResetCommandPool (device, swapchain_command_pool, VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_RESET_COMMAND_POOL;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_RESET_COMMAND_POOL;
 		goto exit;
 	}
 
@@ -1665,7 +1665,7 @@ AGE_RESULT graphics_update_command_buffers (const size_t game_asteroid_live_coun
 		vk_result = vkBeginCommandBuffer (swapchain_command_buffers[i], &command_buffer_begin_info);
 		if (vk_result != VK_SUCCESS)
 		{
-			age_result = AGE_ERROR_GRAPHICS_BEGIN_COMMAND_BUFFER;
+			age_result = AGE_RESULT::ERROR_GRAPHICS_BEGIN_COMMAND_BUFFER;
 			goto exit;
 		}
 
@@ -1734,7 +1734,7 @@ AGE_RESULT graphics_update_command_buffers (const size_t game_asteroid_live_coun
 		vk_result = vkEndCommandBuffer (swapchain_command_buffers[i]);
 		if (vk_result != VK_SUCCESS)
 		{
-			age_result = AGE_ERROR_GRAPHICS_END_COMMAND_BUFFER;
+			age_result = AGE_RESULT::ERROR_GRAPHICS_END_COMMAND_BUFFER;
 			goto exit;
 		}
 	}
@@ -1746,59 +1746,59 @@ exit: // clear function specific allocations before exit
 
 AGE_RESULT graphics_init (const size_t game_asteroid_current_max_count, const size_t game_asteroid_live_count, const size_t game_bullet_current_max_count, const size_t game_bullet_live_count)
 {
-	AGE_RESULT age_result = AGE_SUCCESS;
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 	VkResult vk_result = VK_SUCCESS;
 
 	age_result = graphics_create_geometry_buffers ();
-	if (age_result != AGE_SUCCESS)
+	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		goto exit;
 	}
 
 	age_result = graphics_create_image_buffers ();
-	if (age_result != AGE_SUCCESS)
+	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		goto exit;
 	}
 
 	age_result = graphics_create_descriptor_sets ();
-	if (age_result != AGE_SUCCESS)
+	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		goto exit;
 	}
 
 	age_result = graphics_create_swapchain_render_pass_framebuffers ();
-	if (age_result != AGE_SUCCESS)
+	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		goto exit;
 	}
 
 	age_result = graphics_create_pipeline ();
-	if (age_result != AGE_SUCCESS)
+	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		goto exit;
 	}
 
 	age_result = graphics_create_swapchain_command_buffers ();
-	if (age_result != AGE_SUCCESS)
+	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		goto exit;
 	}
 
 	age_result = graphics_create_swapchain_semaphores_fences ();
-	if (age_result != AGE_SUCCESS)
+	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		goto exit;
 	}
 
 	age_result = graphics_create_transforms_buffer (game_asteroid_current_max_count + game_bullet_current_max_count);
-	if (age_result != AGE_SUCCESS)
+	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		goto exit;
 	}
 
 	age_result = graphics_update_command_buffers (game_asteroid_live_count, game_bullet_live_count);
-	if (age_result != AGE_SUCCESS)
+	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		goto exit;
 	}
@@ -1809,7 +1809,7 @@ exit: // clear function specific allocations before exit
 
 AGE_RESULT graphics_submit_present (void)
 {
-	AGE_RESULT age_result = AGE_SUCCESS;
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
 	size_t image_index = 0;
 	VkResult vk_result = vkAcquireNextImageKHR (device, swapchain, UINT64_MAX, wait_semaphore, VK_NULL_HANDLE, &image_index);
@@ -1821,12 +1821,12 @@ AGE_RESULT graphics_submit_present (void)
 			vk_result == VK_TIMEOUT ||
 			vk_result == VK_NOT_READY)
 		{
-			age_result = AGE_SUCCESS;
+			age_result = AGE_RESULT::SUCCESS;
 			goto exit;
 		}
 		else
 		{
-			age_result = AGE_ERROR_GRAPHICS_ACQUIRE_NEXT_IMAGE;
+			age_result = AGE_RESULT::ERROR_GRAPHICS_ACQUIRE_NEXT_IMAGE;
 			goto exit;
 		}
 	}
@@ -1849,7 +1849,7 @@ AGE_RESULT graphics_submit_present (void)
 
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_QUEUE_SUBMIT;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_QUEUE_SUBMIT;
 		goto exit;
 	}
 
@@ -1870,7 +1870,7 @@ AGE_RESULT graphics_submit_present (void)
 	{
 		if (vk_result == VK_ERROR_OUT_OF_HOST_MEMORY || vk_result == VK_ERROR_OUT_OF_DEVICE_MEMORY)
 		{
-			age_result = AGE_ERROR_GRAPHICS_QUEUE_PRESENT;
+			age_result = AGE_RESULT::ERROR_GRAPHICS_QUEUE_PRESENT;
 			goto exit;
 		}
 	}
@@ -1878,14 +1878,14 @@ AGE_RESULT graphics_submit_present (void)
 	vk_result = vkWaitForFences (device, 1, swapchain_fences + image_index, VK_TRUE, UINT64_MAX);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_WAIT_FOR_FENCES;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_WAIT_FOR_FENCES;
 		goto exit;
 	}
 
 	vk_result = vkResetFences (device, 1, swapchain_fences + image_index);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_ERROR_GRAPHICS_RESET_FENCES;
+		age_result = AGE_RESULT::ERROR_GRAPHICS_RESET_FENCES;
 		goto exit;
 	}
 

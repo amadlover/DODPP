@@ -2,7 +2,7 @@
 
 AGE_RESULT compute_common_compute_init (void)
 {
-    AGE_RESULT age_result = AGE_SUCCESS;
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
 exit:
     return age_result;
@@ -10,7 +10,7 @@ exit:
 
 AGE_RESULT compute_init (void)
 {
-    AGE_RESULT age_result = AGE_SUCCESS;
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
 exit:
     return age_result;

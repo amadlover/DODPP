@@ -1,8 +1,8 @@
 #pragma once
 
-#include "error.h"
+#include "error.hpp"
 
-#include <stdint.h>
+#include <cstdint>
 #include <Windows.h>
 
 AGE_RESULT game_init (const HINSTANCE h_instance, const HWND h_wnd);

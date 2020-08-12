@@ -2,7 +2,7 @@
 
 #include <Windows.h>
 #include <stdbool.h>
-#include <stdint.h>
+#include <cstdint>
 
 #define CHECK_AGAINST_RESULT(func, result) result = func; if (result != 0) return result;
 
