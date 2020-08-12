@@ -1603,23 +1603,32 @@ exit: // clean up allocations made by the function
 
 AGE_RESULT graphics_update_transforms_buffer_data (
 	const actor_transform_outputs* game_player_transform_outputs, 
-	const actor_transform_outputs* game_asteroids_transform_outputs, 
+	const float2* game_asteroids_outputs_positions, 
+	const float* game_asteroids_outputs_rotations,
 	const size_t game_asteroid_live_count, 
-	const size_t game_asteroid_current_max_count,
-	//const actor_transform_outputs* game_bullets_transform_outputs, 
+	const size_t game_asteroids_current_max_count, 
 	const float2* game_bullets_outputs_positions, 
-	const float* game_bullets_outputs_rotations, 
-	const size_t game_bullet_live_count, 
-	const size_t game_bullet_current_max_count
+	const float* game_bullets_outputs_rotations, const size_t game_bullet_live_count, const size_t game_bullets_current_max_count
 )
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
 	memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform), game_player_transform_outputs, sizeof (actor_transform_outputs)); 
 	
-	for (size_t a = 0; a < game_asteroid_live_count; ++a)
+	/*for (size_t a = 0; a < game_asteroid_live_count; ++a)
 	{
 		memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (a + 2)), game_asteroids_transform_outputs + a, sizeof (actor_transform_outputs));
+	}*/
+	
+
+	for (size_t a = 0; a < game_asteroid_live_count; ++a)
+	{
+		memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (a + 2)), game_asteroids_outputs_positions + a, sizeof (float2));
+	}
+	
+	for (size_t a = 0; a < game_asteroid_live_count; ++a)
+	{
+		memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (a + 2) + sizeof (float2)), game_asteroids_outputs_rotations + a, sizeof (float));
 	}
 
 	/*for (size_t b = 0; b < game_bullet_live_count; ++b)
@@ -1756,7 +1765,7 @@ exit: // clear function specific allocations before exit
 }
 
 
-AGE_RESULT graphics_init (const size_t game_asteroid_current_max_count, const size_t game_asteroid_live_count, const size_t game_bullet_current_max_count, const size_t game_bullet_live_count)
+AGE_RESULT graphics_init (const size_t game_asteroids_current_max_count, const size_t game_asteroid_live_count, const size_t game_bullets_current_max_count, const size_t game_bullet_live_count)
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 	VkResult vk_result = VK_SUCCESS;
@@ -1803,7 +1812,7 @@ AGE_RESULT graphics_init (const size_t game_asteroid_current_max_count, const si
 		goto exit;
 	}
 
-	age_result = graphics_create_transforms_buffer (game_asteroid_current_max_count + game_bullet_current_max_count);
+	age_result = graphics_create_transforms_buffer (game_asteroids_current_max_count + game_bullets_current_max_count);
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		goto exit;

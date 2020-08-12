@@ -75,21 +75,18 @@ struct asteroid_transform_inputs
     {
         forward_vector = float2 (0, 1);
         forward_speed = 0;
-        rotation = 0;
         rotation_speed = 0;
     }
 
-    asteroid_transform_inputs (float2 forward_vector_, float forward_speed_, float rotation_, float rotation_speed_)
+    asteroid_transform_inputs (float2 forward_vector_, float forward_speed_, float rotation_speed_)
     {
         forward_vector = forward_vector_;
         forward_speed = forward_speed_;
-        rotation = rotation_;
         rotation_speed = rotation_speed_;
     }
 
     float2 forward_vector;
     float forward_speed;
-    float rotation;
     float rotation_speed;
 };
 
