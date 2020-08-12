@@ -2,28 +2,30 @@
 
 #include "error.hpp"
 
-#include <vulkan/vulkan.h>
 #include <Windows.h>
-#include <vector>
+#include <vulkan/vulkan.h>
 
-static VkInstance instance;
-static VkPhysicalDevice physical_device;
-static VkDevice device;
-static uint32_t graphics_queue_family_index;
-static uint32_t compute_queue_family_index;
-static uint32_t transfer_queue_family_index;
-static VkQueue graphics_queue;
-static VkQueue compute_queue;
-static VkQueue transfer_queue;
-static VkPhysicalDeviceMemoryProperties physical_device_memory_properties;
-static VkPhysicalDeviceLimits physical_device_limits;
-static VkExtent2D surface_extent;
-static VkSwapchainKHR swapchain;
-static std::vector<VkImage> swapchain_images;
-static std::vector<VkImageView> swapchain_image_views;
-static size_t swapchain_image_count;
-static VkExtent2D current_extent;
-static VkSurfaceFormatKHR chosen_surface_format;
+
+VkInstance instance;
+VkPhysicalDevice physical_device;
+VkDevice device;
+uint32_t graphics_queue_family_index;
+uint32_t compute_queue_family_index;
+uint32_t transfer_queue_family_index;
+VkQueue graphics_queue;
+VkQueue compute_queue;
+VkQueue transfer_queue;
+VkPhysicalDeviceMemoryProperties physical_device_memory_properties;
+VkPhysicalDeviceLimits physical_device_limits;
+VkExtent2D surface_extent;
+VkSwapchainKHR swapchain;
+VkImage* swapchain_images;
+VkImageView* swapchain_image_views;
+size_t swapchain_image_count;
+VkExtent2D current_extent;
+VkSurfaceFormatKHR chosen_surface_format;
+VkCommandPool transfer_command_pool;
+VkSampler common_sampler;
 
 AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd);
-void vulkan_interface_shutdown ();
+void vulkan_interface_shutdown (void);

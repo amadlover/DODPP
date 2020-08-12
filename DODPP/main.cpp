@@ -1,64 +1,98 @@
 #include <Windows.h>
 #include <Windowsx.h>
 #include <conio.h>
-#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
 
-#include "error.hpp"
-#include "log.hpp"
-#include "game.hpp"
+#include "error.h"
+#include "log.h"
+#include "game.h"
 
 #define ID_GAME_TICK 1237
 
+unsigned long long last_tick_count = 0;
+
 LRESULT CALLBACK WindowProc (HWND h_wnd, UINT msg, WPARAM w_param, LPARAM l_param)
 {
-    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
+    AGE_RESULT age_result = AGE_SUCCESS;
+
+    unsigned long long current_tick_count = 0;
 
     switch (msg)
     {
-        case WM_COMMAND:
-            break;
+    case WM_QUIT:
+        PostQuitMessage (0);
+        break;
 
-        case WM_QUIT:
-            PostQuitMessage (0);
-            break;
+    case WM_DESTROY:
+        PostQuitMessage (0);
+        break;
 
-        case WM_DESTROY:
-            PostQuitMessage (0);
-            break;
+    case WM_CLOSE:
+        PostQuitMessage (0);
+        break;
 
-        case WM_CLOSE:
-            PostQuitMessage (0);
-            break;
+    case WM_KEYDOWN:
+        age_result = game_process_key_down (w_param);
+        if (age_result != AGE_SUCCESS)
+        {
+            log_error (age_result);
+            PostQuitMessage (age_result);
+        }
+        break;
 
-        case WM_KEYDOWN:
-            break;
+    case WM_KEYUP:
+        age_result = game_process_key_up (w_param);
+        if (age_result != AGE_SUCCESS)
+        {
+            log_error (age_result);
+            PostQuitMessage (age_result);
+        }
+        break;
 
-        case WM_TIMER:
-            age_result = game_update ();
-            if (age_result != AGE_RESULT::SUCCESS)
-            {
-                log_error (age_result);
-                PostQuitMessage (0);
-            }
-            break;
+    case WM_TIMER:
+        current_tick_count = GetTickCount ();
 
-        case WM_LBUTTONDOWN:
-            age_result = game_process_left_mouse_click (GET_X_LPARAM (l_param), GET_Y_LPARAM (l_param));
-            if (age_result != AGE_RESULT::SUCCESS)
-            {
-                log_error (age_result);
-                PostQuitMessage (0);
-            }
-            break;
+        age_result = game_update ((size_t)(current_tick_count - last_tick_count));
+        last_tick_count = current_tick_count;
 
-        case WM_RBUTTONDOWN:
-            break;
+        if (age_result != AGE_SUCCESS)
+        {
+            log_error (age_result);
+            PostQuitMessage (age_result);
+        }
 
-        case WM_MOUSEMOVE:
-            break;
+        break;
 
-        default:
-            break;
+    case WM_LBUTTONDOWN:
+        age_result = game_process_left_mouse_click (GET_X_LPARAM (l_param), GET_Y_LPARAM (l_param));
+        if (age_result != AGE_SUCCESS)
+        {
+            log_error (age_result);
+            PostQuitMessage (age_result);
+        }
+        break;
+
+    case WM_RBUTTONDOWN:
+        age_result = game_process_right_mouse_click (GET_X_LPARAM (l_param), GET_Y_LPARAM (l_param));
+        if (age_result != AGE_SUCCESS)
+        {
+            log_error (age_result);
+            PostQuitMessage (age_result);
+        }
+        break;
+
+    case WM_MOUSEMOVE:
+        age_result = game_process_mouse_move (GET_X_LPARAM (l_param), GET_Y_LPARAM (l_param));
+        if (age_result != AGE_SUCCESS)
+        {
+            log_error (age_result);
+            PostQuitMessage (age_result);
+        }
+        break;
+
+    default:
+        break;
     }
 
     return DefWindowProc (h_wnd, msg, w_param, l_param);
@@ -69,7 +103,7 @@ int WINAPI wWinMain (_In_ HINSTANCE h_instance, _In_opt_ HINSTANCE previous_inst
 {
     AllocConsole ();
     freopen ("CONOUT$", "w", stdout);
-    std::cout << "Hello Console\n";
+    printf ("Hello Console\n");
 
     HANDLE con_hnd = GetStdHandle (STD_OUTPUT_HANDLE);
     CONSOLE_FONT_INFOEX font = { sizeof (font) };
@@ -82,22 +116,22 @@ int WINAPI wWinMain (_In_ HINSTANCE h_instance, _In_opt_ HINSTANCE previous_inst
     wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
     wc.lpfnWndProc = WindowProc;
     wc.hInstance = h_instance;
-    wc.lpszClassName = L"DODPP";
+    wc.lpszClassName = L"DOD";
     wc.hCursor = LoadCursor (h_instance, IDC_ARROW);
 
     if (!RegisterClass (&wc))
     {
-        goto exit;
+        return EXIT_FAILURE;
     }
 
     HWND h_wnd = CreateWindow (
-        L"DODPP", 
-        L"DODPP",
-        WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU,
+        L"DOD", 
+        L"DOD",
+        WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU, 
         CW_USEDEFAULT,
         CW_USEDEFAULT,
-        1280,
-        720, 
+        640,
+        480, 
         NULL,
         NULL,
         h_instance,
@@ -106,20 +140,22 @@ int WINAPI wWinMain (_In_ HINSTANCE h_instance, _In_opt_ HINSTANCE previous_inst
 
     if (!h_wnd)
     {
-        goto exit;
+        return EXIT_FAILURE;
     }
 
     ShowWindow (h_wnd, cmd_show);
     UpdateWindow (h_wnd);
 
     AGE_RESULT result = game_init (h_instance, h_wnd);
-    if (result != AGE_RESULT::SUCCESS)
+    if (result != AGE_SUCCESS)
     {
         log_error (result);
         goto exit;
     }
 
-    SetTimer (h_wnd, ID_GAME_TICK, 8, NULL);
+    last_tick_count = GetTickCount64 ();
+
+    SetTimer (h_wnd, ID_GAME_TICK, 15, NULL);
 
     MSG msg;
     ZeroMemory (&msg, sizeof (msg));
@@ -132,17 +168,13 @@ int WINAPI wWinMain (_In_ HINSTANCE h_instance, _In_opt_ HINSTANCE previous_inst
     {
         if (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE))
         {
-            if (msg.message == WM_TIMER) 
-            {
-                msg.hwnd = h_wnd;
-            }
             TranslateMessage (&msg);
             DispatchMessage (&msg);
         }
         else
         {
             result = game_submit_present ();
-            if (result != AGE_RESULT::SUCCESS)
+            if (result != AGE_SUCCESS)
             {
                 log_error (result);
                 goto exit;
@@ -153,7 +185,7 @@ int WINAPI wWinMain (_In_ HINSTANCE h_instance, _In_opt_ HINSTANCE previous_inst
     KillTimer (h_wnd, ID_GAME_TICK);
 
  exit:
-    game_exit ();
+    game_shutdown ();
 
     DestroyWindow (h_wnd);
 

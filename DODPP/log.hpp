@@ -1,5 +1,5 @@
 #pragma once
 
-#include "error.hpp"
+#include "error.h"
 
 AGE_RESULT log_error (const AGE_RESULT result);
