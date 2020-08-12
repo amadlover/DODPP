@@ -1606,8 +1606,10 @@ AGE_RESULT graphics_update_transforms_buffer_data (
 	const actor_transform_outputs* game_asteroids_transform_outputs, 
 	const size_t game_asteroid_live_count, 
 	const size_t game_asteroid_current_max_count,
-	const actor_transform_outputs* game_bullets_transform_outputs, 
-	const size_t game_bullet_live_count,
+	//const actor_transform_outputs* game_bullets_transform_outputs, 
+	const float2* game_bullets_outputs_positions, 
+	const float* game_bullets_outputs_rotations, 
+	const size_t game_bullet_live_count, 
 	const size_t game_bullet_current_max_count
 )
 {
@@ -1620,9 +1622,19 @@ AGE_RESULT graphics_update_transforms_buffer_data (
 		memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (a + 2)), game_asteroids_transform_outputs + a, sizeof (actor_transform_outputs));
 	}
 
-	for (size_t b = 0; b < game_bullet_live_count; ++b)
+	/*for (size_t b = 0; b < game_bullet_live_count; ++b)
 	{
 		memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (game_asteroid_live_count + b + 2)), game_bullets_transform_outputs + b, sizeof (actor_transform_outputs));
+	}*/
+
+	for (size_t b = 0; b < game_bullet_live_count; ++b)
+	{
+		memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (game_asteroid_live_count + b + 2)), game_bullets_outputs_positions + b, sizeof (float2));
+	}
+	
+	for (size_t b = 0; b < game_bullet_live_count; ++b)
+	{
+		memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (game_asteroid_live_count + b + 2) + sizeof (float2)), game_bullets_outputs_rotations + b, sizeof (float));
 	}
 
 	memcpy (transforms_mapped_data, transforms_aligned_data, total_transforms_size);

@@ -4,6 +4,8 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include <exception>
+
 #include "error.hpp"
 #include "log.hpp"
 #include "game.hpp"
@@ -53,7 +55,15 @@ LRESULT CALLBACK WindowProc (HWND h_wnd, UINT msg, WPARAM w_param, LPARAM l_para
     case WM_TIMER:
         current_tick_count = GetTickCount ();
 
-        age_result = game_update ((size_t)(current_tick_count - last_tick_count));
+        try
+        {
+            age_result = game_update ((size_t)(current_tick_count - last_tick_count));
+        }
+        catch (std::exception ex)
+        {
+            printf ("exception: %s\n", ex.what ());
+        }
+
         last_tick_count = current_tick_count;
 
         if (age_result != AGE_RESULT::SUCCESS)
