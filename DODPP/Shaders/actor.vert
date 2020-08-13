@@ -16,8 +16,8 @@ layout (location = 0) out vec2 out_uv;
 
 void main ()
 {
-    vec3 rotated_pos = vec3 ((in_position.x * cos (mat_buff.actor_rotation)) - (in_position.y * sin (mat_buff.actor_rotation)),
-                             (in_position.y * cos (mat_buff.actor_rotation)) + (in_position.x * sin (mat_buff.actor_rotation)), 
+    vec3 rotated_pos = vec3 (-sin (mat_buff.actor_rotation),
+                             cos (mat_buff.actor_rotation),
                              in_position.z
                             );
     
