@@ -65,8 +65,8 @@ AGE_RESULT game_init (const HINSTANCE h_instance, const HWND h_wnd)
     game_player_transform_inputs.time_msecs_to_come_to_rest = 500.f;
     game_player_transform_inputs.forward_vector.x = 0;
     game_player_transform_inputs.forward_vector.y = 1;
-    game_player_transform_inputs.acceleration = 0.000125f;
-    game_player_transform_inputs.deceleration = -0.0000625f;
+    game_player_transform_inputs.acceleration = 0.00005f;
+    game_player_transform_inputs.deceleration = -0.000025f;
     game_player_transform_inputs.rotation_speed = 0.005f;
     game_player_transform_inputs.max_velocity = 0.05f;
     game_player_output_scale = float2 (1, 1);
@@ -121,7 +121,7 @@ exit: // clean up allocations done in this function
     return age_result;
 }
 
-AGE_RESULT game_asteroid_add (void)
+AGE_RESULT game_asteroid_add (float2 position, float scale)
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
@@ -143,10 +143,10 @@ AGE_RESULT game_asteroid_add (void)
     }
 
     srand (rand ());
-
-    game_asteroids_outputs_positions.emplace_back (float2 (((float)rand () / (float)RAND_MAX) * 2 - 1, ((float)rand () / (float)RAND_MAX) * 2 - 1));
+    //
+    game_asteroids_outputs_positions.emplace_back (position);
     game_asteroids_outputs_rotations.emplace_back (float2 ((float)rand () / (float)RAND_MAX * 3.14f, 0));
-    game_asteroids_outputs_scales.emplace_back (float2 (1, 1));
+    game_asteroids_outputs_scales.emplace_back (float2 (scale, scale));
 
     game_asteroids_transform_inputs.emplace_back (
         float2 (((float)rand () / (float)RAND_MAX) * 2 - 1, ((float)rand () / (float)RAND_MAX) * 2 - 1), 
@@ -169,8 +169,8 @@ exit:
 AGE_RESULT game_process_left_mouse_click (const int32_t x, const int32_t y)
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
-
-    age_result = game_asteroid_add ();
+    
+    age_result = game_asteroid_add (float2 (((float)rand () / (float)RAND_MAX) * 2 - 1, ((float)rand () / (float)RAND_MAX) * 2 - 1), 1);
     if (age_result != AGE_RESULT::SUCCESS)
     {
         goto exit;
@@ -351,8 +351,6 @@ AGE_RESULT game_bullet_add (void)
         }
     }
 
-    srand (rand ());
-
     game_bullets_transform_inputs.emplace_back (
         bullet_transform_inputs (game_player_transform_inputs.forward_vector, (float2_length (&game_player_transform_inputs.v) / (float)game_delta_time) + 0.005f)
     );
@@ -360,7 +358,7 @@ AGE_RESULT game_bullet_add (void)
 
     game_bullets_outputs_positions.emplace_back (game_player_output_position);
     game_bullets_outputs_rotations.emplace_back (game_player_output_rotation);
-    game_bullets_outputs_scales.emplace_back (float2 (1, 1));
+    game_bullets_outputs_scales.emplace_back (float2 (0.5, 0.5));
 
     ++game_bullet_live_count;
 
@@ -775,7 +773,7 @@ AGE_RESULT game_bullets_asteroids_collision_checks (void)
                 game_asteroids_outputs_positions[a].y - game_bullets_outputs_positions[b].y,
             };
 
-            if (hypotf (diff.x, diff.y) < 0.1f)
+            if (hypotf (diff.x, diff.y) < (game_asteroids_outputs_scales[a].x / 10.f))
             {
                 age_result = game_bullet_remove (b);
                 if (age_result != AGE_RESULT::SUCCESS)
@@ -783,10 +781,25 @@ AGE_RESULT game_bullets_asteroids_collision_checks (void)
                     goto exit;
                 }
 
+                float2 position = game_asteroids_outputs_positions[a];
+                float2 scale = game_asteroids_outputs_scales[a];
+
                 age_result = game_asteroid_remove (a);
                 if (age_result != AGE_RESULT::SUCCESS)
                 {
                     goto exit;
+                }
+
+                if (scale.x == 1.f)
+                {
+                    for (size_t a = 0; a < 3; ++a)
+                    {
+                        age_result = game_asteroid_add (position, 0.5f);
+                        if (age_result != AGE_RESULT::SUCCESS)
+                        {
+                            goto exit;
+                        }
+                    }
                 }
 
                 break;

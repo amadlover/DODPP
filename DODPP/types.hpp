@@ -8,6 +8,7 @@ struct float2
         x = 0;
         y = 0;
     }
+
     float2 (float x_, float y_)
     {
         x = x_;
@@ -26,6 +27,7 @@ struct float3
         y = 0;
         z = 0;
     }
+
     float3 (float x_, float y_, float z_)
     {
         x = x_;
