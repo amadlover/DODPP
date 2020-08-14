@@ -1506,7 +1506,7 @@ AGE_RESULT graphics_create_transforms_buffer (const size_t game_current_max_aste
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 	VkResult vk_result = VK_SUCCESS;
 
-	size_t raw_size_per_transform = sizeof (actor_transform_outputs);
+	size_t raw_size_per_transform = sizeof (float2) + sizeof (float) + sizeof (float2);
 	aligned_size_per_transform = (raw_size_per_transform + (size_t)physical_device_limits.minUniformBufferOffsetAlignment - 1) & ~((size_t)physical_device_limits.minUniformBufferOffsetAlignment - 1);
 
 	total_transforms_size = aligned_size_per_transform * (game_current_max_asteroid_bullet_count + 2);
@@ -1602,48 +1602,48 @@ exit: // clean up allocations made by the function
 }
 
 AGE_RESULT graphics_update_transforms_buffer_data (
-	const actor_transform_outputs* game_player_transform_outputs, 
-	const float2* game_asteroids_outputs_positions, 
-	const float* game_asteroids_outputs_rotations,
+	const float2* game_player_output_position, const float* game_player_output_rotation, const float2* game_player_output_scale,
+	const float2* game_asteroids_outputs_positions,	const float* game_asteroids_outputs_rotations, const float2* game_asteroids_outputs_scales,
 	const size_t game_asteroid_live_count, 
 	const size_t game_asteroids_current_max_count, 
-	const float2* game_bullets_outputs_positions, 
-	const float* game_bullets_outputs_rotations, const size_t game_bullet_live_count, const size_t game_bullets_current_max_count
+	const float2* game_bullets_outputs_positions, const float* game_bullets_outputs_rotations, const float2* game_bullets_outputs_scales, 
+	const size_t game_bullet_live_count, const size_t game_bullets_current_max_count
 )
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
-	memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform), game_player_transform_outputs, sizeof (actor_transform_outputs)); 
-	
-	/*for (size_t a = 0; a < game_asteroid_live_count; ++a)
-	{
-		memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (a + 2)), game_asteroids_transform_outputs + a, sizeof (actor_transform_outputs));
-	}*/
-	
+	memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform), game_player_output_position, sizeof (float2));
+	memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform + sizeof (float2)), game_player_output_rotation, sizeof (float));
+	memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform + sizeof (float2) + sizeof (float)), game_player_output_scale, sizeof (float2));
 
 	for (size_t a = 0; a < game_asteroid_live_count; ++a)
 	{
 		memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (a + 2)), game_asteroids_outputs_positions + a, sizeof (float2));
 	}
-	
+
 	for (size_t a = 0; a < game_asteroid_live_count; ++a)
 	{
 		memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (a + 2) + sizeof (float2)), game_asteroids_outputs_rotations + a, sizeof (float));
 	}
 
-	/*for (size_t b = 0; b < game_bullet_live_count; ++b)
+	for (size_t a = 0; a < game_asteroid_live_count; ++a)
 	{
-		memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (game_asteroid_live_count + b + 2)), game_bullets_transform_outputs + b, sizeof (actor_transform_outputs));
-	}*/
+		memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (a + 2) + sizeof (float2) + sizeof (float)), game_asteroids_outputs_scales + a, sizeof (float2));
+	}
 
 	for (size_t b = 0; b < game_bullet_live_count; ++b)
 	{
 		memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (game_asteroid_live_count + b + 2)), game_bullets_outputs_positions + b, sizeof (float2));
 	}
-	
+
 	for (size_t b = 0; b < game_bullet_live_count; ++b)
 	{
 		memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (game_asteroid_live_count + b + 2) + sizeof (float2)), game_bullets_outputs_rotations + b, sizeof (float));
+	}
+	
+	for (size_t b = 0; b < game_bullet_live_count; ++b)
+	{
+		memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (game_asteroid_live_count + b + 2) + sizeof (float2) + sizeof (float)), game_bullets_outputs_scales + b, sizeof (float2));
 	}
 
 	memcpy (transforms_mapped_data, transforms_aligned_data, total_transforms_size);

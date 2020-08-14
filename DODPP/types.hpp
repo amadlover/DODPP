@@ -90,26 +90,4 @@ struct asteroid_transform_inputs
     float rotation_speed;
 };
 
-struct actor_transform_outputs
-{
-    actor_transform_outputs ()
-    {
-        position = float2 (0, 0);
-        rotation = 0;
-        scale = float2 (1, 1);
-    }
-
-    actor_transform_outputs (float2 position_, float rotation_, float2 scale_)
-    {
-        position = position_;
-        rotation = rotation_;
-        scale = scale_;
-    }
-
-    float2 position;
-    float rotation;
-    float2 scale;
-};
-
-
 float float2_length (const float2* in_vector);
