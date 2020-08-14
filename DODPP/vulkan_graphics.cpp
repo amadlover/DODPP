@@ -1313,7 +1313,7 @@ exit:
 }
 
 
-AGE_RESULT graphics_create_descriptor_sets (void)
+AGE_RESULT graphics_create_descriptor_sets_pipeline_layout (void)
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 	VkResult vk_result = VK_SUCCESS;
@@ -1575,6 +1575,9 @@ AGE_RESULT graphics_create_transforms_buffer (const size_t game_current_max_aste
 
 	vkMapMemory (device, transforms_buffer_memory, 0, memory_requirements.size, 0, &transforms_mapped_data);
 
+	float2 background_scale (1, 1);
+	std::memcpy ((char*)transforms_mapped_data + sizeof (float2) + sizeof (float), &background_scale, sizeof (float2));
+
 	VkDescriptorBufferInfo buffer_info = {
 		transforms_buffer,
 		0,
@@ -1612,41 +1615,41 @@ AGE_RESULT graphics_update_transforms_buffer_data (
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
-	memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform), game_player_output_position, sizeof (float2));
-	memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform + sizeof (float2)), game_player_output_rotation, sizeof (float));
-	memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform + sizeof (float2) + sizeof (float)), game_player_output_scale, sizeof (float2));
+	std::memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform), game_player_output_position, sizeof (float2));
+	std::memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform + sizeof (float2)), game_player_output_rotation, sizeof (float));
+	std::memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform + sizeof (float2) + sizeof (float)), game_player_output_scale, sizeof (float2));
 
 	for (size_t a = 0; a < game_asteroid_live_count; ++a)
 	{
-		memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (a + 2)), game_asteroids_outputs_positions + a, sizeof (float2));
+		std::memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (a + 2)), game_asteroids_outputs_positions + a, sizeof (float2));
 	}
 
 	for (size_t a = 0; a < game_asteroid_live_count; ++a)
 	{
-		memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (a + 2) + sizeof (float2)), game_asteroids_outputs_rotations + a, sizeof (float));
+		std::memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (a + 2) + sizeof (float2)), game_asteroids_outputs_rotations + a, sizeof (float));
 	}
 
 	for (size_t a = 0; a < game_asteroid_live_count; ++a)
 	{
-		memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (a + 2) + sizeof (float2) + sizeof (float)), game_asteroids_outputs_scales + a, sizeof (float2));
+		std::memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (a + 2) + sizeof (float2) + sizeof (float)), game_asteroids_outputs_scales + a, sizeof (float2));
 	}
 
 	for (size_t b = 0; b < game_bullet_live_count; ++b)
 	{
-		memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (game_asteroid_live_count + b + 2)), game_bullets_outputs_positions + b, sizeof (float2));
+		std::memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (game_asteroid_live_count + b + 2)), game_bullets_outputs_positions + b, sizeof (float2));
 	}
 
 	for (size_t b = 0; b < game_bullet_live_count; ++b)
 	{
-		memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (game_asteroid_live_count + b + 2) + sizeof (float2)), game_bullets_outputs_rotations + b, sizeof (float));
+		std::memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (game_asteroid_live_count + b + 2) + sizeof (float2)), game_bullets_outputs_rotations + b, sizeof (float));
 	}
 	
 	for (size_t b = 0; b < game_bullet_live_count; ++b)
 	{
-		memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (game_asteroid_live_count + b + 2) + sizeof (float2) + sizeof (float)), game_bullets_outputs_scales + b, sizeof (float2));
+		std::memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (game_asteroid_live_count + b + 2) + sizeof (float2) + sizeof (float)), game_bullets_outputs_scales + b, sizeof (float2));
 	}
 
-	memcpy (transforms_mapped_data, transforms_aligned_data, total_transforms_size);
+	std::memcpy (transforms_mapped_data, transforms_aligned_data, total_transforms_size);
 
 exit:
 	return age_result;
@@ -1782,7 +1785,7 @@ AGE_RESULT graphics_init (const size_t game_asteroids_current_max_count, const s
 		goto exit;
 	}
 
-	age_result = graphics_create_descriptor_sets ();
+	age_result = graphics_create_descriptor_sets_pipeline_layout ();
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		goto exit;

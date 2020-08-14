@@ -549,6 +549,9 @@ AGE_RESULT game_update_player_asteroids_bullets_output_positions (void)
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
+    game_player_output_scale.x = 1;
+    game_player_output_scale.y = 1;
+
     game_player_output_position.x += game_player_transform_inputs.v.x;
     game_player_output_position.y += game_player_transform_inputs.v.y;
 
