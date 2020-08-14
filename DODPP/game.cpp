@@ -23,7 +23,7 @@ bool is_left_arrow_pressed = false;
 
 player_transform_inputs game_player_transform_inputs = {};
 float2 game_player_output_position;
-float game_player_output_rotation;
+float2 game_player_output_rotation;
 float2 game_player_output_scale;
 
 float game_player_shooting_interval_msecs = 100.f;
@@ -33,14 +33,14 @@ std::vector<bullet_transform_inputs> game_bullets_transform_inputs;
 std::vector<size_t> game_bullets_current_lifetimes_msecs;
 
 std::vector<float2> game_bullets_outputs_positions;
-std::vector<float> game_bullets_outputs_rotations;
+std::vector<float2> game_bullets_outputs_rotations;
 std::vector<float2> game_bullets_outputs_scales;
 
 float game_bullets_max_lifetime_msecs = 500.f;
 
 std::vector<asteroid_transform_inputs> game_asteroids_transform_inputs;
 std::vector<float2> game_asteroids_outputs_positions;
-std::vector<float> game_asteroids_outputs_rotations;
+std::vector<float2> game_asteroids_outputs_rotations;
 std::vector<float2> game_asteroids_outputs_scales;
 
 size_t game_asteroids_current_max_count = 0;
@@ -69,6 +69,7 @@ AGE_RESULT game_init (const HINSTANCE h_instance, const HWND h_wnd)
     game_player_transform_inputs.deceleration = -0.0000625f;
     game_player_transform_inputs.rotation_speed = 0.005f;
     game_player_transform_inputs.max_velocity = 0.05f;
+    game_player_output_scale = float2 (1, 1);
 
     GetClientRect (h_wnd, &window_rect);
 
@@ -144,7 +145,7 @@ AGE_RESULT game_asteroid_add (void)
     srand (rand ());
 
     game_asteroids_outputs_positions.emplace_back (float2 (((float)rand () / (float)RAND_MAX) * 2 - 1, ((float)rand () / (float)RAND_MAX) * 2 - 1));
-    game_asteroids_outputs_rotations.emplace_back ((float)rand () / (float)RAND_MAX * 3.14f);
+    game_asteroids_outputs_rotations.emplace_back (float2 ((float)rand () / (float)RAND_MAX * 3.14f, 0));
     game_asteroids_outputs_scales.emplace_back (float2 (1, 1));
 
     game_asteroids_transform_inputs.emplace_back (
@@ -301,7 +302,7 @@ AGE_RESULT game_player_turn_right (void)
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     game_player_transform_inputs.rotation -= (game_player_transform_inputs.rotation_speed * game_delta_time);
-    game_player_output_rotation = game_player_transform_inputs.rotation;
+    game_player_output_rotation.x = game_player_transform_inputs.rotation;
 
     age_result = game_update_player_vectors ();
     if (age_result != AGE_RESULT::SUCCESS)
@@ -318,7 +319,7 @@ AGE_RESULT game_player_turn_left (void)
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
     
     game_player_transform_inputs.rotation += (game_player_transform_inputs.rotation_speed * game_delta_time);
-    game_player_output_rotation = game_player_transform_inputs.rotation;
+    game_player_output_rotation.x = game_player_transform_inputs.rotation;
 
     age_result = game_update_player_vectors ();
     if (age_result != AGE_RESULT::SUCCESS)
@@ -597,7 +598,7 @@ AGE_RESULT game_update_player_asteroids_bullets_output_positions (void)
             game_asteroids_outputs_positions[a].y = 1.f;
         }
 
-        game_asteroids_outputs_rotations[a] += (game_asteroids_transform_inputs[a].rotation_speed) * game_delta_time;
+        game_asteroids_outputs_rotations[a].x += (game_asteroids_transform_inputs[a].rotation_speed) * game_delta_time;
     }
 
     for (size_t b = 0; b < game_bullet_live_count; ++b)

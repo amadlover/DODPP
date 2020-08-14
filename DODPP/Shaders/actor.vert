@@ -5,7 +5,7 @@
 layout (set = 0, binding = 0) uniform mat_ubo
 {
     vec2 actor_position;
-    float actor_rotation;
+    vec2 actor_rotation;
     vec2 actor_scale;
 } mat_buff;
 
@@ -20,8 +20,8 @@ void main ()
                             mat_buff.actor_scale.y * in_position.y,
                             in_position.z);
 
-    vec3 rotated_pos = vec3 ((scaled_pos.x * cos (mat_buff.actor_rotation)) - (scaled_pos.y * sin (mat_buff.actor_rotation)),
-                             (scaled_pos.y * cos (mat_buff.actor_rotation)) + (scaled_pos.x * sin (mat_buff.actor_rotation)), 
+    vec3 rotated_pos = vec3 ((scaled_pos.x * cos (mat_buff.actor_rotation.x)) - (scaled_pos.y * sin (mat_buff.actor_rotation.x)),
+                             (scaled_pos.y * cos (mat_buff.actor_rotation.x)) + (scaled_pos.x * sin (mat_buff.actor_rotation.x)), 
                              scaled_pos.z
                             );
     
