@@ -25,7 +25,6 @@ void main ()
                              scaled_pos.z
                             );
     
-
     vec3 final_pos = rotated_pos + vec3 (mat_buff.actor_position, 0);
 
     gl_Position = vec4 (final_pos, 1);
