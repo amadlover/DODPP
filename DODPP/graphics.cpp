@@ -1486,7 +1486,11 @@ exit:
 	return age_result;
 }
 
-AGE_RESULT graphics_create_transforms_buffer (const size_t game_current_max_asteroid_bullet_count)
+AGE_RESULT graphics_create_transforms_buffer (
+	const size_t game_large_asteroids_current_max_count, 
+	const size_t game_small_asteroids_current_max_count, 
+	const size_t game_bullet_current_max_count
+)
 {
 	if (transforms_mapped_data != NULL)
 	{
@@ -1506,10 +1510,10 @@ AGE_RESULT graphics_create_transforms_buffer (const size_t game_current_max_aste
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 	VkResult vk_result = VK_SUCCESS;
 
-	size_t raw_size_per_transform = sizeof (float2) + sizeof (float2) + sizeof (float2) + (sizeof (float) * 3) + (sizeof (float) * 3);
+	size_t raw_size_per_transform = sizeof (float2) + sizeof (float2) + sizeof (float2);
 	aligned_size_per_transform = (raw_size_per_transform + (size_t)physical_device_limits.minUniformBufferOffsetAlignment - 1) & ~((size_t)physical_device_limits.minUniformBufferOffsetAlignment - 1);
 
-	total_transforms_size = aligned_size_per_transform * (game_current_max_asteroid_bullet_count + 2);
+	total_transforms_size = aligned_size_per_transform * (game_large_asteroids_current_max_count + game_small_asteroids_current_max_count + game_bullet_current_max_count + 2);
 	if (transforms_aligned_data == NULL)
 	{
 		transforms_aligned_data = utils_malloc_zero (total_transforms_size);
@@ -1606,7 +1610,11 @@ exit: // clean up allocations made by the function
 	return age_result;
 }
 
-AGE_RESULT graphics_update_command_buffers (const size_t game_asteroid_live_count, const size_t game_bullet_live_count)
+AGE_RESULT graphics_update_command_buffers (
+	const size_t game_large_asteroids_live_count, 
+	const size_t game_small_asteroids_live_count,
+	const size_t game_bullet_live_count
+)
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 	VkResult vk_result = VK_SUCCESS;
@@ -1658,8 +1666,8 @@ AGE_RESULT graphics_update_command_buffers (const size_t game_asteroid_live_coun
 		
 		vkCmdBindPipeline (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline);
 
-		uint32_t offset = 0;
-		vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 0, 1, &transform_descriptor_set, 1, &offset);
+		uint32_t dynamic_offset = 0;
+		vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 0, 1, &transform_descriptor_set, 1, &dynamic_offset);
 		vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 1, 1, &texture_descriptor_set, 0, NULL);
 		uint32_t texture_index = 0;
 		vkCmdPushConstants (swapchain_command_buffers[i], graphics_pipeline_layout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof (int), &texture_index);
@@ -1668,8 +1676,8 @@ AGE_RESULT graphics_update_command_buffers (const size_t game_asteroid_live_coun
 		vkCmdBindIndexBuffer (swapchain_command_buffers[i], vertex_index_buffer, vertex_index_buffer_offsets[2], VK_INDEX_TYPE_UINT32);
 		vkCmdDrawIndexed (swapchain_command_buffers[i], background_index_count, 1, 0, 0, 0);
 
-		offset = aligned_size_per_transform;
-		vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 0, 1, &transform_descriptor_set, 1, &offset);
+		dynamic_offset = aligned_size_per_transform;
+		vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 0, 1, &transform_descriptor_set, 1, &dynamic_offset);
 		vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 1, 1, &texture_descriptor_set, 0, NULL);
 		texture_index = 1;
 		vkCmdPushConstants (swapchain_command_buffers[i], graphics_pipeline_layout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof (int), &texture_index);
@@ -1678,26 +1686,38 @@ AGE_RESULT graphics_update_command_buffers (const size_t game_asteroid_live_coun
 		vkCmdBindIndexBuffer (swapchain_command_buffers[i], vertex_index_buffer, vertex_index_buffer_offsets[5], VK_INDEX_TYPE_UINT32);
 		vkCmdDrawIndexed (swapchain_command_buffers[i], actor_index_count, 1, 0, 0, 0);
 
-		for (size_t a = 0; a < game_asteroid_live_count; ++a)
+		texture_index = 2;
+		vkCmdPushConstants (swapchain_command_buffers[i], graphics_pipeline_layout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof (int), &texture_index);
+
+		for (size_t a = 0; a < game_large_asteroids_live_count; ++a)
 		{
-			offset = aligned_size_per_transform * (a + 2);
-			vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 0, 1, &transform_descriptor_set, 1, &offset);
+			dynamic_offset = aligned_size_per_transform * (a + 2);
+			vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 0, 1, &transform_descriptor_set, 1, &dynamic_offset);
 			vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 1, 1, &texture_descriptor_set, 0, NULL);
-			texture_index = 2;
-			vkCmdPushConstants (swapchain_command_buffers[i], graphics_pipeline_layout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof (int), &texture_index);
 			vkCmdBindVertexBuffers (swapchain_command_buffers[i], 0, 1, &vertex_index_buffer, &vertex_index_buffer_offsets[3]);
 			vkCmdBindVertexBuffers (swapchain_command_buffers[i], 1, 1, &vertex_index_buffer, &vertex_index_buffer_offsets[4]);
 			vkCmdBindIndexBuffer (swapchain_command_buffers[i], vertex_index_buffer, vertex_index_buffer_offsets[5], VK_INDEX_TYPE_UINT32);
 			vkCmdDrawIndexed (swapchain_command_buffers[i], actor_index_count, 1, 0, 0, 0);
 		}
 
+		for (size_t a = 0; a < game_small_asteroids_live_count; ++a)
+		{
+			dynamic_offset = aligned_size_per_transform * (game_large_asteroids_live_count + a + 2);
+			vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 0, 1, &transform_descriptor_set, 1, &dynamic_offset);
+			vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 1, 1, &texture_descriptor_set, 0, NULL);
+			vkCmdBindVertexBuffers (swapchain_command_buffers[i], 0, 1, &vertex_index_buffer, &vertex_index_buffer_offsets[3]);
+			vkCmdBindVertexBuffers (swapchain_command_buffers[i], 1, 1, &vertex_index_buffer, &vertex_index_buffer_offsets[4]);
+			vkCmdBindIndexBuffer (swapchain_command_buffers[i], vertex_index_buffer, vertex_index_buffer_offsets[5], VK_INDEX_TYPE_UINT32);
+			vkCmdDrawIndexed (swapchain_command_buffers[i], actor_index_count, 1, 0, 0, 0);
+		}
+
+		texture_index = 3;
+		vkCmdPushConstants (swapchain_command_buffers[i], graphics_pipeline_layout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof (int), &texture_index);
 		for (size_t b = 0; b < game_bullet_live_count; ++b)
 		{
-			offset = aligned_size_per_transform * (game_asteroid_live_count + b + 2);
-			vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 0, 1, &transform_descriptor_set, 1, &offset);
+			dynamic_offset = aligned_size_per_transform * (game_large_asteroids_live_count + game_small_asteroids_live_count + b + 2);
+			vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 0, 1, &transform_descriptor_set, 1, &dynamic_offset);
 			vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 1, 1, &texture_descriptor_set, 0, NULL);
-			texture_index = 3;
-			vkCmdPushConstants (swapchain_command_buffers[i], graphics_pipeline_layout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof (int), &texture_index);
 			vkCmdBindVertexBuffers (swapchain_command_buffers[i], 0, 1, &vertex_index_buffer, &vertex_index_buffer_offsets[3]);
 			vkCmdBindVertexBuffers (swapchain_command_buffers[i], 1, 1, &vertex_index_buffer, &vertex_index_buffer_offsets[4]);
 			vkCmdBindIndexBuffer (swapchain_command_buffers[i], vertex_index_buffer, vertex_index_buffer_offsets[5], VK_INDEX_TYPE_UINT32);
@@ -1719,10 +1739,12 @@ exit: // clear function specific allocations before exit
 }
 
 AGE_RESULT graphics_update_transforms_buffer_data (
-	const float2* game_player_output_position, const float2 * game_player_output_rotation, const float2* game_player_output_scale,
-	const float2* game_asteroids_outputs_positions, const float2 * game_asteroids_outputs_rotations, const float2* game_asteroids_outputs_scales,
-	const size_t game_asteroid_live_count, const size_t game_asteroids_current_max_count, 
-	const float2* game_bullets_outputs_positions, const float2 * game_bullets_outputs_rotations, const float2* game_bullets_outputs_scales, 
+	const float2* game_player_output_position, const float2* game_player_output_rotation, const float2* game_player_output_scale,
+	const float2* game_large_asteroids_outputs_positions, const float2* game_large_asteroids_outputs_rotations, const float2* game_large_asteroids_outputs_scales,
+	const size_t game_large_asteroids_live_count, const size_t game_large_asteroids_current_max_count, 
+	const float2* game_small_asteroids_outputs_positions, const float2* game_small_asteroids_outputs_rotations, const float2* game_small_asteroids_outputs_scales,
+	const size_t game_small_asteroids_live_count, const size_t game_small_asteroids_current_max_count, 
+	const float2* game_bullets_outputs_positions, const float2* game_bullets_outputs_rotations, const float2* game_bullets_outputs_scales, 
 	const size_t game_bullet_live_count, const size_t game_bullets_current_max_count
 )
 {
@@ -1742,34 +1764,49 @@ AGE_RESULT graphics_update_transforms_buffer_data (
 
 	std::memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform), player_transform, sizeof (player_transform));
 
-	for (size_t a = 0; a < game_asteroid_live_count; ++a)
+	for (size_t a = 0; a < game_large_asteroids_live_count; ++a)
 	{
-		std::memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (a + 2)), game_asteroids_outputs_positions + a, sizeof (float2));
+		std::memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (a + 2)), game_large_asteroids_outputs_positions + a, sizeof (float2));
 	}
 
-	for (size_t a = 0; a < game_asteroid_live_count; ++a)
+	for (size_t a = 0; a < game_large_asteroids_live_count; ++a)
 	{
-		std::memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (a + 2) + sizeof (float2)), game_asteroids_outputs_rotations + a, sizeof (float2));
+		std::memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (a + 2) + sizeof (float2)), game_large_asteroids_outputs_rotations + a, sizeof (float2));
 	}
 
-	for (size_t a = 0; a < game_asteroid_live_count; ++a)
+	for (size_t a = 0; a < game_large_asteroids_live_count; ++a)
 	{
-		std::memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (a + 2) + sizeof (float2) + sizeof (float2)), game_asteroids_outputs_scales + a, sizeof (float2));
+		std::memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (a + 2) + sizeof (float2) + sizeof (float2)), game_large_asteroids_outputs_scales + a, sizeof (float2));
+	}
+
+	for (size_t a = 0; a < game_small_asteroids_live_count; ++a)
+	{
+		std::memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (game_large_asteroids_live_count + a + 2)), game_small_asteroids_outputs_positions + a, sizeof (float2));
+	}
+
+	for (size_t a = 0; a < game_small_asteroids_live_count; ++a)
+	{
+		std::memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (game_large_asteroids_live_count + a + 2) + sizeof (float2)), game_small_asteroids_outputs_rotations + a, sizeof (float2));
+	}
+
+	for (size_t a = 0; a < game_small_asteroids_live_count; ++a)
+	{
+		std::memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (game_large_asteroids_live_count + a + 2) + sizeof (float2) + sizeof (float2)), game_small_asteroids_outputs_scales + a, sizeof (float2));
 	}
 
 	for (size_t b = 0; b < game_bullet_live_count; ++b)
 	{
-		std::memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (game_asteroid_live_count + b + 2)), game_bullets_outputs_positions + b, sizeof (float2));
+		std::memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (game_large_asteroids_live_count + game_small_asteroids_live_count + b + 2)), game_bullets_outputs_positions + b, sizeof (float2));
 	}
 
 	for (size_t b = 0; b < game_bullet_live_count; ++b)
 	{
-		std::memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (game_asteroid_live_count + b + 2) + sizeof (float2)), game_bullets_outputs_rotations + b, sizeof (float2));
+		std::memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (game_large_asteroids_live_count + game_small_asteroids_live_count + b + 2) + sizeof (float2)), game_bullets_outputs_rotations + b, sizeof (float2));
 	}
 
 	for (size_t b = 0; b < game_bullet_live_count; ++b)
 	{
-		std::memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (game_asteroid_live_count + b + 2) + sizeof (float2) + sizeof (float2)), game_bullets_outputs_scales + b, sizeof (float2));
+		std::memcpy ((char*)transforms_aligned_data + (aligned_size_per_transform * (game_large_asteroids_live_count + game_small_asteroids_live_count + b + 2) + sizeof (float2) + sizeof (float2)), game_bullets_outputs_scales + b, sizeof (float2));
 	}
 
 	std::memcpy (transforms_mapped_data, transforms_aligned_data, total_transforms_size);
@@ -1778,7 +1815,10 @@ exit:
 	return age_result;
 }
 
-AGE_RESULT graphics_init (const size_t game_asteroids_current_max_count, const size_t game_asteroid_live_count, const size_t game_bullets_current_max_count, const size_t game_bullet_live_count)
+AGE_RESULT graphics_init (
+	const size_t game_large_asteroids_current_max_count, const size_t game_large_asteroids_live_count,
+	const size_t game_small_asteroids_current_max_count, const size_t game_small_asteroids_live_count,
+	const size_t game_bullets_current_max_count, const size_t game_bullet_live_count)
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 	VkResult vk_result = VK_SUCCESS;
@@ -1825,13 +1865,19 @@ AGE_RESULT graphics_init (const size_t game_asteroids_current_max_count, const s
 		goto exit;
 	}
 
-	age_result = graphics_create_transforms_buffer (game_asteroids_current_max_count + game_bullets_current_max_count);
+	age_result = graphics_create_transforms_buffer (
+		game_large_asteroids_current_max_count, 
+		game_small_asteroids_current_max_count, 
+		game_bullets_current_max_count);
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		goto exit;
 	}
 
-	age_result = graphics_update_command_buffers (game_asteroid_live_count, game_bullet_live_count);
+	age_result = graphics_update_command_buffers (
+		game_large_asteroids_live_count, 
+		game_small_asteroids_live_count, 
+		game_bullet_live_count);
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		goto exit;
