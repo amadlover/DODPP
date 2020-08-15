@@ -222,7 +222,7 @@ AGE_RESULT game_small_asteroid_add (float2 position)
 
     ++game_small_asteroids_live_count;
 
-    age_result = graphics_update_command_buffers (game_small_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count);
+    age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count);
     if (age_result != AGE_RESULT::SUCCESS)
     {
         goto exit;
@@ -950,9 +950,6 @@ AGE_RESULT game_bullets_small_asteroids_collision_checks (void)
                 {
                     goto exit;
                 }
-
-                float2 position = game_small_asteroids_outputs_positions[a];
-                float2 scale = game_small_asteroids_outputs_scales[a];
 
                 age_result = game_small_asteroid_remove (a);
                 if (age_result != AGE_RESULT::SUCCESS)
