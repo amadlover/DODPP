@@ -1,4 +1,4 @@
-#include "vulkan_compute.hpp"
+#include "compute.hpp"
 
 AGE_RESULT compute_common_compute_init (void)
 {

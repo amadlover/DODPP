@@ -1,5 +1,5 @@
 #include "game.hpp"
-#include "vulkan_graphics.hpp"
+#include "graphics.hpp"
 #include "types.hpp"
 #include "vulkan_interface.hpp"
 
