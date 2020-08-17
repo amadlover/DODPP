@@ -29,24 +29,23 @@ float2 game_player_output_scale;
 float game_player_shooting_interval_msecs = 100.f;
 float game_secs_since_last_shot = 0;
 
-std::vector<bullet_transform_inputs> game_bullets_transform_inputs;
-std::vector<size_t> game_bullets_current_lifetimes_msecs;
+bullet_transform_inputs* game_bullets_transform_inputs;
 
-std::vector<float2> game_bullets_outputs_positions;
-std::vector<float2> game_bullets_outputs_rotations;
-std::vector<float2> game_bullets_outputs_scales;
+float2* game_bullets_outputs_positions;
+float2* game_bullets_outputs_rotations;
+float2* game_bullets_outputs_scales;
 
 float game_bullets_max_lifetime_msecs = 500.f;
 
-std::vector<asteroid_transform_inputs> game_large_asteroids_transform_inputs;
-std::vector<float2> game_large_asteroids_outputs_positions;
-std::vector<float2> game_large_asteroids_outputs_rotations;
-std::vector<float2> game_large_asteroids_outputs_scales;
+asteroid_transform_inputs* game_large_asteroids_transform_inputs;
+float2* game_large_asteroids_outputs_positions;
+float2* game_large_asteroids_outputs_rotations;
+float2* game_large_asteroids_outputs_scales;
 
-std::vector<asteroid_transform_inputs> game_small_asteroids_transform_inputs;
-std::vector<float2> game_small_asteroids_outputs_positions;
-std::vector<float2> game_small_asteroids_outputs_rotations;
-std::vector<float2> game_small_asteroids_outputs_scales;
+asteroid_transform_inputs* game_small_asteroids_transform_inputs;
+float2* game_small_asteroids_outputs_positions;
+float2* game_small_asteroids_outputs_rotations;
+float2* game_small_asteroids_outputs_scales;
 
 size_t game_large_asteroids_current_max_count = 0;
 size_t game_large_asteroids_live_count = 0;
@@ -116,26 +115,25 @@ AGE_RESULT game_reserve_memory_for_asteroids_bullets ()
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     game_large_asteroids_current_max_count += game_LARGE_ASTEROID_BATCH_SIZE;
-    game_large_asteroids_transform_inputs.reserve (game_large_asteroids_current_max_count);
+    game_large_asteroids_transform_inputs = (asteroid_transform_inputs*)utils_malloc (sizeof (asteroid_transform_inputs) * game_large_asteroids_current_max_count);
 
-    game_large_asteroids_outputs_positions.reserve (game_large_asteroids_current_max_count);
-    game_large_asteroids_outputs_rotations.reserve (game_large_asteroids_current_max_count);
-    game_large_asteroids_outputs_scales.reserve (game_large_asteroids_current_max_count);
+    game_large_asteroids_outputs_positions = (float2*)utils_malloc (sizeof (float2) * game_large_asteroids_current_max_count);
+    game_large_asteroids_outputs_rotations = (float2*)utils_malloc (sizeof (float2) * game_large_asteroids_current_max_count);
+    game_large_asteroids_outputs_scales = (float2*)utils_malloc (sizeof (float2) * game_large_asteroids_current_max_count);
 
     game_small_asteroids_current_max_count += game_SMALL_ASTEROID_BATCH_SIZE;
-    game_small_asteroids_transform_inputs.reserve (game_small_asteroids_current_max_count);
+    game_small_asteroids_transform_inputs = (asteroid_transform_inputs*)utils_malloc (sizeof (asteroid_transform_inputs) * game_small_asteroids_current_max_count);
 
-    game_small_asteroids_outputs_positions.reserve (game_small_asteroids_current_max_count);
-    game_small_asteroids_outputs_rotations.reserve (game_small_asteroids_current_max_count);
-    game_small_asteroids_outputs_scales.reserve (game_small_asteroids_current_max_count);
+    game_small_asteroids_outputs_positions = (float2*)utils_malloc (sizeof (float2) * game_small_asteroids_current_max_count);
+    game_small_asteroids_outputs_rotations = (float2*)utils_malloc (sizeof (float2) * game_small_asteroids_current_max_count);
+    game_small_asteroids_outputs_scales = (float2*)utils_malloc (sizeof (float2) * game_small_asteroids_current_max_count);
 
     game_bullets_current_max_count += game_BULLET_BATCH_SIZE;
-    game_bullets_transform_inputs.reserve (game_bullets_current_max_count);
-    game_bullets_current_lifetimes_msecs.reserve (game_bullets_current_max_count);
+    game_bullets_transform_inputs = (bullet_transform_inputs*)utils_malloc (sizeof (bullet_transform_inputs) * game_bullets_current_max_count);
 
-    game_bullets_outputs_positions.reserve (game_bullets_current_max_count);
-    game_bullets_outputs_rotations.reserve (game_bullets_current_max_count);
-    game_bullets_outputs_scales.reserve (game_bullets_current_max_count);
+    game_bullets_outputs_positions = (float2*)utils_malloc (sizeof (float2) * game_bullets_current_max_count);
+    game_bullets_outputs_rotations = (float2*)utils_malloc (sizeof (float2) * game_bullets_current_max_count);
+    game_bullets_outputs_scales = (float2*)utils_malloc (sizeof (float2) * game_bullets_current_max_count);
 
 exit: // clean up allocations done in this function
 
@@ -150,11 +148,11 @@ AGE_RESULT game_large_asteroid_add (float2 position)
     {
         game_large_asteroids_current_max_count += game_LARGE_ASTEROID_BATCH_SIZE;
 
-        game_large_asteroids_transform_inputs.reserve (game_large_asteroids_current_max_count);
+        game_large_asteroids_transform_inputs = (asteroid_transform_inputs*)utils_realloc (game_large_asteroids_transform_inputs, sizeof (asteroid_transform_inputs) * game_large_asteroids_current_max_count);
 
-        game_large_asteroids_outputs_positions.reserve (game_large_asteroids_current_max_count);
-        game_large_asteroids_outputs_rotations.reserve (game_large_asteroids_current_max_count);
-        game_large_asteroids_outputs_scales.reserve (game_large_asteroids_current_max_count);
+        game_large_asteroids_outputs_positions = (float2*)utils_realloc (game_large_asteroids_outputs_positions, sizeof (float2) * game_large_asteroids_current_max_count);
+        game_large_asteroids_outputs_rotations = (float2*)utils_realloc (game_large_asteroids_outputs_rotations, sizeof (float2) * game_large_asteroids_current_max_count);
+        game_large_asteroids_outputs_scales = (float2*)utils_realloc (game_large_asteroids_outputs_scales, sizeof (float2) * game_large_asteroids_current_max_count);
         
         age_result = graphics_create_transforms_buffer (game_large_asteroids_current_max_count, game_small_asteroids_current_max_count, game_bullets_current_max_count);
         if (age_result != AGE_RESULT::SUCCESS)
@@ -165,15 +163,13 @@ AGE_RESULT game_large_asteroid_add (float2 position)
 
     srand (rand ());
     
-    game_large_asteroids_outputs_positions.emplace_back (position);
-    game_large_asteroids_outputs_rotations.emplace_back (float2 ((float)rand () / (float)RAND_MAX * 3.14f, 0));
-    game_large_asteroids_outputs_scales.emplace_back (float2 (1, 1));
+    game_large_asteroids_outputs_positions[game_large_asteroids_live_count] = position;
+    game_large_asteroids_outputs_rotations[game_large_asteroids_live_count] = float2 ((float)rand () / (float)RAND_MAX * 3.14f, 0);
+    game_large_asteroids_outputs_scales[game_large_asteroids_live_count] = float2 (1, 1);
 
-    game_large_asteroids_transform_inputs.emplace_back (
-        float2 (((float)rand () / (float)RAND_MAX) * 2 - 1, ((float)rand () / (float)RAND_MAX) * 2 - 1), 
-        ((float)rand () / (float)RAND_MAX) / 1000.f, 
-        (((float)rand () / (float)RAND_MAX)) / 100.f
-    );
+    game_large_asteroids_transform_inputs[game_large_asteroids_live_count].forward_vector = float2 (((float)rand () / (float)RAND_MAX) * 2 - 1, ((float)rand () / (float)RAND_MAX) * 2 - 1);
+    game_large_asteroids_transform_inputs[game_large_asteroids_live_count].forward_speed = ((float)rand () / (float)RAND_MAX) / 1000.f;
+    game_large_asteroids_transform_inputs[game_large_asteroids_live_count].rotation_speed = (((float)rand () / (float)RAND_MAX)) / 100.f;
 
     ++game_large_asteroids_live_count;
 
@@ -195,12 +191,12 @@ AGE_RESULT game_small_asteroid_add (float2 position)
     {
         game_small_asteroids_current_max_count += game_SMALL_ASTEROID_BATCH_SIZE;
 
-        game_small_asteroids_transform_inputs.reserve (game_small_asteroids_current_max_count);
+        game_small_asteroids_transform_inputs = (asteroid_transform_inputs*)utils_realloc (game_small_asteroids_transform_inputs, sizeof (asteroid_transform_inputs) * game_small_asteroids_current_max_count);
 
-        game_small_asteroids_outputs_positions.reserve (game_small_asteroids_current_max_count);
-        game_small_asteroids_outputs_rotations.reserve (game_small_asteroids_current_max_count);
-        game_small_asteroids_outputs_scales.reserve (game_small_asteroids_current_max_count);
-        
+        game_small_asteroids_outputs_positions = (float2*)utils_realloc (game_small_asteroids_outputs_positions, sizeof (float2) * game_small_asteroids_current_max_count);
+        game_small_asteroids_outputs_rotations = (float2*)utils_realloc (game_small_asteroids_outputs_rotations, sizeof (float2) * game_small_asteroids_current_max_count);
+        game_small_asteroids_outputs_scales = (float2*)utils_realloc (game_small_asteroids_outputs_scales, sizeof (float2) * game_small_asteroids_current_max_count);
+
         age_result = graphics_create_transforms_buffer (game_small_asteroids_current_max_count, game_small_asteroids_current_max_count, game_bullets_current_max_count);
         if (age_result != AGE_RESULT::SUCCESS)
         {
@@ -209,16 +205,14 @@ AGE_RESULT game_small_asteroid_add (float2 position)
     }
 
     srand (rand ());
-    
-    game_small_asteroids_outputs_positions.emplace_back (position);
-    game_small_asteroids_outputs_rotations.emplace_back (float2 ((float)rand () / (float)RAND_MAX * 3.14f, 0));
-    game_small_asteroids_outputs_scales.emplace_back (float2 (0.5f, 0.5f));
 
-    game_small_asteroids_transform_inputs.emplace_back (
-        float2 (((float)rand () / (float)RAND_MAX) * 2 - 1, ((float)rand () / (float)RAND_MAX) * 2 - 1), 
-        ((float)rand () / (float)RAND_MAX) / 1000.f, 
-        (((float)rand () / (float)RAND_MAX)) / 100.f
-    );
+    game_small_asteroids_outputs_positions[game_small_asteroids_live_count] = position;
+    game_small_asteroids_outputs_rotations[game_small_asteroids_live_count] = float2 ((float)rand () / (float)RAND_MAX * 3.14f, 0);
+    game_small_asteroids_outputs_scales[game_small_asteroids_live_count] = float2 (0.5, 0.5);
+
+    game_small_asteroids_transform_inputs[game_small_asteroids_live_count].forward_vector = float2 (((float)rand () / (float)RAND_MAX) * 2 - 1, ((float)rand () / (float)RAND_MAX) * 2 - 1);
+    game_small_asteroids_transform_inputs[game_small_asteroids_live_count].forward_speed = ((float)rand () / (float)RAND_MAX) / 4000.f;
+    game_small_asteroids_transform_inputs[game_small_asteroids_live_count].rotation_speed = (((float)rand () / (float)RAND_MAX)) / 100.f;
 
     ++game_small_asteroids_live_count;
 
@@ -255,11 +249,25 @@ AGE_RESULT game_large_asteroid_remove (const size_t& index_to_remove)
         goto exit;
     }
 
-    game_large_asteroids_transform_inputs.erase (std::begin (game_large_asteroids_transform_inputs) + index_to_remove);
+    for (size_t a = index_to_remove; a < game_large_asteroids_live_count; ++a)
+    {
+        game_large_asteroids_transform_inputs[a] = game_large_asteroids_transform_inputs[a + 1];
+    }
 
-    game_large_asteroids_outputs_positions.erase (std::begin (game_large_asteroids_outputs_positions) + index_to_remove);
-    game_large_asteroids_outputs_rotations.erase (std::begin (game_large_asteroids_outputs_rotations) + index_to_remove);
-    game_large_asteroids_outputs_scales.erase (std::begin (game_large_asteroids_outputs_scales) + index_to_remove);
+    for (size_t a = index_to_remove; a < game_large_asteroids_live_count; ++a)
+    {
+        game_large_asteroids_outputs_positions[a] = game_large_asteroids_outputs_positions[a + 1];
+    }
+
+    for (size_t a = index_to_remove; a < game_large_asteroids_live_count; ++a)
+    {
+        game_large_asteroids_outputs_rotations[a] = game_large_asteroids_outputs_rotations[a + 1];
+    }
+
+    for (size_t a = index_to_remove; a < game_large_asteroids_live_count; ++a)
+    {
+        game_large_asteroids_outputs_scales[a] = game_large_asteroids_outputs_scales[a + 1];
+    }
 
     --game_large_asteroids_live_count;
 
@@ -282,11 +290,25 @@ AGE_RESULT game_small_asteroid_remove (const size_t& index_to_remove)
         goto exit;
     }
 
-    game_small_asteroids_transform_inputs.erase (std::begin (game_small_asteroids_transform_inputs) + index_to_remove);
+    for (size_t a = index_to_remove; a < game_small_asteroids_live_count; ++a)
+    {
+        game_small_asteroids_transform_inputs[a] = game_small_asteroids_transform_inputs[a + 1];
+    }
 
-    game_small_asteroids_outputs_positions.erase (std::begin (game_small_asteroids_outputs_positions) + index_to_remove);
-    game_small_asteroids_outputs_rotations.erase (std::begin (game_small_asteroids_outputs_rotations) + index_to_remove);
-    game_small_asteroids_outputs_scales.erase (std::begin (game_small_asteroids_outputs_scales) + index_to_remove);
+    for (size_t a = index_to_remove; a < game_small_asteroids_live_count; ++a)
+    {
+        game_small_asteroids_outputs_positions[a] = game_small_asteroids_outputs_positions[a + 1];
+    }
+
+    for (size_t a = index_to_remove; a < game_small_asteroids_live_count; ++a)
+    {
+        game_small_asteroids_outputs_rotations[a] = game_small_asteroids_outputs_rotations[a + 1];
+    }
+
+    for (size_t a = index_to_remove; a < game_small_asteroids_live_count; ++a)
+    {
+        game_small_asteroids_outputs_scales[a] = game_small_asteroids_outputs_scales[a + 1];
+    }
 
     --game_small_asteroids_live_count;
 
@@ -430,12 +452,11 @@ AGE_RESULT game_bullet_add (void)
     if (game_bullet_live_count == game_bullets_current_max_count)
     {
         game_bullets_current_max_count += game_BULLET_BATCH_SIZE;
-        game_bullets_transform_inputs.reserve (game_bullets_current_max_count);
-        game_bullets_current_lifetimes_msecs.reserve (game_bullets_current_max_count);
+        game_bullets_transform_inputs = (bullet_transform_inputs*)utils_realloc (game_bullets_transform_inputs, sizeof (bullet_transform_inputs) * game_bullets_current_max_count);
 
-        game_bullets_outputs_positions.reserve (game_bullets_current_max_count);
-        game_bullets_outputs_rotations.reserve (game_bullets_current_max_count);
-        game_bullets_outputs_scales.reserve (game_bullets_current_max_count);
+        game_bullets_outputs_positions = (float2*)utils_realloc (game_bullets_outputs_positions, sizeof (float2) * game_bullets_current_max_count);
+        game_bullets_outputs_rotations = (float2*)utils_realloc (game_bullets_outputs_rotations, sizeof (float2) * game_bullets_current_max_count);
+        game_bullets_outputs_scales = (float2*)utils_realloc (game_bullets_outputs_scales, sizeof (float2) * game_bullets_current_max_count);
 
         age_result = graphics_create_transforms_buffer (
             game_large_asteroids_current_max_count, 
@@ -448,14 +469,12 @@ AGE_RESULT game_bullet_add (void)
         }
     }
 
-    game_bullets_transform_inputs.emplace_back (
-        bullet_transform_inputs (game_player_transform_inputs.forward_vector, (float2_length (&game_player_transform_inputs.v) / (float)game_delta_time) + 0.005f)
-    );
-    game_bullets_current_lifetimes_msecs.emplace_back (0);
+    game_bullets_transform_inputs[game_bullet_live_count].forward_vector = game_player_transform_inputs.forward_vector;
+    game_bullets_transform_inputs[game_bullet_live_count].speed = (float2_length (&game_player_transform_inputs.v) / (float)game_delta_time) + 0.005f;
 
-    game_bullets_outputs_positions.emplace_back (game_player_output_position);
-    game_bullets_outputs_rotations.emplace_back (game_player_output_rotation);
-    game_bullets_outputs_scales.emplace_back (float2 (0.5, 0.5));
+    game_bullets_outputs_positions[game_bullet_live_count] = game_player_output_position;
+    game_bullets_outputs_rotations[game_bullet_live_count] = game_player_output_rotation;
+    game_bullets_outputs_scales[game_bullet_live_count] = float2 (0.5, 0.5);
 
     ++game_bullet_live_count;
 
@@ -478,12 +497,25 @@ AGE_RESULT game_bullet_remove (const size_t& index_to_remove)
         goto exit;
     }
 
-    game_bullets_transform_inputs.erase (std::begin (game_bullets_transform_inputs) + index_to_remove);
-    game_bullets_current_lifetimes_msecs.erase (std::begin (game_bullets_current_lifetimes_msecs) + index_to_remove);
+    for (size_t b = index_to_remove; b < game_bullet_live_count; ++b)
+    {
+        game_bullets_transform_inputs[b] = game_bullets_transform_inputs[b + 1];
+    }
+    
+    for (size_t b = index_to_remove; b < game_bullet_live_count; ++b)
+    {
+        game_bullets_outputs_positions[b] = game_bullets_outputs_positions[b + 1];
+    }
 
-    game_bullets_outputs_positions.erase (std::begin (game_bullets_outputs_positions) + index_to_remove);
-    game_bullets_outputs_rotations.erase (std::begin (game_bullets_outputs_rotations) + index_to_remove);
-    game_bullets_outputs_scales.erase (std::begin (game_bullets_outputs_scales) + index_to_remove);
+    for (size_t b = index_to_remove; b < game_bullet_live_count; ++b)
+    {
+        game_bullets_outputs_rotations[b] = game_bullets_outputs_rotations[b + 1];
+    }
+
+    for (size_t b = index_to_remove; b < game_bullet_live_count; ++b)
+    {
+        game_bullets_outputs_scales[b] = game_bullets_outputs_scales[b + 1];
+    }
 
     --game_bullet_live_count;
 
@@ -1014,19 +1046,19 @@ AGE_RESULT game_update (size_t delta_msecs)
         &game_player_output_position,
         &game_player_output_rotation,
         &game_player_output_scale,
-        game_large_asteroids_outputs_positions.data (),
-        game_large_asteroids_outputs_rotations.data (),
-        game_large_asteroids_outputs_scales.data(),
+        game_large_asteroids_outputs_positions,
+        game_large_asteroids_outputs_rotations,
+        game_large_asteroids_outputs_scales,
         game_large_asteroids_live_count,
         game_large_asteroids_current_max_count,
-        game_small_asteroids_outputs_positions.data (),
-        game_small_asteroids_outputs_rotations.data (),
-        game_small_asteroids_outputs_scales.data(),
+        game_small_asteroids_outputs_positions,
+        game_small_asteroids_outputs_rotations,
+        game_small_asteroids_outputs_scales,
         game_small_asteroids_live_count,
         game_small_asteroids_current_max_count,
-        game_bullets_outputs_positions.data (),
-        game_bullets_outputs_rotations.data (),
-        game_bullets_outputs_scales.data (),
+        game_bullets_outputs_positions,
+        game_bullets_outputs_rotations,
+        game_bullets_outputs_scales,
         game_bullet_live_count,
         game_bullets_current_max_count
     );
@@ -1058,22 +1090,21 @@ void game_shutdown (void)
     graphics_shutdown ();
     vulkan_interface_shutdown ();
     
-    game_large_asteroids_transform_inputs.clear ();
+    utils_free (game_large_asteroids_transform_inputs);
 
-    game_large_asteroids_outputs_positions.clear ();
-    game_large_asteroids_outputs_rotations.clear ();
-    game_large_asteroids_outputs_scales.clear ();
+    utils_free (game_large_asteroids_outputs_positions);
+    utils_free (game_large_asteroids_outputs_rotations);
+    utils_free (game_large_asteroids_outputs_scales);
 
-    game_small_asteroids_transform_inputs.clear ();
+    utils_free (game_small_asteroids_transform_inputs);
 
-    game_small_asteroids_outputs_positions.clear ();
-    game_small_asteroids_outputs_rotations.clear ();
-    game_small_asteroids_outputs_scales.clear ();
+    utils_free (game_small_asteroids_outputs_positions);
+    utils_free (game_small_asteroids_outputs_rotations);
+    utils_free (game_small_asteroids_outputs_scales);
 
-    game_bullets_transform_inputs.clear ();
-    game_bullets_current_lifetimes_msecs.clear ();
+    utils_free (game_bullets_transform_inputs);
 
-    game_bullets_outputs_positions.clear ();
-    game_bullets_outputs_rotations.clear ();
-    game_bullets_outputs_scales.clear ();
+    utils_free (game_bullets_outputs_positions);
+    utils_free (game_bullets_outputs_rotations);
+    utils_free (game_bullets_outputs_scales);
 }
