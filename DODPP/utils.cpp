@@ -1,6 +1,7 @@
 #include "utils.hpp"
 #include <Shlwapi.h>
 #include <strsafe.h>
+#include <cstdlib>
 
 #pragma comment (lib, "Shlwapi.lib")
 
@@ -107,12 +108,12 @@ void utils_import_texture (const char* texture_path, int* width, int* height, in
 
 void* utils_malloc (const size_t size)
 {
-	return malloc (size);
+	return std::malloc (size);
 }
 
 void* utils_malloc_zero (const size_t size)
 {
-	void* ptr = malloc (size);
+	void* ptr = std::malloc (size);
 	memset (ptr, 0, size);
 	return ptr;
 }
@@ -132,7 +133,7 @@ void* utils_aligned_malloc_zero (const size_t size, const size_t alignment)
 
 void* utils_calloc (const size_t count, const size_t size)
 {
-	return calloc (count, size);
+	return std::calloc (count, size);
 }
 
 void* utils_aligned_calloc (const size_t count, const size_t size, const size_t alignment)
@@ -145,13 +146,13 @@ void* utils_aligned_calloc (const size_t count, const size_t size, const size_t 
 
 void* utils_realloc (void* ptr, size_t new_size)
 {
-	void* new_ptr = realloc (ptr, new_size);
+	void* new_ptr = std::realloc (ptr, new_size);
 	return new_ptr;
 }
 
 void* utils_realloc_zero (void* ptr, size_t old_size, size_t new_size)
 {
-	void* new_ptr = realloc (ptr, new_size);
+	void* new_ptr = std::realloc (ptr, new_size);
 	memset ((char*)new_ptr + old_size, 0, new_size - old_size);
 	return new_ptr;
 }
@@ -167,7 +168,7 @@ void utils_free (void* ptr)
 {
 	if (ptr != NULL)
 	{
-		free (ptr);
+		std::free (ptr);
 		ptr = NULL;
 	}
 }
