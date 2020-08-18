@@ -103,7 +103,8 @@ AGE_RESULT game_init (const HINSTANCE h_instance, const HWND h_wnd)
     age_result = graphics_init (
         game_large_asteroids_current_max_count, game_large_asteroids_live_count, 
         game_small_asteroids_current_max_count, game_small_asteroids_live_count, 
-        game_bullets_current_max_count, game_bullet_live_count
+        game_bullets_current_max_count, game_bullet_live_count,
+        screen_aspect_ratio
     );
 
     return age_result;
@@ -174,7 +175,7 @@ AGE_RESULT game_large_asteroid_add (float2 position)
 
     ++game_large_asteroids_live_count;
 
-    age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count);
+    age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count, screen_aspect_ratio);
 
     return age_result;
 }
@@ -208,7 +209,7 @@ AGE_RESULT game_small_asteroid_add (float2 position)
 
     game_small_asteroids_outputs_positions[game_small_asteroids_live_count] = position;
     game_small_asteroids_outputs_rotations[game_small_asteroids_live_count] = float2 ((float)rand () / (float)RAND_MAX * 3.14f, 0);
-    game_small_asteroids_outputs_scales[game_small_asteroids_live_count] = float2 (0.5, 0.5);
+    game_small_asteroids_outputs_scales[game_small_asteroids_live_count] = float2 (0.5f, 0.5f);
 
     game_small_asteroids_transform_inputs[game_small_asteroids_live_count].forward_vector = float2 (((float)rand () / (float)RAND_MAX) * 2 - 1, ((float)rand () / (float)RAND_MAX) * 2 - 1);
     game_small_asteroids_transform_inputs[game_small_asteroids_live_count].forward_speed = ((float)rand () / (float)RAND_MAX) / 4000.f;
@@ -216,7 +217,7 @@ AGE_RESULT game_small_asteroid_add (float2 position)
 
     ++game_small_asteroids_live_count;
 
-    age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count);
+    age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count, screen_aspect_ratio);
     
     return age_result;;
 }
@@ -261,7 +262,7 @@ AGE_RESULT game_large_asteroid_remove (const size_t& index_to_remove)
 
     --game_large_asteroids_live_count;
 
-    age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count);
+    age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count, screen_aspect_ratio);
 
     return age_result;
 }
@@ -297,7 +298,7 @@ AGE_RESULT game_small_asteroid_remove (const size_t& index_to_remove)
 
     --game_small_asteroids_live_count;
 
-    age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count);
+    age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count, screen_aspect_ratio);
 
     return age_result;
 }
@@ -459,7 +460,7 @@ AGE_RESULT game_bullet_add ()
 
     ++game_bullet_live_count;
 
-    age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count);
+    age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count, screen_aspect_ratio);
 
     return age_result;
 }
@@ -495,7 +496,7 @@ AGE_RESULT game_bullet_remove (const size_t& index_to_remove)
 
     --game_bullet_live_count;
 
-    age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count);
+    age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count, screen_aspect_ratio);
 
     return age_result;
 }
@@ -1030,8 +1031,7 @@ AGE_RESULT game_update (size_t delta_msecs)
         game_bullets_outputs_rotations,
         game_bullets_outputs_scales,
         game_bullet_live_count,
-        game_bullets_current_max_count,
-        screen_aspect_ratio
+        game_bullets_current_max_count
     );
     if (age_result != AGE_RESULT::SUCCESS)
     {
