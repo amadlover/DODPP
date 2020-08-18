@@ -2006,7 +2006,7 @@ void graphics_shutdown ()
 		texture_descriptor_set
 	};
 
-	vkFreeDescriptorSets (device, descriptor_pool, 3, descriptor_sets);
+	vkFreeDescriptorSets (device, descriptor_pool, 2, descriptor_sets);
 
 	if (transform_descriptor_set_layout != VK_NULL_HANDLE)
 	{
