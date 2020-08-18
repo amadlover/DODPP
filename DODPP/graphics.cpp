@@ -28,8 +28,6 @@ VkDeviceMemory vertex_index_buffer_memory = VK_NULL_HANDLE;
 VkPipelineLayout graphics_pipeline_layout = VK_NULL_HANDLE;
 VkPipeline graphics_pipeline = VK_NULL_HANDLE;
 VkDescriptorPool descriptor_pool = VK_NULL_HANDLE;
-VkDescriptorSetLayout aspect_adjust_descriptor_set_layout = VK_NULL_HANDLE;
-VkDescriptorSet aspect_adjust_descriptor_set = VK_NULL_HANDLE;
 VkDescriptorSetLayout transform_descriptor_set_layout = VK_NULL_HANDLE;
 VkDescriptorSet transform_descriptor_set = VK_NULL_HANDLE;
 VkDescriptorSetLayout texture_descriptor_set_layout = VK_NULL_HANDLE;
@@ -2004,17 +2002,11 @@ void graphics_shutdown ()
 	utils_free (transforms_aligned_data);
 
 	VkDescriptorSet descriptor_sets[] = {
-		aspect_adjust_descriptor_set,
 		transform_descriptor_set,
 		texture_descriptor_set
 	};
 
 	vkFreeDescriptorSets (device, descriptor_pool, 3, descriptor_sets);
-
-	if (aspect_adjust_descriptor_set_layout != VK_NULL_HANDLE)
-	{
-		vkDestroyDescriptorSetLayout (device, aspect_adjust_descriptor_set_layout, NULL);
-	}
 
 	if (transform_descriptor_set_layout != VK_NULL_HANDLE)
 	{
