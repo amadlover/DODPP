@@ -10,7 +10,7 @@
 #include <cmath>
 #include <ctime>
 
-
+bool use_mouse_for_look_at = true;
 bool is_w_pressed = false;
 bool is_s_pressed = false;
 bool is_d_pressed = false;
@@ -60,7 +60,7 @@ const size_t game_LARGE_ASTEROID_BATCH_SIZE = 50;
 const size_t game_SMALL_ASTEROID_BATCH_SIZE = 150;
 const size_t game_BULLET_BATCH_SIZE = 20;
 
-RECT window_rect;
+RECT scene_rect;
 int32_t last_mouse_x;
 int32_t last_mouse_y;
 
@@ -81,32 +81,27 @@ AGE_RESULT game_init (const HINSTANCE h_instance, const HWND h_wnd)
     game_player_transform_inputs.max_velocity = 0.05f;
     game_player_output_scale = float2 (1, 1);
 
-    GetClientRect (h_wnd, &window_rect);
+    GetClientRect (h_wnd, &scene_rect);
 
     srand (time_t (NULL));
 
     age_result = game_reserve_memory_for_asteroids_bullets ();
     if (age_result != AGE_RESULT::SUCCESS)
     {
-        goto exit;
+        return age_result;
     }
 
     age_result = vulkan_interface_init (h_instance, h_wnd);
     if (age_result != AGE_RESULT::SUCCESS)
     {
-        goto exit;
+        return age_result;
     }
 
     age_result = graphics_init (
         game_large_asteroids_current_max_count, game_large_asteroids_live_count, 
         game_small_asteroids_current_max_count, game_small_asteroids_live_count, 
         game_bullets_current_max_count, game_bullet_live_count);
-    if (age_result != AGE_RESULT::SUCCESS)
-    {
-        goto exit;
-    }
 
-exit:  // place to clean up local allocations
     return age_result;
 }
 
@@ -135,8 +130,6 @@ AGE_RESULT game_reserve_memory_for_asteroids_bullets ()
     game_bullets_outputs_rotations = (float2*)utils_malloc (sizeof (float2) * game_bullets_current_max_count);
     game_bullets_outputs_scales = (float2*)utils_malloc (sizeof (float2) * game_bullets_current_max_count);
 
-exit: // clean up allocations done in this function
-
     return age_result;
 }
 
@@ -157,7 +150,7 @@ AGE_RESULT game_large_asteroid_add (float2 position)
         age_result = graphics_create_transforms_buffer (game_large_asteroids_current_max_count, game_small_asteroids_current_max_count, game_bullets_current_max_count);
         if (age_result != AGE_RESULT::SUCCESS)
         {
-            goto exit;
+            return age_result;
         }
     }
 
@@ -174,12 +167,7 @@ AGE_RESULT game_large_asteroid_add (float2 position)
     ++game_large_asteroids_live_count;
 
     age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count);
-    if (age_result != AGE_RESULT::SUCCESS)
-    {
-        goto exit;
-    }
 
-exit:
     return age_result;;
 }
 
@@ -200,7 +188,7 @@ AGE_RESULT game_small_asteroid_add (float2 position)
         age_result = graphics_create_transforms_buffer (game_small_asteroids_current_max_count, game_small_asteroids_current_max_count, game_bullets_current_max_count);
         if (age_result != AGE_RESULT::SUCCESS)
         {
-            goto exit;
+            return age_result;
         }
     }
 
@@ -217,12 +205,7 @@ AGE_RESULT game_small_asteroid_add (float2 position)
     ++game_small_asteroids_live_count;
 
     age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count);
-    if (age_result != AGE_RESULT::SUCCESS)
-    {
-        goto exit;
-    }
-
-exit:
+    
     return age_result;;
 }
 
@@ -231,12 +214,7 @@ AGE_RESULT game_process_left_mouse_click (const int32_t x, const int32_t y)
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
     
     age_result = game_large_asteroid_add (float2 (((float)rand () / (float)RAND_MAX) * 2 - 1, ((float)rand () / (float)RAND_MAX) * 2 - 1));
-    if (age_result != AGE_RESULT::SUCCESS)
-    {
-        goto exit;
-    }
-
-exit:
+    
     return age_result;
 }
 
@@ -246,7 +224,7 @@ AGE_RESULT game_large_asteroid_remove (const size_t& index_to_remove)
 
     if (game_large_asteroids_live_count == 0)
     {
-        goto exit;
+        return age_result;
     }
 
     for (size_t a = index_to_remove; a < game_large_asteroids_live_count; ++a)
@@ -272,12 +250,7 @@ AGE_RESULT game_large_asteroid_remove (const size_t& index_to_remove)
     --game_large_asteroids_live_count;
 
     age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count);
-    if (age_result != AGE_RESULT::SUCCESS)
-    {
-        goto exit;
-    }
 
-exit:
     return age_result;
 }
 
@@ -287,7 +260,7 @@ AGE_RESULT game_small_asteroid_remove (const size_t& index_to_remove)
 
     if (game_small_asteroids_live_count == 0)
     {
-        goto exit;
+        return age_result;
     }
 
     for (size_t a = index_to_remove; a < game_small_asteroids_live_count; ++a)
@@ -313,12 +286,7 @@ AGE_RESULT game_small_asteroid_remove (const size_t& index_to_remove)
     --game_small_asteroids_live_count;
 
     age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count);
-    if (age_result != AGE_RESULT::SUCCESS)
-    {
-        goto exit;
-    }
 
-exit:
     return age_result;
 }
 
@@ -327,12 +295,7 @@ AGE_RESULT game_process_right_mouse_click (const int32_t x, const int32_t y)
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     age_result = game_large_asteroid_remove ((size_t)(((float)rand () / (float)RAND_MAX) * game_large_asteroids_live_count));
-    if (age_result != AGE_RESULT::SUCCESS)
-    {
-        goto exit;
-    }
 
-exit:
     return age_result;
 }
 
@@ -346,7 +309,6 @@ AGE_RESULT game_update_player_vectors (void)
     game_player_transform_inputs.forward_vector.x = new_vector_x;
     game_player_transform_inputs.forward_vector.y = new_vector_y;
 
-exit:
     return age_result;
 }
 
@@ -356,13 +318,12 @@ AGE_RESULT game_process_mouse_move (const int32_t x, const int32_t y)
 
     if (x < 0 || y < 0)
     {
-        goto exit;
+        return age_result;
     }
 
     last_mouse_x = x;
     last_mouse_y = y;
 
-exit:
     return age_result;
 }
 
@@ -372,7 +333,7 @@ AGE_RESULT game_player_increase_speed (void)
 
     if (hypot (game_player_transform_inputs.v.x, game_player_transform_inputs.v.y) > game_player_transform_inputs.max_velocity)
     {
-        goto exit;
+        return age_result;
     }
 
     float2 acceleration = { 
@@ -385,7 +346,6 @@ AGE_RESULT game_player_increase_speed (void)
 
     game_player_transform_inputs.u = game_player_transform_inputs.v;
 
-exit:
     return age_result;
 }
 
@@ -395,7 +355,7 @@ AGE_RESULT game_player_decrease_speed (void)
 
     if (hypot (game_player_transform_inputs.v.x, game_player_transform_inputs.v.y) > game_player_transform_inputs.max_velocity)
     {
-        goto exit;
+        return age_result;
     }
 
     float2 deceleration = { 
@@ -408,7 +368,6 @@ AGE_RESULT game_player_decrease_speed (void)
 
     game_player_transform_inputs.u = game_player_transform_inputs.v;
 
-exit:
     return age_result;
 }
 
@@ -420,12 +379,7 @@ AGE_RESULT game_player_turn_right (void)
     game_player_output_rotation.x = game_player_transform_inputs.rotation;
 
     age_result = game_update_player_vectors ();
-    if (age_result != AGE_RESULT::SUCCESS)
-    {
-        goto exit;
-    }
 
-exit:
     return age_result;
 }
 
@@ -437,11 +391,23 @@ AGE_RESULT game_player_turn_left (void)
     game_player_output_rotation.x = game_player_transform_inputs.rotation;
 
     age_result = game_update_player_vectors ();
-    if (age_result != AGE_RESULT::SUCCESS)
-    {
-        goto exit;
-    }
-exit:
+    
+    return age_result;
+}
+
+AGE_RESULT game_player_look_at_mouse (void)
+{
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
+
+    float2 transformed_mouse_pos = float2 (
+        (float)last_mouse_x / (float)scene_rect.right * 2 - 1,
+        (float)last_mouse_y / (float)scene_rect.bottom * 2 -1
+    );
+
+    float2 look_at_mouse = float2 (transformed_mouse_pos.x - game_player_output_position.x, transformed_mouse_pos.y - game_player_output_position.y);
+    float2_unit_vector (&look_at_mouse);
+    game_player_transform_inputs.forward_vector = look_at_mouse;
+
     return age_result;
 }
 
@@ -465,7 +431,7 @@ AGE_RESULT game_bullet_add (void)
         );
         if (age_result != AGE_RESULT::SUCCESS)
         {
-            goto exit;
+            return age_result;
         }
     }
 
@@ -479,12 +445,7 @@ AGE_RESULT game_bullet_add (void)
     ++game_bullet_live_count;
 
     age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count);
-    if (age_result != AGE_RESULT::SUCCESS)
-    {
-        goto exit;
-    }
 
-exit:
     return age_result;
 }
 
@@ -494,7 +455,7 @@ AGE_RESULT game_bullet_remove (const size_t& index_to_remove)
 
     if (game_bullet_live_count == 0)
     {
-        goto exit;
+        return age_result;
     }
 
     for (size_t b = index_to_remove; b < game_bullet_live_count; ++b)
@@ -520,12 +481,7 @@ AGE_RESULT game_bullet_remove (const size_t& index_to_remove)
     --game_bullet_live_count;
 
     age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count);
-    if (age_result != AGE_RESULT::SUCCESS)
-    {
-        goto exit;
-    }
 
-exit:
     return age_result;
 }
 
@@ -538,13 +494,12 @@ AGE_RESULT game_player_attempt_to_shoot (void)
         age_result = game_bullet_add ();
         if (age_result != AGE_RESULT::SUCCESS)
         {
-            goto exit;
+            return age_result;
         }
 
         game_secs_since_last_shot = 0;
     }
 
-exit:
     return age_result;
 }
 
@@ -619,7 +574,6 @@ AGE_RESULT game_process_key_down (const WPARAM w_param)
         break;
     }
 
-exit:
     return age_result;
 }
 
@@ -669,7 +623,6 @@ AGE_RESULT game_process_key_up (const WPARAM w_param)
         break;
     }
 
-exit:
     return age_result;
 }
 
@@ -763,7 +716,7 @@ AGE_RESULT game_update_player_asteroids_bullets_output_positions (void)
             age_result = game_bullet_remove (b);
             if (age_result != AGE_RESULT::SUCCESS)
             {
-                goto exit;
+                return age_result;
             }
 
             break;
@@ -773,7 +726,7 @@ AGE_RESULT game_update_player_asteroids_bullets_output_positions (void)
             age_result = game_bullet_remove (b);
             if (age_result != AGE_RESULT::SUCCESS)
             {
-                goto exit;
+                return age_result;
             }
 
             break;
@@ -783,7 +736,7 @@ AGE_RESULT game_update_player_asteroids_bullets_output_positions (void)
             age_result = game_bullet_remove (b);
             if (age_result != AGE_RESULT::SUCCESS)
             {
-                goto exit;
+                return age_result;
             }
 
             break;
@@ -793,14 +746,13 @@ AGE_RESULT game_update_player_asteroids_bullets_output_positions (void)
             age_result = game_bullet_remove (b);
             if (age_result != AGE_RESULT::SUCCESS)
             {
-                goto exit;
+                return age_result;
             }
 
             break;
         }
     }
 
-exit:
     return age_result;
 }
 
@@ -821,7 +773,6 @@ AGE_RESULT game_player_apply_damping (void)
     game_player_transform_inputs.u.x *= damping_value;
     game_player_transform_inputs.u.y *= damping_value;
 
-exit:
     return age_result;
 }
 
@@ -834,7 +785,7 @@ AGE_RESULT game_process_player_input (void)
         age_result = game_player_increase_speed ();
         if (age_result != AGE_RESULT::SUCCESS)
         {
-            goto exit;
+            return age_result;
         }
     }
 
@@ -843,7 +794,7 @@ AGE_RESULT game_process_player_input (void)
         age_result = game_player_increase_speed ();
         if (age_result != AGE_RESULT::SUCCESS)
         {
-            goto exit;
+            return age_result;
         }
     }
     
@@ -852,7 +803,7 @@ AGE_RESULT game_process_player_input (void)
         age_result = game_player_decrease_speed ();
         if (age_result != AGE_RESULT::SUCCESS)
         {
-            goto exit;
+            return age_result;
         }
     }
 
@@ -861,43 +812,53 @@ AGE_RESULT game_process_player_input (void)
         age_result = game_player_decrease_speed ();
         if (age_result != AGE_RESULT::SUCCESS)
         {
-            goto exit;
+            return age_result;
         }
     }
 
-    if (is_d_pressed)
+    if (use_mouse_for_look_at)
     {
-        age_result = game_player_turn_right ();
-        if (age_result != AGE_RESULT::SUCCESS)
-        {
-            goto exit;
+        age_result = game_player_look_at_mouse ();
+        if (age_result != AGE_RESULT::SUCCESS) {
+            return age_result;
         }
     }
-
-    if (is_right_arrow_pressed)
+    else
     {
-        age_result = game_player_turn_right ();
-        if (age_result != AGE_RESULT::SUCCESS)
+        if (is_d_pressed)
         {
-            goto exit;
+            age_result = game_player_turn_right ();
+            if (age_result != AGE_RESULT::SUCCESS)
+            {
+                return age_result;
+            }
         }
-    }
 
-    if (is_a_pressed)
-    {
-        age_result = game_player_turn_left ();
-        if (age_result != AGE_RESULT::SUCCESS)
+        if (is_right_arrow_pressed)
         {
-            goto exit;
+            age_result = game_player_turn_right ();
+            if (age_result != AGE_RESULT::SUCCESS)
+            {
+                return age_result;
+            }
         }
-    }
 
-    if (is_left_arrow_pressed)
-    {
-        age_result = game_player_turn_left ();
-        if (age_result != AGE_RESULT::SUCCESS)
+        if (is_a_pressed)
         {
-            goto exit;
+            age_result = game_player_turn_left ();
+            if (age_result != AGE_RESULT::SUCCESS)
+            {
+                return age_result;
+            }
+        }
+
+        if (is_left_arrow_pressed)
+        {
+            age_result = game_player_turn_left ();
+            if (age_result != AGE_RESULT::SUCCESS)
+            {
+                return age_result;
+            }
         }
     }
 
@@ -906,11 +867,10 @@ AGE_RESULT game_process_player_input (void)
         age_result = game_player_attempt_to_shoot ();
         if (age_result != AGE_RESULT::SUCCESS)
         {
-            goto exit;
+            return age_result;
         }
     }
 
-exit:
     return age_result;
 }
 
@@ -932,7 +892,7 @@ AGE_RESULT game_bullets_large_asteroids_collision_checks (void)
                 age_result = game_bullet_remove (b);
                 if (age_result != AGE_RESULT::SUCCESS)
                 {
-                    goto exit;
+                    return age_result;
                 }
 
                 float2 position = game_large_asteroids_outputs_positions[a];
@@ -941,7 +901,7 @@ AGE_RESULT game_bullets_large_asteroids_collision_checks (void)
                 age_result = game_large_asteroid_remove (a);
                 if (age_result != AGE_RESULT::SUCCESS)
                 {
-                    goto exit;
+                    return age_result;
                 }
 
                 for (size_t a = 0; a < 3; ++a)
@@ -949,7 +909,7 @@ AGE_RESULT game_bullets_large_asteroids_collision_checks (void)
                     age_result = game_small_asteroid_add (position);
                     if (age_result != AGE_RESULT::SUCCESS)
                     {
-                        goto exit;
+                        return age_result;
                     }
                 }
 
@@ -958,7 +918,6 @@ AGE_RESULT game_bullets_large_asteroids_collision_checks (void)
         }
     }
 
-exit:
     return age_result;
 }
 
@@ -980,13 +939,13 @@ AGE_RESULT game_bullets_small_asteroids_collision_checks (void)
                 age_result = game_bullet_remove (b);
                 if (age_result != AGE_RESULT::SUCCESS)
                 {
-                    goto exit;
+                    return age_result;
                 }
 
                 age_result = game_small_asteroid_remove (a);
                 if (age_result != AGE_RESULT::SUCCESS)
                 {
-                    goto exit;
+                    return age_result;
                 }
 
                 break;
@@ -994,7 +953,6 @@ AGE_RESULT game_bullets_small_asteroids_collision_checks (void)
         }
     }
 
-exit:
     return age_result;
 }
 
@@ -1009,19 +967,19 @@ AGE_RESULT game_update (size_t delta_msecs)
     age_result = game_process_player_input ();
     if (age_result != AGE_RESULT::SUCCESS)
     {
-        goto exit;
+        return age_result;
     }
 
     age_result = game_update_player_asteroids_bullets_output_positions ();
     if (age_result != AGE_RESULT::SUCCESS)
     {
-        goto exit;
+        return age_result;
     }
 
     age_result = game_player_apply_damping ();
     if (age_result != AGE_RESULT::SUCCESS)
     {
-        goto exit;
+        return age_result;
     }
 
     /*age_result = game_bullets_check_life ();
@@ -1033,13 +991,13 @@ AGE_RESULT game_update (size_t delta_msecs)
     age_result = game_bullets_large_asteroids_collision_checks ();
     if (age_result != AGE_RESULT::SUCCESS)
     {
-        goto exit;
+        return age_result;
     }
 
     age_result = game_bullets_small_asteroids_collision_checks ();
     if (age_result != AGE_RESULT::SUCCESS)
     {
-        goto exit;
+        return age_result;
     }
 
     age_result = graphics_update_transforms_buffer_data (
@@ -1064,10 +1022,9 @@ AGE_RESULT game_update (size_t delta_msecs)
     );
     if (age_result != AGE_RESULT::SUCCESS)
     {
-        goto exit;
+        return age_result;
     }
 
-exit: // clear function specific allocations
     return age_result;
 }
 
@@ -1076,12 +1033,7 @@ AGE_RESULT game_submit_present (void)
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     age_result = graphics_submit_present ();
-    if (age_result != AGE_RESULT::SUCCESS)
-    {
-        goto exit;
-    }
 
-exit:
     return age_result;
 }
 

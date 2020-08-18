@@ -31,7 +31,7 @@ VkSurfaceFormatKHR chosen_surface_format;
 VkCommandPool transfer_command_pool;
 VkSampler common_sampler;
 
-VkResult create_debug_utils_messenger (VkInstance instance,
+VkResult create_instance_debug_utils_messenger (VkInstance instance,
 	const VkDebugUtilsMessengerCreateInfoEXT* debug_utils_messenger_create_info,
 	const VkAllocationCallbacks* allocation_callbacks,
 	VkDebugUtilsMessengerEXT* debug_utils_messenger)
@@ -48,7 +48,7 @@ VkResult create_debug_utils_messenger (VkInstance instance,
 	}
 }
 
-void destroy_debug_utils_messenger (VkInstance instance,
+void destroy_instance_debug_utils_messenger (VkInstance instance,
 	VkDebugUtilsMessengerEXT debug_utils_messenger,
 	const VkAllocationCallbacks* allocation_callbacks)
 {
@@ -78,6 +78,47 @@ VKAPI_ATTR VkBool32 VKAPI_CALL debug_messenger_callback (
 	return false;
 }
 
+AGE_RESULT vulkan_interface_create_instance (void)
+{
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
+	
+	return age_result;
+}
+
+AGE_RESULT vulkan_interface_create_debug_utils_messenger (void)
+{
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
+
+	return age_result;
+}
+
+AGE_RESULT vulkan_interface_create_device (void)
+{
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
+
+	return age_result;
+}
+
+AGE_RESULT vulkan_interface_create_swapchain (void)
+{
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
+
+	return age_result;
+}
+
+AGE_RESULT vulkan_interface_create_transfer_command_pool (void)
+{
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
+
+	return age_result;
+}
+
+AGE_RESULT vulkan_interface_create_common_sampler (void)
+{
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
+
+	return age_result;
+}
 
 AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 {
@@ -249,7 +290,7 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 			NULL
 		};
 
-		vk_result = create_debug_utils_messenger (instance, &debug_utils_messenger_create_info, NULL, &debug_utils_messenger);
+		vk_result = create_instance_debug_utils_messenger (instance, &debug_utils_messenger_create_info, NULL, &debug_utils_messenger);
 
 		if (vk_result != VK_SUCCESS)
 		{
@@ -684,7 +725,7 @@ void vulkan_interface_shutdown (void)
 	{
 		if (debug_utils_messenger != VK_NULL_HANDLE)
 		{
-			destroy_debug_utils_messenger (instance, debug_utils_messenger, NULL);
+			destroy_instance_debug_utils_messenger (instance, debug_utils_messenger, NULL);
 		}
 	}
 

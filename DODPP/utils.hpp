@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Windows.h>
-#include <stdbool.h>
+#include <cstdbool>
 #include <cstdint>
 
 #define CHECK_AGAINST_RESULT(func, result) result = func; if (result != 0) return result;
