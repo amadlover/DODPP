@@ -2,7 +2,7 @@
 
 #include "error.hpp"
 
-AGE_RESULT compute_common_compute_init (void);
-AGE_RESULT compute_init (void);
+AGE_RESULT compute_common_compute_init ();
+AGE_RESULT compute_init ();
 
-void compute_shutdown (void);
+void compute_shutdown ();

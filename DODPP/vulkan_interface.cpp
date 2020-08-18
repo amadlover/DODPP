@@ -78,42 +78,42 @@ VKAPI_ATTR VkBool32 VKAPI_CALL debug_messenger_callback (
 	return false;
 }
 
-AGE_RESULT vulkan_interface_create_instance (void)
+AGE_RESULT vulkan_interface_create_instance ()
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 	
 	return age_result;
 }
 
-AGE_RESULT vulkan_interface_create_debug_utils_messenger (void)
+AGE_RESULT vulkan_interface_create_debug_utils_messenger ()
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
 	return age_result;
 }
 
-AGE_RESULT vulkan_interface_create_device (void)
+AGE_RESULT vulkan_interface_create_device ()
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
 	return age_result;
 }
 
-AGE_RESULT vulkan_interface_create_swapchain (void)
+AGE_RESULT vulkan_interface_create_swapchain ()
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
 	return age_result;
 }
 
-AGE_RESULT vulkan_interface_create_transfer_command_pool (void)
+AGE_RESULT vulkan_interface_create_transfer_command_pool ()
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
 	return age_result;
 }
 
-AGE_RESULT vulkan_interface_create_common_sampler (void)
+AGE_RESULT vulkan_interface_create_common_sampler ()
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
@@ -683,7 +683,7 @@ exit: // clean up allocation made within the function
 	return age_result;
 }
 
-void vulkan_interface_shutdown (void)
+void vulkan_interface_shutdown ()
 {
 	if (transfer_command_pool != VK_NULL_HANDLE)
 	{

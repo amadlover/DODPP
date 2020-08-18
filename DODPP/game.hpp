@@ -12,5 +12,5 @@ AGE_RESULT game_process_mouse_move (const int32_t x, const int32_t y);
 AGE_RESULT game_process_key_down (const WPARAM w_param);
 AGE_RESULT game_process_key_up (const WPARAM w_param);
 AGE_RESULT game_update (size_t delta_time);
-AGE_RESULT game_submit_present (void);
-void game_shutdown (void);
+AGE_RESULT game_submit_present ();
+void game_shutdown ();

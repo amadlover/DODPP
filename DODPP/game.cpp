@@ -10,7 +10,7 @@
 #include <cmath>
 #include <ctime>
 
-bool use_mouse_for_look_at = true;
+bool use_mouse_for_look_at = false;
 bool is_w_pressed = false;
 bool is_s_pressed = false;
 bool is_d_pressed = false;
@@ -20,6 +20,8 @@ bool is_up_arrow_pressed = false;
 bool is_down_arrow_pressed = false;
 bool is_right_arrow_pressed = false;
 bool is_left_arrow_pressed = false;
+
+float screen_aspect_ratio = 1;
 
 player_transform_inputs game_player_transform_inputs = {};
 float2 game_player_output_position;
@@ -66,11 +68,14 @@ int32_t last_mouse_y;
 
 size_t game_delta_time = 0;
 
-AGE_RESULT game_reserve_memory_for_asteroids_bullets (void);
+AGE_RESULT game_reserve_memory_for_asteroids_bullets ();
 
 AGE_RESULT game_init (const HINSTANCE h_instance, const HWND h_wnd)
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
+
+    GetClientRect (h_wnd, &scene_rect);
+    screen_aspect_ratio = (float)scene_rect.right / (float)scene_rect.bottom;
 
     game_player_transform_inputs.time_msecs_to_come_to_rest = 500.f;
     game_player_transform_inputs.forward_vector.x = 0;
@@ -80,8 +85,6 @@ AGE_RESULT game_init (const HINSTANCE h_instance, const HWND h_wnd)
     game_player_transform_inputs.rotation_speed = 0.005f;
     game_player_transform_inputs.max_velocity = 0.05f;
     game_player_output_scale = float2 (1, 1);
-
-    GetClientRect (h_wnd, &scene_rect);
 
     srand (time_t (NULL));
 
@@ -100,7 +103,8 @@ AGE_RESULT game_init (const HINSTANCE h_instance, const HWND h_wnd)
     age_result = graphics_init (
         game_large_asteroids_current_max_count, game_large_asteroids_live_count, 
         game_small_asteroids_current_max_count, game_small_asteroids_live_count, 
-        game_bullets_current_max_count, game_bullet_live_count);
+        game_bullets_current_max_count, game_bullet_live_count
+    );
 
     return age_result;
 }
@@ -147,7 +151,11 @@ AGE_RESULT game_large_asteroid_add (float2 position)
         game_large_asteroids_outputs_rotations = (float2*)utils_realloc (game_large_asteroids_outputs_rotations, sizeof (float2) * game_large_asteroids_current_max_count);
         game_large_asteroids_outputs_scales = (float2*)utils_realloc (game_large_asteroids_outputs_scales, sizeof (float2) * game_large_asteroids_current_max_count);
         
-        age_result = graphics_create_transforms_buffer (game_large_asteroids_current_max_count, game_small_asteroids_current_max_count, game_bullets_current_max_count);
+        age_result = graphics_create_transforms_buffer (
+            game_large_asteroids_current_max_count, 
+            game_small_asteroids_current_max_count, 
+            game_bullets_current_max_count
+        );
         if (age_result != AGE_RESULT::SUCCESS)
         {
             return age_result;
@@ -168,7 +176,7 @@ AGE_RESULT game_large_asteroid_add (float2 position)
 
     age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count);
 
-    return age_result;;
+    return age_result;
 }
 
 AGE_RESULT game_small_asteroid_add (float2 position)
@@ -185,7 +193,11 @@ AGE_RESULT game_small_asteroid_add (float2 position)
         game_small_asteroids_outputs_rotations = (float2*)utils_realloc (game_small_asteroids_outputs_rotations, sizeof (float2) * game_small_asteroids_current_max_count);
         game_small_asteroids_outputs_scales = (float2*)utils_realloc (game_small_asteroids_outputs_scales, sizeof (float2) * game_small_asteroids_current_max_count);
 
-        age_result = graphics_create_transforms_buffer (game_small_asteroids_current_max_count, game_small_asteroids_current_max_count, game_bullets_current_max_count);
+        age_result = graphics_create_transforms_buffer (
+            game_large_asteroids_current_max_count, 
+            game_small_asteroids_current_max_count, 
+            game_bullets_current_max_count
+        );
         if (age_result != AGE_RESULT::SUCCESS)
         {
             return age_result;
@@ -299,7 +311,7 @@ AGE_RESULT game_process_right_mouse_click (const int32_t x, const int32_t y)
     return age_result;
 }
 
-AGE_RESULT game_update_player_vectors (void)
+AGE_RESULT game_update_player_vectors ()
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
@@ -327,7 +339,7 @@ AGE_RESULT game_process_mouse_move (const int32_t x, const int32_t y)
     return age_result;
 }
 
-AGE_RESULT game_player_increase_speed (void)
+AGE_RESULT game_player_increase_speed ()
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
@@ -349,7 +361,7 @@ AGE_RESULT game_player_increase_speed (void)
     return age_result;
 }
 
-AGE_RESULT game_player_decrease_speed (void)
+AGE_RESULT game_player_decrease_speed ()
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
@@ -371,7 +383,7 @@ AGE_RESULT game_player_decrease_speed (void)
     return age_result;
 }
 
-AGE_RESULT game_player_turn_right (void)
+AGE_RESULT game_player_turn_right ()
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
@@ -383,7 +395,7 @@ AGE_RESULT game_player_turn_right (void)
     return age_result;
 }
 
-AGE_RESULT game_player_turn_left (void)
+AGE_RESULT game_player_turn_left ()
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
     
@@ -395,23 +407,26 @@ AGE_RESULT game_player_turn_left (void)
     return age_result;
 }
 
-AGE_RESULT game_player_look_at_mouse (void)
+AGE_RESULT game_player_look_at_mouse ()
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     float2 transformed_mouse_pos = float2 (
         (float)last_mouse_x / (float)scene_rect.right * 2 - 1,
-        (float)last_mouse_y / (float)scene_rect.bottom * 2 -1
+        (float)last_mouse_y / (float)scene_rect.bottom * 2 - 1
     );
 
     float2 look_at_mouse = float2 (transformed_mouse_pos.x - game_player_output_position.x, transformed_mouse_pos.y - game_player_output_position.y);
     float2_unit_vector (&look_at_mouse);
     game_player_transform_inputs.forward_vector = look_at_mouse;
 
+    game_player_output_rotation.x = -asinf (game_player_transform_inputs.forward_vector.x);
+    game_player_output_rotation.y = acosf (game_player_transform_inputs.forward_vector.y);
+
     return age_result;
 }
 
-AGE_RESULT game_bullet_add (void)
+AGE_RESULT game_bullet_add ()
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
@@ -485,7 +500,7 @@ AGE_RESULT game_bullet_remove (const size_t& index_to_remove)
     return age_result;
 }
 
-AGE_RESULT game_player_attempt_to_shoot (void)
+AGE_RESULT game_player_attempt_to_shoot ()
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
@@ -503,7 +518,7 @@ AGE_RESULT game_player_attempt_to_shoot (void)
     return age_result;
 }
 
-/*AGE_RESULT game_bullets_check_life (void)
+/*AGE_RESULT game_bullets_check_life ()
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
@@ -626,12 +641,9 @@ AGE_RESULT game_process_key_up (const WPARAM w_param)
     return age_result;
 }
 
-AGE_RESULT game_update_player_asteroids_bullets_output_positions (void)
+AGE_RESULT game_update_player_asteroids_bullets_output_positions ()
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
-
-    game_player_output_scale.x = 1;
-    game_player_output_scale.y = 1;
 
     game_player_output_position.x += game_player_transform_inputs.v.x;
     game_player_output_position.y += game_player_transform_inputs.v.y;
@@ -756,7 +768,7 @@ AGE_RESULT game_update_player_asteroids_bullets_output_positions (void)
     return age_result;
 }
 
-AGE_RESULT game_player_apply_damping (void)
+AGE_RESULT game_player_apply_damping ()
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
@@ -776,7 +788,7 @@ AGE_RESULT game_player_apply_damping (void)
     return age_result;
 }
 
-AGE_RESULT game_process_player_input (void)
+AGE_RESULT game_process_player_input ()
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
@@ -874,7 +886,7 @@ AGE_RESULT game_process_player_input (void)
     return age_result;
 }
 
-AGE_RESULT game_bullets_large_asteroids_collision_checks (void)
+AGE_RESULT game_bullets_large_asteroids_collision_checks ()
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
@@ -921,7 +933,7 @@ AGE_RESULT game_bullets_large_asteroids_collision_checks (void)
     return age_result;
 }
 
-AGE_RESULT game_bullets_small_asteroids_collision_checks (void)
+AGE_RESULT game_bullets_small_asteroids_collision_checks ()
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
@@ -1018,7 +1030,8 @@ AGE_RESULT game_update (size_t delta_msecs)
         game_bullets_outputs_rotations,
         game_bullets_outputs_scales,
         game_bullet_live_count,
-        game_bullets_current_max_count
+        game_bullets_current_max_count,
+        screen_aspect_ratio
     );
     if (age_result != AGE_RESULT::SUCCESS)
     {
@@ -1028,7 +1041,7 @@ AGE_RESULT game_update (size_t delta_msecs)
     return age_result;
 }
 
-AGE_RESULT game_submit_present (void)
+AGE_RESULT game_submit_present ()
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
@@ -1037,7 +1050,7 @@ AGE_RESULT game_submit_present (void)
     return age_result;
 }
 
-void game_shutdown (void)
+void game_shutdown ()
 {
     graphics_shutdown ();
     vulkan_interface_shutdown ();

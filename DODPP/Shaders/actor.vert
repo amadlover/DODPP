@@ -2,7 +2,12 @@
 
 #extension GL_ARB_separate_shader_objects : enable
 
-layout (set = 0, binding = 0) uniform mat_ubo
+layout (set = 0, binding = 0) uniform aspect_ubo
+{
+    float screen_aspect_adjust;
+} aspect_buff;
+
+layout (set = 1, binding = 0) uniform mat_ubo
 {
     vec2 actor_position;
     vec2 actor_rotation;
@@ -26,6 +31,7 @@ void main ()
                             );
     
     vec3 final_pos = rotated_pos + vec3 (mat_buff.actor_position, 0);
+    final_pos.x *= aspect_buff.screen_aspect_adjust;
 
     gl_Position = vec4 (final_pos, 1);
 
