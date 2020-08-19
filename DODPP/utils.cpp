@@ -166,7 +166,7 @@ void* utils_aligned_realloc_zero (void* ptr, size_t alignment, size_t old_size, 
 
 void utils_free (void* ptr)
 {
-	if (ptr != NULL)
+	if (ptr)
 	{
 		std::free (ptr);
 		ptr = NULL;
@@ -175,7 +175,7 @@ void utils_free (void* ptr)
 
 void utils_aligned_free (void* ptr)
 {
-	if (ptr != NULL)
+	if (ptr)
 	{
 		_aligned_free (ptr);
 		ptr = NULL;

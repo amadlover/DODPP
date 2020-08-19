@@ -81,155 +81,13 @@ VKAPI_ATTR VkBool32 VKAPI_CALL debug_messenger_callback (
 AGE_RESULT vulkan_interface_create_instance ()
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
-	
-	return age_result;
-}
-
-AGE_RESULT vulkan_interface_create_debug_utils_messenger ()
-{
-	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
-
-	return age_result;
-}
-
-AGE_RESULT vulkan_interface_create_device ()
-{
-	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
-
-	return age_result;
-}
-
-AGE_RESULT vulkan_interface_create_swapchain ()
-{
-	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
-
-	return age_result;
-}
-
-AGE_RESULT vulkan_interface_create_transfer_command_pool ()
-{
-	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
-
-	return age_result;
-}
-
-AGE_RESULT vulkan_interface_create_common_sampler ()
-{
-	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
-
-	return age_result;
-}
-
-AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
-{
-    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 	VkResult vk_result = VK_SUCCESS;
 
-#ifdef _DEBUG 
-	is_validation_needed = true;
-#elif DEBUG
-	is_validation_needed = true;
-#else
-	is_validation_needed = false;
-#endif
+	char* instance_extensions[256];
+	char* instance_layers[256];
 
-	char** requested_instance_layers = NULL;
-	size_t requested_instance_layer_count = 0;
-
-	char** requested_instance_extensions = NULL;
-	size_t requested_instance_extension_count = 0;
-
-	if (is_validation_needed)
-	{
-		size_t layer_count = 0;
-		vkEnumerateInstanceLayerProperties (&layer_count, NULL);
-		VkLayerProperties* layer_properties = (VkLayerProperties*)utils_calloc (layer_count, sizeof (VkLayerProperties));
-		vkEnumerateInstanceLayerProperties (&layer_count, layer_properties);
-
-		for (size_t l = 0; l < layer_count; l++)
-		{
-			if (strcmp (layer_properties[l].layerName, "VK_LAYER_KHRONOS_validation") == 0)
-			{
-				if (requested_instance_layers == NULL)
-				{
-					requested_instance_layers = (char**)utils_calloc (1, sizeof (char*));
-				}
-				else
-				{
-					requested_instance_layers = (char**)utils_realloc_zero (requested_instance_layers, sizeof (char*) * requested_instance_layer_count, sizeof (char*) * (requested_instance_layer_count + 1));
-				}
-
-				requested_instance_layers[requested_instance_layer_count] = (char*)utils_calloc (strlen ("VK_LAYER_KHRONOS_validation") + 1, sizeof (char));
-				strcpy (requested_instance_layers[requested_instance_layer_count], "VK_LAYER_KHRONOS_validation");
-				++requested_instance_layer_count;
-
-				break;
-			}
-		}
-
-		utils_free (layer_properties);
-	}
-
-	size_t extension_count = 0;
-	vkEnumerateInstanceExtensionProperties (NULL, &extension_count, NULL);
-
-	VkExtensionProperties* extension_properties = (VkExtensionProperties*)utils_calloc (extension_count, sizeof (VkExtensionProperties));
-	vkEnumerateInstanceExtensionProperties (NULL, &extension_count, extension_properties);
-
-	for (size_t e = 0; e < extension_count; e++)
-	{
-		if (strcmp (extension_properties[e].extensionName, VK_KHR_SURFACE_EXTENSION_NAME) == 0)
-		{
-			if (requested_instance_extensions == NULL)
-			{
-				requested_instance_extensions = (char**)utils_calloc (1, sizeof (char*));
-			}
-			else
-			{
-				requested_instance_extensions = (char**)utils_realloc_zero (requested_instance_extensions, sizeof (char*) * requested_instance_extension_count, sizeof (char*) * (requested_instance_extension_count + 1));
-			}
-
-			requested_instance_extensions[requested_instance_extension_count] = (char*)utils_calloc (strlen (VK_KHR_SURFACE_EXTENSION_NAME) + 1, sizeof (char));
-			strcpy (requested_instance_extensions[requested_instance_extension_count], VK_KHR_SURFACE_EXTENSION_NAME);
-			++requested_instance_extension_count;
-		}
-		else if (strcmp (extension_properties[e].extensionName, "VK_KHR_win32_surface") == 0)
-		{
-			if (requested_instance_extensions == NULL)
-			{
-				requested_instance_extensions = (char**)utils_calloc (1, sizeof (char*));
-			}
-			else
-			{
-				requested_instance_extensions = (char**)utils_realloc_zero (requested_instance_extensions, sizeof (char*) * requested_instance_extension_count, sizeof (char*) * (requested_instance_extension_count + 1));
-			}
-
-			requested_instance_extensions[requested_instance_extension_count] = (char*)utils_calloc (strlen ("VK_KHR_win32_surface") + 1, sizeof (char));
-			strcpy (requested_instance_extensions[requested_instance_extension_count], "VK_KHR_win32_surface");
-			++requested_instance_extension_count;
-		}
-
-		if (is_validation_needed)
-		{
-			if (strcmp (extension_properties[e].extensionName, VK_EXT_DEBUG_UTILS_EXTENSION_NAME) == 0)
-			{
-				if (requested_instance_extensions == NULL)
-				{
-					requested_instance_extensions = (char**)utils_calloc (1, sizeof (char*));
-				}
-				else
-				{
-					requested_instance_extensions = (char**)utils_realloc_zero (requested_instance_extensions, sizeof (char*) * requested_instance_extension_count, sizeof (char*) * (requested_instance_extension_count + 1));
-				}
-
-				requested_instance_extensions[requested_instance_extension_count] = (char*)utils_calloc (strlen (VK_EXT_DEBUG_UTILS_EXTENSION_NAME) + 1, sizeof (char));
-				strcpy (requested_instance_extensions[requested_instance_extension_count], VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-				++requested_instance_extension_count;
-			}
-		}
-	}
-
-	utils_free (extension_properties);
+	instance_extensions[0] = VK_KHR_SURFACE_EXTENSION_NAME;
+	instance_extensions[1] = "VK_KHR_win32_surface";
 
 	VkApplicationInfo application_info = {
 		VK_STRUCTURE_TYPE_APPLICATION_INFO,
@@ -243,6 +101,8 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 
 	if (is_validation_needed)
 	{
+		instance_extensions[2] = VK_EXT_DEBUG_UTILS_EXTENSION_NAME;
+		instance_layers[0] = "VK_LAYER_KHRONOS_validation";
 		VkValidationFeatureEnableEXT enables[] = {
 			VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT,
 			VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_EXT
@@ -262,40 +122,16 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 			&features,
 			0,
 			&application_info,
-			requested_instance_layer_count,
-			requested_instance_layers,
-			requested_instance_extension_count,
-			requested_instance_extensions
+			1,
+			instance_layers,
+			3,
+			instance_extensions
 		};
 
 		vk_result = vkCreateInstance (&instance_create_info, NULL, &instance);
 		if (vk_result != VK_SUCCESS)
 		{
 			age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_INSTANCE;
-			goto exit;
-		}
-
-		VkDebugUtilsMessengerCreateInfoEXT debug_utils_messenger_create_info = {
-			VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
-			NULL,
-			0,
-			/*VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |*/
-			VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-			VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
-			VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
-			VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-			VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT |
-			VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT,
-			debug_messenger_callback,
-			NULL
-		};
-
-		vk_result = create_instance_debug_utils_messenger (instance, &debug_utils_messenger_create_info, NULL, &debug_utils_messenger);
-
-		if (vk_result != VK_SUCCESS)
-		{
-			age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_DEBUG_UTILS_MESSENGER;
-			goto exit;
 		}
 	}
 	else
@@ -305,20 +141,78 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 			NULL,
 			0,
 			&application_info,
-			requested_instance_layer_count,
-			requested_instance_layers,
-			requested_instance_extension_count,
-			requested_instance_extensions
+			0,
+			nullptr,
+			2,
+			instance_extensions
 		};
 
-		AGE_RESULT age_result = AGE_RESULT::SUCCESS;
-		VkResult vk_result = vkCreateInstance (&instance_create_info, NULL, &instance);
+		vk_result = vkCreateInstance (&instance_create_info, NULL, &instance);
 		if (vk_result != VK_SUCCESS)
 		{
 			age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_INSTANCE;
-			goto exit;
 		}
 	}
+
+	return age_result;
+}
+
+AGE_RESULT vulkan_interface_create_debug_utils_messenger ()
+{
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
+	VkResult vk_result = VK_SUCCESS;
+
+	VkDebugUtilsMessengerCreateInfoEXT debug_utils_messenger_create_info = {
+		VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
+		NULL,
+		0,
+		/*VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |*/
+		VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+		VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+		VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
+		VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+		VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT |
+		VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT,
+		debug_messenger_callback,
+		NULL
+	};
+
+	vk_result = create_instance_debug_utils_messenger (instance, &debug_utils_messenger_create_info, NULL, &debug_utils_messenger);
+
+	if (vk_result != VK_SUCCESS)
+	{
+		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_DEBUG_UTILS_MESSENGER;
+	}
+
+	return age_result;
+}
+
+AGE_RESULT vulkan_interface_create_surface (HINSTANCE h_instance, HWND h_wnd)
+{
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
+	VkResult vk_result = VK_SUCCESS;
+
+	VkWin32SurfaceCreateInfoKHR surface_create_info = { 
+		VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR, 
+		NULL, 
+		0, 
+		h_instance, 
+		h_wnd 
+	};
+
+	vk_result = vkCreateWin32SurfaceKHR (instance, &surface_create_info, NULL, &surface);
+
+	if (vk_result != VK_SUCCESS)
+	{
+		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_SURFACE;
+	}
+
+	return age_result;
+}
+
+AGE_RESULT vulkan_interface_get_physical_device ()
+{
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
 	size_t physical_device_count = 0;
 	vkEnumeratePhysicalDevices (instance, &physical_device_count, NULL);
@@ -326,7 +220,7 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 	if (physical_device_count == 0)
 	{
 		age_result = AGE_RESULT::ERROR_GRAPHICS_GET_PHYSICAL_DEVICE;
-		goto exit;
+		return age_result;
 	}
 
 	VkPhysicalDevice* physical_devices = (VkPhysicalDevice*)utils_calloc (physical_device_count, sizeof (VkPhysicalDevice));
@@ -334,8 +228,29 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 
 	physical_device = physical_devices[0];
 
-	VkPhysicalDeviceFeatures device_features;
-	vkGetPhysicalDeviceFeatures (physical_device, &device_features);
+	utils_free (physical_devices);
+
+	return age_result;
+}
+
+AGE_RESULT vulkan_interface_check_physical_device_surface_support ()
+{
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
+
+	VkBool32 is_surface_supported = false;
+	vkGetPhysicalDeviceSurfaceSupportKHR (physical_device, graphics_queue_family_index, surface, &is_surface_supported);
+
+	if (!is_surface_supported)
+	{
+		age_result = AGE_RESULT::ERROR_GRAPHICS_SURFACE_SUPPORT;
+	}
+
+	return age_result;
+}
+
+AGE_RESULT vulkan_interface_get_physical_device_queue_families ()
+{
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
 	size_t queue_family_count = 0;
 	vkGetPhysicalDeviceQueueFamilyProperties (physical_device, &queue_family_count, NULL);
@@ -393,30 +308,20 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 		}
 	}
 
+	utils_free (queue_family_properties);
+
+	return age_result;
+}
+
+AGE_RESULT vulkan_interface_get_physical_device_properties ()
+{
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
+
 	vkGetPhysicalDeviceMemoryProperties (physical_device, &physical_device_memory_properties);
 
 	VkPhysicalDeviceProperties device_properties;
 	vkGetPhysicalDeviceProperties (physical_device, &device_properties);
 	physical_device_limits = device_properties.limits;
-
-	VkWin32SurfaceCreateInfoKHR surface_create_info = { VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR, NULL, 0, h_instance, h_wnd };
-
-	vk_result = vkCreateWin32SurfaceKHR (instance, &surface_create_info, NULL, &surface);
-
-	if (vk_result != VK_SUCCESS)
-	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_SURFACE;
-		goto exit;
-	}
-
-	VkBool32 is_surface_supported = false;
-	vkGetPhysicalDeviceSurfaceSupportKHR (physical_device, graphics_queue_family_index, surface, &is_surface_supported);
-
-	if (!is_surface_supported)
-	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_SURFACE_SUPPORT;
-		goto exit;
-	}
 
 	vkGetPhysicalDeviceSurfaceCapabilitiesKHR (physical_device, surface, &surface_capabilities);
 
@@ -451,42 +356,18 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 		}
 	}
 
-	if (chosen_present_mode == -1)
-	{
-		chosen_present_mode = VK_PRESENT_MODE_FIFO_KHR;
-	}
+	utils_free (surface_formats);
+	utils_free (present_modes);
 
-	char** requested_device_extensions = NULL;
-	size_t requested_device_extension_count = 0;
+	return age_result;
+}
 
-	extension_count = 0;
-	vkEnumerateDeviceExtensionProperties (physical_device, NULL, &extension_count, NULL);
+AGE_RESULT vulkan_interface_create_device ()
+{
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
-	extension_properties = (VkExtensionProperties*)utils_calloc (extension_count, sizeof (VkExtensionProperties));
-	vkEnumerateDeviceExtensionProperties (physical_device, NULL, &extension_count, extension_properties);
-
-	for (size_t e = 0; e < extension_count; e++)
-	{
-		if (strcmp (extension_properties[e].extensionName, VK_KHR_SWAPCHAIN_EXTENSION_NAME) == 0)
-		{
-			if (requested_device_extensions == NULL)
-			{
-				requested_device_extensions = (char**)utils_calloc (1, sizeof (char*));
-			}
-			else
-			{
-				requested_device_extensions = (char**)utils_realloc_zero (requested_device_extensions, sizeof (char*) * requested_device_extension_count, sizeof (char*) * (requested_device_extension_count + 1));
-			}
-
-			requested_device_extensions[requested_device_extension_count] = (char*)utils_calloc (strlen (VK_KHR_SWAPCHAIN_EXTENSION_NAME) + 1, sizeof (char));
-			strcpy (requested_device_extensions[requested_device_extension_count], VK_KHR_SWAPCHAIN_EXTENSION_NAME);
-			++requested_device_extension_count;
-
-			break;
-		}
-	}
-
-	utils_free (extension_properties);
+	char* device_extensions[256];
+	device_extensions[0] = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 
 	float priorities[3] = { 1.f, 1.f, 1.f };
 
@@ -524,6 +405,9 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 		queue_create_infos[ui].flags = 0;
 	}
 
+	VkPhysicalDeviceFeatures device_features;
+	vkGetPhysicalDeviceFeatures (physical_device, &device_features);
+
 	VkDeviceCreateInfo device_create_info = {
 		VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
 		NULL,
@@ -532,18 +416,25 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 		queue_create_infos,
 		0,
 		NULL,
-		requested_device_extension_count,
-		requested_device_extensions,
+		1,
+		device_extensions,
 		&device_features
 	};
 
-	vk_result = vkCreateDevice (physical_device, &device_create_info, NULL, &device);
+
+	VkResult vk_result = vkCreateDevice (physical_device, &device_create_info, NULL, &device);
 
 	if (vk_result != VK_SUCCESS)
 	{
 		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_GRAPHICS_DEVICE;
-		goto exit;
 	}
+
+	return age_result;
+}
+
+AGE_RESULT vulkan_interface_create_swapchain ()
+{
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
 	VkSwapchainCreateInfoKHR swapchain_create_info = {
 		VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
@@ -566,13 +457,20 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 		VK_NULL_HANDLE
 	};
 
-	vk_result = vkCreateSwapchainKHR (device, &swapchain_create_info, NULL, &swapchain);
+	VkResult vk_result = vkCreateSwapchainKHR (device, &swapchain_create_info, NULL, &swapchain);
 
 	if (vk_result != VK_SUCCESS)
 	{
 		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_SWAPCHAIN;
-		goto exit;
 	}
+
+	return age_result;
+}
+
+AGE_RESULT vulkan_interface_create_swapchain_image_views ()
+{
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
+	VkResult vk_result = VK_SUCCESS;
 
 	vkGetSwapchainImagesKHR (device, swapchain, &swapchain_image_count, NULL);
 	swapchain_images.resize (swapchain_image_count);
@@ -600,9 +498,15 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 		if (vk_result != VK_SUCCESS)
 		{
 			age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_IMAGE_VIEW;
-			goto exit;
 		}
 	}
+
+	return age_result;
+}
+
+AGE_RESULT vulkan_interface_get_device_queues ()
+{
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
 	size_t graphics_queue_index = 0;
 	size_t compute_queue_index = graphics_queue_family_index == compute_queue_family_index ? 1 : 0;
@@ -612,6 +516,13 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 	vkGetDeviceQueue (device, compute_queue_family_index, compute_queue_index, &compute_queue);
 	vkGetDeviceQueue (device, transfer_queue_family_index, transfer_queue_index, &transfer_queue);
 
+	return age_result;
+}
+
+AGE_RESULT vulkan_interface_create_transfer_command_pool ()
+{
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
+
 	VkCommandPoolCreateInfo transfer_command_pool_create_info = {
 		VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
 		NULL,
@@ -619,12 +530,18 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 		graphics_queue_family_index
 	};
 
-	vk_result = vkCreateCommandPool (device, &transfer_command_pool_create_info, NULL, &transfer_command_pool);
+	VkResult vk_result = vkCreateCommandPool (device, &transfer_command_pool_create_info, NULL, &transfer_command_pool);
 	if (vk_result != VK_SUCCESS)
 	{
 		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_COMMAND_POOL;
-		goto exit;
 	}
+
+	return age_result;
+}
+
+AGE_RESULT vulkan_interface_create_common_sampler ()
+{
+	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
 	VkSamplerCreateInfo sampler_create_info = {
 		VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
@@ -647,38 +564,114 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 		VK_FALSE
 	};
 
-	vk_result = vkCreateSampler (device, &sampler_create_info, NULL, &common_sampler);
+	VkResult vk_result = vkCreateSampler (device, &sampler_create_info, NULL, &common_sampler);
 	if (vk_result != VK_SUCCESS)
 	{
 		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_SAMPLER;
-		goto exit;
 	}
 
-exit: // clean up allocation made within the function
+	return age_result;
+}
 
-	for (size_t i = 0; i < requested_instance_layer_count; ++i)
+AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
+{
+    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
+
+#ifdef _DEBUG 
+	is_validation_needed = true;
+#elif DEBUG
+	is_validation_needed = true;
+#else
+	is_validation_needed = false;
+#endif
+
+	age_result = vulkan_interface_create_instance ();
+	if (age_result != AGE_RESULT::SUCCESS)
 	{
-		utils_free (requested_instance_layers[i]);
+		return age_result;
 	}
-	utils_free (requested_instance_layers);
 
-	for (size_t i = 0; i < requested_instance_extension_count; ++i)
+	if (is_validation_needed)
 	{
-		utils_free (requested_instance_extensions[i]);
+		age_result = vulkan_interface_create_debug_utils_messenger ();
+
+		if (age_result != AGE_RESULT::SUCCESS)
+		{
+			return age_result;
+		}
 	}
-	utils_free (requested_instance_extensions);
 
-	utils_free (physical_devices);
-	utils_free (queue_family_properties);
-
-	utils_free (surface_formats);
-	utils_free (present_modes);
-
-	for (size_t i = 0; i < requested_device_extension_count; ++i)
+	age_result = vulkan_interface_create_surface (h_instance, h_wnd);
+	if (age_result != AGE_RESULT::SUCCESS)
 	{
-		utils_free (requested_device_extensions[i]);
+		return age_result;
 	}
-	utils_free (requested_device_extensions);
+
+	age_result = vulkan_interface_get_physical_device ();
+	if (age_result != AGE_RESULT::SUCCESS)
+	{
+		return age_result;
+	}
+
+	age_result = vulkan_interface_check_physical_device_surface_support ();
+	if (age_result != AGE_RESULT::SUCCESS)
+	{
+		return age_result;
+	}
+
+	age_result = vulkan_interface_get_physical_device_queue_families ();
+	if (age_result != AGE_RESULT::SUCCESS)
+	{
+		return age_result;
+	}
+
+	age_result = vulkan_interface_get_physical_device_properties ();
+	if (age_result != AGE_RESULT::SUCCESS)
+	{
+		return age_result;
+	}
+	
+	age_result = vulkan_interface_get_physical_device_properties ();
+	if (age_result != AGE_RESULT::SUCCESS)
+	{
+		return age_result;
+	}
+
+	age_result = vulkan_interface_create_device ();
+	if (age_result != AGE_RESULT::SUCCESS)
+	{
+		return age_result;
+	}
+
+	age_result = vulkan_interface_create_swapchain ();
+	if (age_result != AGE_RESULT::SUCCESS)
+	{
+		return age_result;
+	}
+	
+	age_result = vulkan_interface_create_swapchain_image_views ();
+	if (age_result != AGE_RESULT::SUCCESS)
+	{
+		return age_result;
+	}
+	
+	age_result = vulkan_interface_get_device_queues ();
+	if (age_result != AGE_RESULT::SUCCESS)
+	{
+		return age_result;
+	}
+
+	age_result = vulkan_interface_create_transfer_command_pool ();
+	if (age_result != AGE_RESULT::SUCCESS)
+	{
+		return age_result;
+	}
+
+	age_result = vulkan_interface_create_common_sampler ();
+	if (age_result != AGE_RESULT::SUCCESS)
+	{
+		return age_result;
+	}
 
 	return age_result;
 }

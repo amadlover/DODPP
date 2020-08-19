@@ -1992,9 +1992,12 @@ exit:
 
 void graphics_shutdown ()
 {
-	vkQueueWaitIdle (graphics_queue);
+	if (graphics_queue != VK_NULL_HANDLE)
+	{
+		vkQueueWaitIdle (graphics_queue);
+	}
 
-	if (transforms_mapped_data != NULL)
+	if (transforms_mapped_data != NULL && transforms_buffer_memory != VK_NULL_HANDLE)
 	{
 		vkUnmapMemory (device, transforms_buffer_memory);
 	}
@@ -2006,7 +2009,10 @@ void graphics_shutdown ()
 		texture_descriptor_set
 	};
 
-	vkFreeDescriptorSets (device, descriptor_pool, 2, descriptor_sets);
+	if (transform_descriptor_set != VK_NULL_HANDLE && texture_descriptor_set != VK_NULL_HANDLE)
+	{
+		vkFreeDescriptorSets (device, descriptor_pool, 2, descriptor_sets);
+	}
 
 	if (transform_descriptor_set_layout != VK_NULL_HANDLE)
 	{
