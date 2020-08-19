@@ -78,7 +78,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL debug_messenger_callback (
 	return false;
 }
 
-AGE_RESULT vulkan_interface_create_instance ()
+AGE_RESULT create_instance ()
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 	VkResult vk_result = VK_SUCCESS;
@@ -157,7 +157,7 @@ AGE_RESULT vulkan_interface_create_instance ()
 	return age_result;
 }
 
-AGE_RESULT vulkan_interface_create_debug_utils_messenger ()
+AGE_RESULT create_debug_utils_messenger ()
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 	VkResult vk_result = VK_SUCCESS;
@@ -187,7 +187,7 @@ AGE_RESULT vulkan_interface_create_debug_utils_messenger ()
 	return age_result;
 }
 
-AGE_RESULT vulkan_interface_create_surface (HINSTANCE h_instance, HWND h_wnd)
+AGE_RESULT create_surface (HINSTANCE h_instance, HWND h_wnd)
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 	VkResult vk_result = VK_SUCCESS;
@@ -210,7 +210,7 @@ AGE_RESULT vulkan_interface_create_surface (HINSTANCE h_instance, HWND h_wnd)
 	return age_result;
 }
 
-AGE_RESULT vulkan_interface_get_physical_device ()
+AGE_RESULT get_physical_device ()
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
@@ -233,7 +233,7 @@ AGE_RESULT vulkan_interface_get_physical_device ()
 	return age_result;
 }
 
-AGE_RESULT vulkan_interface_check_physical_device_surface_support ()
+AGE_RESULT check_physical_device_surface_support ()
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
@@ -248,7 +248,7 @@ AGE_RESULT vulkan_interface_check_physical_device_surface_support ()
 	return age_result;
 }
 
-AGE_RESULT vulkan_interface_get_physical_device_queue_families ()
+AGE_RESULT get_physical_device_queue_families ()
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
@@ -313,7 +313,7 @@ AGE_RESULT vulkan_interface_get_physical_device_queue_families ()
 	return age_result;
 }
 
-AGE_RESULT vulkan_interface_get_physical_device_properties ()
+AGE_RESULT get_physical_device_properties ()
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
@@ -362,7 +362,7 @@ AGE_RESULT vulkan_interface_get_physical_device_properties ()
 	return age_result;
 }
 
-AGE_RESULT vulkan_interface_create_device ()
+AGE_RESULT create_device ()
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
@@ -432,7 +432,7 @@ AGE_RESULT vulkan_interface_create_device ()
 	return age_result;
 }
 
-AGE_RESULT vulkan_interface_create_swapchain ()
+AGE_RESULT create_swapchain ()
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
@@ -467,7 +467,7 @@ AGE_RESULT vulkan_interface_create_swapchain ()
 	return age_result;
 }
 
-AGE_RESULT vulkan_interface_create_swapchain_image_views ()
+AGE_RESULT create_swapchain_image_views ()
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 	VkResult vk_result = VK_SUCCESS;
@@ -504,7 +504,7 @@ AGE_RESULT vulkan_interface_create_swapchain_image_views ()
 	return age_result;
 }
 
-AGE_RESULT vulkan_interface_get_device_queues ()
+AGE_RESULT get_device_queues ()
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
@@ -519,7 +519,7 @@ AGE_RESULT vulkan_interface_get_device_queues ()
 	return age_result;
 }
 
-AGE_RESULT vulkan_interface_create_transfer_command_pool ()
+AGE_RESULT create_transfer_command_pool ()
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
@@ -539,7 +539,7 @@ AGE_RESULT vulkan_interface_create_transfer_command_pool ()
 	return age_result;
 }
 
-AGE_RESULT vulkan_interface_create_common_sampler ()
+AGE_RESULT create_common_sampler ()
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
@@ -585,7 +585,7 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 	is_validation_needed = false;
 #endif
 
-	age_result = vulkan_interface_create_instance ();
+	age_result = create_instance ();
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		return age_result;
@@ -593,7 +593,7 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 
 	if (is_validation_needed)
 	{
-		age_result = vulkan_interface_create_debug_utils_messenger ();
+		age_result = create_debug_utils_messenger ();
 
 		if (age_result != AGE_RESULT::SUCCESS)
 		{
@@ -601,73 +601,73 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 		}
 	}
 
-	age_result = vulkan_interface_create_surface (h_instance, h_wnd);
+	age_result = create_surface (h_instance, h_wnd);
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		return age_result;
 	}
 
-	age_result = vulkan_interface_get_physical_device ();
+	age_result = get_physical_device ();
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		return age_result;
 	}
 
-	age_result = vulkan_interface_check_physical_device_surface_support ();
+	age_result = check_physical_device_surface_support ();
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		return age_result;
 	}
 
-	age_result = vulkan_interface_get_physical_device_queue_families ();
+	age_result = get_physical_device_queue_families ();
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		return age_result;
 	}
 
-	age_result = vulkan_interface_get_physical_device_properties ();
+	age_result = get_physical_device_properties ();
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		return age_result;
 	}
 	
-	age_result = vulkan_interface_get_physical_device_properties ();
+	age_result = get_physical_device_properties ();
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		return age_result;
 	}
 
-	age_result = vulkan_interface_create_device ();
+	age_result = create_device ();
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		return age_result;
 	}
 
-	age_result = vulkan_interface_create_swapchain ();
+	age_result = create_swapchain ();
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		return age_result;
 	}
 	
-	age_result = vulkan_interface_create_swapchain_image_views ();
+	age_result = create_swapchain_image_views ();
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		return age_result;
 	}
 	
-	age_result = vulkan_interface_get_device_queues ();
+	age_result = get_device_queues ();
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		return age_result;
 	}
 
-	age_result = vulkan_interface_create_transfer_command_pool ();
+	age_result = create_transfer_command_pool ();
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		return age_result;
 	}
 
-	age_result = vulkan_interface_create_common_sampler ();
+	age_result = create_common_sampler ();
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		return age_result;
