@@ -62,16 +62,16 @@ size_t actor_index_count = 6;
 
 VkImage background_image = VK_NULL_HANDLE;
 VkImageView background_image_view = VK_NULL_HANDLE;
-size_t background_image_size = 0;
+size_t background_image_pixels_size = 0;
 VkImage player_image = VK_NULL_HANDLE;
 VkImageView player_image_view = VK_NULL_HANDLE;
-size_t player_image_size = 0;
+size_t player_image_pixels_size = 0;
 VkImage asteroid_image = VK_NULL_HANDLE;
 VkImageView asteroid_image_view = VK_NULL_HANDLE;
-size_t asteroid_image_size = 0;
+size_t asteroid_image_pixels_size = 0;
 VkImage bullet_image = VK_NULL_HANDLE;
 VkImageView bullet_image_view = VK_NULL_HANDLE;
-size_t bullet_image_size = 0;
+size_t bullet_image_pixels_size = 0;
 
 VkDeviceMemory images_memory = VK_NULL_HANDLE;
 
@@ -130,9 +130,9 @@ AGE_RESULT vk_allocate_bind_buffer_memory (const VkBuffer buffer, uint32_t requi
 	return AGE_RESULT::SUCCESS;
 }
 
-AGE_RESULT vk_map_buffer_memory (const VkDeviceMemory memory, const size_t offset, const size_t size, void** data)
+AGE_RESULT vk_map_buffer_memory (const VkDeviceMemory memory, const size_t offset, const size_t size, void** mapped_memory_ptr)
 {
-	VkResult vk_result = vkMapMemory (device, memory, offset, size, 0, data);
+	VkResult vk_result = vkMapMemory (device, memory, offset, size, 0, mapped_memory_ptr);
 
 	if (vk_result != VK_SUCCESS)
 	{
@@ -359,7 +359,7 @@ AGE_RESULT graphics_create_image_buffers ()
 	uint8_t* background_image_pixels = NULL;
 	utils_import_texture ("background.png", &background_image_width, &background_image_height, &background_image_bpp, &background_image_pixels);
 
-	background_image_size = background_image_width * background_image_height * background_image_bpp * sizeof (uint8_t);
+	background_image_pixels_size = background_image_width * background_image_height * background_image_bpp * sizeof (uint8_t);
 
 	int player_image_width = 0;
 	int player_image_height = 0;
@@ -367,7 +367,7 @@ AGE_RESULT graphics_create_image_buffers ()
 	uint8_t* player_image_pixels = NULL;
 	utils_import_texture ("player.png", &player_image_width, &player_image_height, &player_image_bpp, &player_image_pixels);
 
-	player_image_size = player_image_width * player_image_height * player_image_bpp * sizeof (uint8_t);
+	player_image_pixels_size = player_image_width * player_image_height * player_image_bpp * sizeof (uint8_t);
 
 	int asteroid_image_width = 0;
 	int asteroid_image_height = 0;
@@ -375,7 +375,7 @@ AGE_RESULT graphics_create_image_buffers ()
 	uint8_t* asteroid_image_pixels = NULL;
 	utils_import_texture ("asteroid.png", &asteroid_image_width, &asteroid_image_height, &asteroid_image_bpp, &asteroid_image_pixels);
 
-	asteroid_image_size = asteroid_image_width * asteroid_image_height * asteroid_image_bpp * sizeof (uint8_t);
+	asteroid_image_pixels_size = asteroid_image_width * asteroid_image_height * asteroid_image_bpp * sizeof (uint8_t);
 
 	int bullet_image_width = 0;
 	int bullet_image_height = 0;
@@ -383,90 +383,48 @@ AGE_RESULT graphics_create_image_buffers ()
 	uint8_t* bullet_image_pixels = NULL;
 	utils_import_texture ("bullet.png", &bullet_image_width, &bullet_image_height, &bullet_image_bpp, &bullet_image_pixels);
 
-	bullet_image_size = bullet_image_width * bullet_image_height * bullet_image_bpp * sizeof (uint8_t);
+	bullet_image_pixels_size = bullet_image_width * bullet_image_height * bullet_image_bpp * sizeof (uint8_t);
 
 	VkBuffer staging_image_buffer = VK_NULL_HANDLE;
-	VkDeviceMemory staging_image_memory = VK_NULL_HANDLE;
-
-	VkBufferCreateInfo staging_image_buffer_create_info = {
-		VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-		NULL,
-		0,
-		(VkDeviceSize)background_image_size +
-		(VkDeviceSize)player_image_size +
-		(VkDeviceSize)asteroid_image_size +
-		(VkDeviceSize)bullet_image_size,
+	age_result = vk_create_buffer (
+		(VkDeviceSize)background_image_pixels_size +
+		(VkDeviceSize)player_image_pixels_size +
+		(VkDeviceSize)asteroid_image_pixels_size +
+		(VkDeviceSize)bullet_image_pixels_size,
 		VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-		VK_SHARING_MODE_EXCLUSIVE,
-		0,
-		NULL
-	};
-
-	vk_result = vkCreateBuffer (device, &staging_image_buffer_create_info, NULL, &staging_image_buffer);
-	if (vk_result != VK_SUCCESS)
+		&staging_image_buffer
+	);
+	if (age_result != AGE_RESULT::SUCCESS)
 	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_BUFFER;
 		goto exit;
 	}
 
-	VkMemoryRequirements memory_requirements;
-	vkGetBufferMemoryRequirements (device, staging_image_buffer, &memory_requirements);
-	uint32_t required_memory_types = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
-	uint32_t required_memory_type_index = 0;
-
-	for (uint32_t i = 0; i < physical_device_memory_properties.memoryTypeCount; i++)
+	VkDeviceMemory staging_image_memory = VK_NULL_HANDLE;
+	age_result = vk_allocate_bind_buffer_memory (staging_image_buffer, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, &staging_image_memory);
+	if (age_result != AGE_RESULT::SUCCESS)
 	{
-		if (memory_requirements.memoryTypeBits & (1 << i) && required_memory_types & physical_device_memory_properties.memoryTypes[i].propertyFlags)
-		{
-			required_memory_type_index = i;
-			break;
-		}
-	}
-
-	VkMemoryAllocateInfo memory_allocate_info = {
-		VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-		NULL,
-		memory_requirements.size,
-		required_memory_type_index
-	};
-
-	vk_result = vkAllocateMemory (device, &memory_allocate_info, NULL, &staging_image_memory);
-	if (vk_result != VK_SUCCESS)
-	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_ALLOCATE_MEMORY;
 		goto exit;
 	}
 
-	vk_result = vkBindBufferMemory (device, staging_image_buffer, staging_image_memory, 0);
-	if (vk_result != VK_SUCCESS)
-	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_BIND_BUFFER_MEMORY;
-		goto exit;
-	}
-
-	void* data = NULL;
-
-	vk_result = vkMapMemory (
-		device,
+	void* mapped_memory_ptr = NULL;
+	age_result = vk_map_buffer_memory (
 		staging_image_memory,
 		0,
-		(VkDeviceSize)background_image_size +
-		(VkDeviceSize)player_image_size +
-		(VkDeviceSize)asteroid_image_size +
-		(VkDeviceSize)bullet_image_size,
-		0,
-		&data
+		(VkDeviceSize)background_image_pixels_size +
+		(VkDeviceSize)player_image_pixels_size +
+		(VkDeviceSize)asteroid_image_pixels_size +
+		(VkDeviceSize)bullet_image_pixels_size,
+		&mapped_memory_ptr
 	);
-
-	if (vk_result != VK_SUCCESS) {
-		age_result = AGE_RESULT::ERROR_GRAPHICS_MAP_MEMORY;
+	if (age_result!=AGE_RESULT::SUCCESS)
+	{
 		goto exit;
 	}
 
-	std::memcpy (data, background_image_pixels, background_image_size);
-	std::memcpy ((char*)data + background_image_size, player_image_pixels, player_image_size);
-	std::memcpy ((char*)data + background_image_size + player_image_size, asteroid_image_pixels, asteroid_image_size);
-	std::memcpy ((char*)data + background_image_size + player_image_size + asteroid_image_size, bullet_image_pixels, bullet_image_size);
+	vk_copy_data_to_memory_mapped_ptr (0, background_image_pixels, background_image_pixels_size, mapped_memory_ptr);
+	vk_copy_data_to_memory_mapped_ptr (background_image_pixels_size, player_image_pixels, player_image_pixels_size, mapped_memory_ptr);
+	vk_copy_data_to_memory_mapped_ptr (background_image_pixels_size + player_image_pixels_size, asteroid_image_pixels, asteroid_image_pixels_size, mapped_memory_ptr);
+	vk_copy_data_to_memory_mapped_ptr (background_image_pixels_size + player_image_pixels_size + asteroid_image_pixels_size, bullet_image_pixels, bullet_image_pixels_size, mapped_memory_ptr);
 
 	vkUnmapMemory (device, staging_image_memory);
 
@@ -528,6 +486,7 @@ AGE_RESULT graphics_create_image_buffers ()
 		goto exit;
 	}
 
+	VkMemoryRequirements memory_requirements = {};
 	VkDeviceSize total_vk_images_size = 0;
 	vkGetImageMemoryRequirements (device, background_image, &memory_requirements);
 	total_vk_images_size += memory_requirements.size;
@@ -539,8 +498,8 @@ AGE_RESULT graphics_create_image_buffers ()
 	total_vk_images_size += memory_requirements.size;
 
 	memory_requirements.size = total_vk_images_size;
-	required_memory_types = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-	required_memory_type_index = 0;
+	uint32_t required_memory_types = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+	uint32_t required_memory_type_index = 0;
 
 	for (uint32_t i = 0; i < physical_device_memory_properties.memoryTypeCount; i++)
 	{
@@ -568,21 +527,21 @@ AGE_RESULT graphics_create_image_buffers ()
 		goto exit;
 	}
 
-	vk_result = vkBindImageMemory (device, player_image, images_memory, (VkDeviceSize)background_image_size);
+	vk_result = vkBindImageMemory (device, player_image, images_memory, (VkDeviceSize)background_image_pixels_size);
 	if (vk_result != VK_SUCCESS)
 	{
 		age_result = AGE_RESULT::ERROR_GRAPHICS_BIND_IMAGE_MEMORY;
 		goto exit;
 	}
 
-	vk_result = vkBindImageMemory (device, asteroid_image, images_memory, (VkDeviceSize)background_image_size + (VkDeviceSize)player_image_size);
+	vk_result = vkBindImageMemory (device, asteroid_image, images_memory, (VkDeviceSize)background_image_pixels_size + (VkDeviceSize)player_image_pixels_size);
 	if (vk_result != VK_SUCCESS)
 	{
 		age_result = AGE_RESULT::ERROR_GRAPHICS_BIND_IMAGE_MEMORY;
 		goto exit;
 	}
 
-	vk_result = vkBindImageMemory (device, bullet_image, images_memory, (VkDeviceSize)background_image_size + (VkDeviceSize)player_image_size + (VkDeviceSize)asteroid_image_size);
+	vk_result = vkBindImageMemory (device, bullet_image, images_memory, (VkDeviceSize)background_image_pixels_size + (VkDeviceSize)player_image_pixels_size + (VkDeviceSize)asteroid_image_pixels_size);
 	if (vk_result != VK_SUCCESS)
 	{
 		age_result = AGE_RESULT::ERROR_GRAPHICS_BIND_IMAGE_MEMORY;
@@ -742,7 +701,7 @@ AGE_RESULT graphics_create_image_buffers ()
 	);
 
 	VkBufferImageCopy player_img_copy = background_img_copy;
-	player_img_copy.bufferOffset = (VkDeviceSize)background_image_size;
+	player_img_copy.bufferOffset = (VkDeviceSize)background_image_pixels_size;
 	player_img_copy.imageExtent.width = player_image_width;
 	player_img_copy.imageExtent.height = player_image_height;
 
@@ -756,7 +715,7 @@ AGE_RESULT graphics_create_image_buffers ()
 	);
 
 	VkBufferImageCopy asteroid_img_copy = background_img_copy;
-	asteroid_img_copy.bufferOffset = (VkDeviceSize)background_image_size + (VkDeviceSize)player_image_size;
+	asteroid_img_copy.bufferOffset = (VkDeviceSize)background_image_pixels_size + (VkDeviceSize)player_image_pixels_size;
 	asteroid_img_copy.imageExtent.width = asteroid_image_width;
 	asteroid_img_copy.imageExtent.height = asteroid_image_height;
 
@@ -770,7 +729,7 @@ AGE_RESULT graphics_create_image_buffers ()
 	);
 
 	VkBufferImageCopy bullet_img_copy = background_img_copy;
-	bullet_img_copy.bufferOffset = (VkDeviceSize)background_image_size + (VkDeviceSize)player_image_size + (VkDeviceSize)asteroid_image_size;;
+	bullet_img_copy.bufferOffset = (VkDeviceSize)background_image_pixels_size + (VkDeviceSize)player_image_pixels_size + (VkDeviceSize)asteroid_image_pixels_size;;
 	bullet_img_copy.imageExtent.width = bullet_image_width;
 	bullet_img_copy.imageExtent.height = bullet_image_height;
 
