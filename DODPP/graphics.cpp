@@ -223,6 +223,117 @@ AGE_RESULT vk_submit_cmd_buffer (const VkCommandBuffer cmd_buffer, const VkQueue
 	return AGE_RESULT::SUCCESS;
 }
 
+AGE_RESULT vk_create_image (
+	VkImageType image_type,
+	VkFormat format,
+	VkExtent3D extent,
+	uint32_t mip_levels,
+	uint32_t array_layers,
+	VkSampleCountFlagBits samples,
+	VkImageTiling tiling,
+	VkImageUsageFlags usage,
+	VkImage* out_image
+)
+{
+	VkImageCreateInfo create_info = {
+		VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+		NULL,
+		0,
+		image_type,
+		format,
+		extent,
+		mip_levels,
+		array_layers,
+		samples,
+		tiling,
+		usage,
+		VK_SHARING_MODE_EXCLUSIVE,
+		0,
+		NULL,
+		VK_IMAGE_LAYOUT_UNDEFINED
+	};
+
+	VkResult vk_result = vkCreateImage (device, &create_info, NULL, out_image);
+	if (vk_result != VK_SUCCESS)
+	{
+		return AGE_RESULT::ERROR_GRAPHICS_CREATE_IMAGE;
+	}
+
+	return AGE_RESULT::SUCCESS;
+}
+
+AGE_RESULT vk_allocate_bind_image_memory (const VkImage[] images, const size_t images_count, VkDeviceMemory& out_memory)
+{
+	VkDeviceSize total_vk_images_size = 0;
+	VkMemoryRequirements memory_requirements;
+
+	vkGetImageMemoryRequirements (device, background_image, &memory_requirements);
+	total_vk_images_size += memory_requirements.size;
+	vkGetImageMemoryRequirements (device, player_image, &memory_requirements);
+	total_vk_images_size += memory_requirements.size;
+	vkGetImageMemoryRequirements (device, asteroid_image, &memory_requirements);
+	total_vk_images_size += memory_requirements.size;
+	vkGetImageMemoryRequirements (device, bullet_image, &memory_requirements);
+	total_vk_images_size += memory_requirements.size;
+
+	memory_requirements.size = total_vk_images_size;
+	uint32_t required_memory_types = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+	uint32_t required_memory_type_index = 0;
+
+	for (uint32_t i = 0; i < physical_device_memory_properties.memoryTypeCount; i++)
+	{
+		if (memory_requirements.memoryTypeBits & (1 << i) && required_memory_types & physical_device_memory_properties.memoryTypes[i].propertyFlags)
+		{
+			required_memory_type_index = i;
+			break;
+		}
+	}
+
+	VkMemoryAllocateInfo memory_allocate_info = {
+
+	};
+
+	memory_allocate_info.allocationSize = total_vk_images_size;
+	memory_allocate_info.memoryTypeIndex = required_memory_type_index;
+
+	VkResult vk_result = vkAllocateMemory (device, &memory_allocate_info, NULL, &images_memory);
+	if (vk_result != VK_SUCCESS)
+	{
+		return AGE_RESULT::ERROR_GRAPHICS_ALLOCATE_MEMORY;
+	}
+
+	vk_result = vkBindImageMemory (device, background_image, images_memory, 0);
+	if (vk_result != VK_SUCCESS)
+	{
+		return AGE_RESULT::ERROR_GRAPHICS_BIND_IMAGE_MEMORY;
+	}
+
+	vk_result = vkBindImageMemory (device, player_image, images_memory, (VkDeviceSize)background_image_pixels_size);
+	if (vk_result != VK_SUCCESS)
+	{
+		return AGE_RESULT::ERROR_GRAPHICS_BIND_IMAGE_MEMORY;
+	}
+
+	vk_result = vkBindImageMemory (device, asteroid_image, images_memory, (VkDeviceSize)background_image_pixels_size + (VkDeviceSize)player_image_pixels_size);
+	if (vk_result != VK_SUCCESS)
+	{
+		return AGE_RESULT::ERROR_GRAPHICS_BIND_IMAGE_MEMORY;
+	}
+
+	vk_result = vkBindImageMemory (device, bullet_image, images_memory, (VkDeviceSize)background_image_pixels_size + (VkDeviceSize)player_image_pixels_size + (VkDeviceSize)asteroid_image_pixels_size);
+	if (vk_result != VK_SUCCESS)
+	{
+		return AGE_RESULT::ERROR_GRAPHICS_BIND_IMAGE_MEMORY;
+	}
+
+	return AGE_RESULT::SUCCESS;
+}
+
+AGE_RESULT vk_create_image_view ()
+{
+	return AGE_RESULT::SUCCESS;
+}
+
 AGE_RESULT graphics_create_geometry_buffers ()
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
@@ -428,10 +539,7 @@ AGE_RESULT graphics_create_image_buffers ()
 
 	vkUnmapMemory (device, staging_image_memory);
 
-	VkImageCreateInfo background_image_create_info = {
-		VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-		NULL,
-		0,
+	age_result = vk_create_image (
 		VK_IMAGE_TYPE_2D,
 		VK_FORMAT_R8G8B8A8_UNORM,
 		{(uint32_t)background_image_width, (uint32_t)background_image_height, 1},
@@ -440,111 +548,64 @@ AGE_RESULT graphics_create_image_buffers ()
 		VK_SAMPLE_COUNT_1_BIT,
 		VK_IMAGE_TILING_OPTIMAL,
 		VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-		VK_SHARING_MODE_EXCLUSIVE,
-		0,
-		NULL,
-		VK_IMAGE_LAYOUT_UNDEFINED
-	};
-
-	vk_result = vkCreateImage (device, &background_image_create_info, NULL, &background_image);
-	if (vk_result != VK_SUCCESS)
+		&background_image
+	);
+	if (age_result != AGE_RESULT::SUCCESS)
 	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_IMAGE;
 		goto exit;
 	}
 
-	VkImageCreateInfo player_image_create_info = background_image_create_info;
-	player_image_create_info.extent.width = player_image_width;
-	player_image_create_info.extent.height = player_image_height;
-
-	vk_result = vkCreateImage (device, &player_image_create_info, NULL, &player_image);
-	if (vk_result != VK_SUCCESS)
+	age_result = vk_create_image (
+		VK_IMAGE_TYPE_2D,
+		VK_FORMAT_R8G8B8A8_UNORM,
+		{(uint32_t)player_image_width, (uint32_t)player_image_height, 1},
+		1,
+		1,
+		VK_SAMPLE_COUNT_1_BIT,
+		VK_IMAGE_TILING_OPTIMAL,
+		VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+		&player_image
+	);
+	if (age_result != AGE_RESULT::SUCCESS)
 	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_IMAGE;
 		goto exit;
 	}
 
-	VkImageCreateInfo asteroid_image_create_info = player_image_create_info;
-	asteroid_image_create_info.extent.width = asteroid_image_width;
-	asteroid_image_create_info.extent.height = asteroid_image_height;
-
-	vk_result = vkCreateImage (device, &asteroid_image_create_info, NULL, &asteroid_image);
-	if (vk_result != VK_SUCCESS)
+	age_result = vk_create_image (
+		VK_IMAGE_TYPE_2D,
+		VK_FORMAT_R8G8B8A8_UNORM,
+		{(uint32_t)asteroid_image_width, (uint32_t)asteroid_image_height, 1},
+		1,
+		1,
+		VK_SAMPLE_COUNT_1_BIT,
+		VK_IMAGE_TILING_OPTIMAL,
+		VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+		&asteroid_image
+	);
+	if (age_result != AGE_RESULT::SUCCESS)
 	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_IMAGE;
 		goto exit;
 	}
 
-	VkImageCreateInfo bullet_image_create_info = player_image_create_info;
-	bullet_image_create_info.extent.width = bullet_image_width;
-	bullet_image_create_info.extent.height = bullet_image_height;
-
-	vk_result = vkCreateImage (device, &bullet_image_create_info, NULL, &bullet_image);
-	if (vk_result != VK_SUCCESS)
+	age_result = vk_create_image (
+		VK_IMAGE_TYPE_2D,
+		VK_FORMAT_R8G8B8A8_UNORM,
+		{(uint32_t)bullet_image_width, (uint32_t)bullet_image_height, 1},
+		1,
+		1,
+		VK_SAMPLE_COUNT_1_BIT,
+		VK_IMAGE_TILING_OPTIMAL,
+		VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+		&bullet_image
+	);
+	if (age_result != AGE_RESULT::SUCCESS)
 	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_IMAGE;
 		goto exit;
 	}
 
-	VkMemoryRequirements memory_requirements = {};
-	VkDeviceSize total_vk_images_size = 0;
-	vkGetImageMemoryRequirements (device, background_image, &memory_requirements);
-	total_vk_images_size += memory_requirements.size;
-	vkGetImageMemoryRequirements (device, player_image, &memory_requirements);
-	total_vk_images_size += memory_requirements.size;
-	vkGetImageMemoryRequirements (device, asteroid_image, &memory_requirements);
-	total_vk_images_size += memory_requirements.size;
-	vkGetImageMemoryRequirements (device, bullet_image, &memory_requirements);
-	total_vk_images_size += memory_requirements.size;
-
-	memory_requirements.size = total_vk_images_size;
-	uint32_t required_memory_types = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-	uint32_t required_memory_type_index = 0;
-
-	for (uint32_t i = 0; i < physical_device_memory_properties.memoryTypeCount; i++)
+	age_result = vk_allocate_bind_image_memory ({background_image, player_image, asteroid_image, bullet_image}, 4, &images_memory);
+	if (age_result != AGE_RESULT::SUCCESS)
 	{
-		if (memory_requirements.memoryTypeBits & (1 << i) && required_memory_types & physical_device_memory_properties.memoryTypes[i].propertyFlags)
-		{
-			required_memory_type_index = i;
-			break;
-		}
-	}
-
-	memory_allocate_info.allocationSize = total_vk_images_size;
-	memory_allocate_info.memoryTypeIndex = required_memory_type_index;
-
-	vk_result = vkAllocateMemory (device, &memory_allocate_info, NULL, &images_memory);
-	if (vk_result != VK_SUCCESS)
-	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_ALLOCATE_MEMORY;
-		goto exit;
-	}
-
-	vk_result = vkBindImageMemory (device, background_image, images_memory, 0);
-	if (vk_result != VK_SUCCESS)
-	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_BIND_IMAGE_MEMORY;
-		goto exit;
-	}
-
-	vk_result = vkBindImageMemory (device, player_image, images_memory, (VkDeviceSize)background_image_pixels_size);
-	if (vk_result != VK_SUCCESS)
-	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_BIND_IMAGE_MEMORY;
-		goto exit;
-	}
-
-	vk_result = vkBindImageMemory (device, asteroid_image, images_memory, (VkDeviceSize)background_image_pixels_size + (VkDeviceSize)player_image_pixels_size);
-	if (vk_result != VK_SUCCESS)
-	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_BIND_IMAGE_MEMORY;
-		goto exit;
-	}
-
-	vk_result = vkBindImageMemory (device, bullet_image, images_memory, (VkDeviceSize)background_image_pixels_size + (VkDeviceSize)player_image_pixels_size + (VkDeviceSize)asteroid_image_pixels_size);
-	if (vk_result != VK_SUCCESS)
-	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_BIND_IMAGE_MEMORY;
 		goto exit;
 	}
 

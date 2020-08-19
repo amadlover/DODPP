@@ -112,8 +112,6 @@ AGE_RESULT game_init (const HINSTANCE h_instance, const HWND h_wnd)
 
 AGE_RESULT game_reserve_memory_for_asteroids_bullets ()
 {
-    AGE_RESULT age_result = AGE_RESULT::SUCCESS;
-
     game_large_asteroids_current_max_count += game_LARGE_ASTEROID_BATCH_SIZE;
     game_large_asteroids_transform_inputs = (asteroid_transform_inputs*)utils_malloc (sizeof (asteroid_transform_inputs) * game_large_asteroids_current_max_count);
 
@@ -135,7 +133,7 @@ AGE_RESULT game_reserve_memory_for_asteroids_bullets ()
     game_bullets_outputs_rotations = (float2*)utils_malloc (sizeof (float2) * game_bullets_current_max_count);
     game_bullets_outputs_scales = (float2*)utils_malloc (sizeof (float2) * game_bullets_current_max_count);
 
-    return age_result;
+    return AGE_RESULT::SUCCESS;
 }
 
 AGE_RESULT game_large_asteroid_add (float2 position)
@@ -219,7 +217,7 @@ AGE_RESULT game_small_asteroid_add (float2 position)
 
     age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count, screen_aspect_ratio);
     
-    return age_result;;
+    return age_result;
 }
 
 AGE_RESULT game_process_left_mouse_click (const int32_t x, const int32_t y)
