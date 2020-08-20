@@ -28,4 +28,4 @@ void* utils_aligned_realloc_zero (void* ptr, size_t alignment, size_t old_size, 
 
 void utils_free (void* ptr);
 void utils_aligned_free (void* ptr);
-void utils_free_image_data (uint8_t * pixels);
+void utils_free_image_data (uint8_t* pixels);

@@ -166,7 +166,7 @@ void* utils_aligned_realloc_zero (void* ptr, size_t alignment, size_t old_size, 
 
 void utils_free (void* ptr)
 {
-	if (ptr)
+	if (ptr != NULL)
 	{
 		std::free (ptr);
 		ptr = NULL;
@@ -175,7 +175,7 @@ void utils_free (void* ptr)
 
 void utils_aligned_free (void* ptr)
 {
-	if (ptr)
+	if (ptr != NULL)
 	{
 		_aligned_free (ptr);
 		ptr = NULL;
@@ -184,5 +184,9 @@ void utils_aligned_free (void* ptr)
 
 void utils_free_image_data (uint8_t * pixels)
 {
-	stbi_image_free (pixels);
+	if (pixels != NULL)
+	{
+		stbi_image_free (pixels);
+		pixels = NULL;
+	}
 }

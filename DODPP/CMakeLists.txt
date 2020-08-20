@@ -11,8 +11,8 @@ include_directories (${CMAKE_SOURCE_DIR}/External/stb)
 
 link_directories ($ENV{VULKAN_SDK}/Lib32)
 
-set (HPP error.hpp game.hpp log.hpp graphics.hpp types.hpp vulkan_interface.hpp utils.hpp compute.hpp actor_vert.hpp actor_frag.hpp)
-set (CPP main.cpp game.cpp log.cpp graphics.cpp types.cpp vulkan_interface.cpp utils.cpp compute.cpp)
+set (HPP error.hpp game.hpp log.hpp graphics.hpp types.hpp vulkan_interface.hpp utils.hpp compute.hpp actor_vert.hpp actor_frag.hpp vk_utils.hpp)
+set (CPP main.cpp game.cpp log.cpp graphics.cpp types.cpp vulkan_interface.cpp utils.cpp compute.cpp vk_utils.cpp)
 
 add_executable (DODPP WIN32 ${HPP} ${CPP})
 target_link_libraries (DODPP vulkan-1)
