@@ -223,16 +223,17 @@ AGE_RESULT vk_submit_cmd_buffer (const VkCommandBuffer cmd_buffer, const VkQueue
 	return AGE_RESULT::SUCCESS;
 }
 
-AGE_RESULT vk_create_image (
-	VkImageType image_type,
-	VkFormat format,
-	VkExtent3D extent,
-	uint32_t mip_levels,
-	uint32_t array_layers,
-	VkSampleCountFlagBits samples,
-	VkImageTiling tiling,
-	VkImageUsageFlags usage,
-	VkImage* out_image
+AGE_RESULT vk_create_images (
+	const VkImageType image_type,
+	const VkFormat format,
+	const uint32_t mip_levels,
+	const uint32_t array_layers,
+	const VkSampleCountFlagBits samples,
+	const VkImageTiling tiling,
+	const VkImageUsageFlags usage,
+	const size_t images_count,
+	const VkExtent3D* extents,
+	VkImage** out_images
 )
 {
 	VkImageCreateInfo create_info = {
@@ -241,7 +242,7 @@ AGE_RESULT vk_create_image (
 		0,
 		image_type,
 		format,
-		extent,
+		{0,0,0},
 		mip_levels,
 		array_layers,
 		samples,
@@ -253,16 +254,20 @@ AGE_RESULT vk_create_image (
 		VK_IMAGE_LAYOUT_UNDEFINED
 	};
 
-	VkResult vk_result = vkCreateImage (device, &create_info, NULL, out_image);
-	if (vk_result != VK_SUCCESS)
+	for (size_t i = 0; i < images_count; ++i)
 	{
-		return AGE_RESULT::ERROR_GRAPHICS_CREATE_IMAGE;
+		create_info.extent = extents[i];
+		VkResult vk_result = vkCreateImage (device, &create_info, NULL, *(out_images + i));
+		if (vk_result != VK_SUCCESS)
+		{
+			return AGE_RESULT::ERROR_GRAPHICS_CREATE_IMAGE;
+		}
 	}
 
 	return AGE_RESULT::SUCCESS;
 }
 
-AGE_RESULT vk_allocate_bind_image_memory (const VkImage* images, const size_t images_count, const uint32_t required_types, VkDeviceMemory* out_memory)
+AGE_RESULT vk_allocate_bind_image_memory (VkImage** images, const size_t images_count, const uint32_t required_types, VkDeviceMemory* out_memory)
 {
 	VkDeviceSize total_vk_images_size = 0;
 	VkMemoryRequirements memory_requirements = { 0 };
@@ -272,7 +277,7 @@ AGE_RESULT vk_allocate_bind_image_memory (const VkImage* images, const size_t im
 	for (size_t i = 0; i < images_count; ++i)
 	{
 		image_data_offsets[i] = total_vk_images_size;
-		vkGetImageMemoryRequirements (device, images[i], &memory_requirements);
+		vkGetImageMemoryRequirements (device, **(images + i), &memory_requirements);
 		total_vk_images_size += memory_requirements.size;
 	}
 
@@ -303,7 +308,7 @@ AGE_RESULT vk_allocate_bind_image_memory (const VkImage* images, const size_t im
 
 	for (size_t i = 0; i < images_count; ++i)
 	{
-		vk_result = vkBindImageMemory (device, images[i], images_memory, image_data_offsets[i]);
+		vk_result = vkBindImageMemory (device, **(images + i), images_memory, image_data_offsets[i]);
 		if (vk_result != VK_SUCCESS)
 		{
 			return AGE_RESULT::ERROR_GRAPHICS_BIND_IMAGE_MEMORY;
@@ -525,73 +530,38 @@ AGE_RESULT graphics_create_image_buffers ()
 
 	vkUnmapMemory (device, staging_image_memory);
 
-	age_result = vk_create_image (
-		VK_IMAGE_TYPE_2D,
-		VK_FORMAT_R8G8B8A8_UNORM,
-		{(uint32_t)background_image_width, (uint32_t)background_image_height, 1},
-		1,
-		1,
-		VK_SAMPLE_COUNT_1_BIT,
-		VK_IMAGE_TILING_OPTIMAL,
-		VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-		&background_image
-	);
-	if (age_result != AGE_RESULT::SUCCESS)
-	{
-		goto exit;
-	}
-
-	age_result = vk_create_image (
-		VK_IMAGE_TYPE_2D,
-		VK_FORMAT_R8G8B8A8_UNORM,
-		{(uint32_t)player_image_width, (uint32_t)player_image_height, 1},
-		1,
-		1,
-		VK_SAMPLE_COUNT_1_BIT,
-		VK_IMAGE_TILING_OPTIMAL,
-		VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-		&player_image
-	);
-	if (age_result != AGE_RESULT::SUCCESS)
-	{
-		goto exit;
-	}
-
-	age_result = vk_create_image (
-		VK_IMAGE_TYPE_2D,
-		VK_FORMAT_R8G8B8A8_UNORM,
-		{(uint32_t)asteroid_image_width, (uint32_t)asteroid_image_height, 1},
-		1,
-		1,
-		VK_SAMPLE_COUNT_1_BIT,
-		VK_IMAGE_TILING_OPTIMAL,
-		VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-		&asteroid_image
-	);
-	if (age_result != AGE_RESULT::SUCCESS)
-	{
-		goto exit;
-	}
-
-	age_result = vk_create_image (
-		VK_IMAGE_TYPE_2D,
-		VK_FORMAT_R8G8B8A8_UNORM,
-		{(uint32_t)bullet_image_width, (uint32_t)bullet_image_height, 1},
-		1,
-		1,
-		VK_SAMPLE_COUNT_1_BIT,
-		VK_IMAGE_TILING_OPTIMAL,
-		VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+	VkImage* images[] = {
+		&background_image,
+		&player_image,
+		&asteroid_image,
 		&bullet_image
+	};
+
+	VkExtent3D extents[] = {
+		{background_image_width, background_image_height, 1},
+		{player_image_width, player_image_height, 1},
+		{asteroid_image_width, asteroid_image_height, 1},
+		{bullet_image_width, bullet_image_height, 1}
+	};
+
+	age_result = vk_create_images (
+		VK_IMAGE_TYPE_2D,
+		VK_FORMAT_R8G8B8A8_UNORM,
+		1,
+		1,
+		VK_SAMPLE_COUNT_1_BIT,
+		VK_IMAGE_TILING_OPTIMAL,
+		VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+		4,
+		extents,
+		images
 	);
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		goto exit;
 	}
 
-	VkImage images_to_bind[] = {background_image, player_image, asteroid_image, bullet_image};
-
-	age_result = vk_allocate_bind_image_memory (images_to_bind, 4, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &images_memory);
+	age_result = vk_allocate_bind_image_memory (images, 4, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, &images_memory);
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		goto exit;
