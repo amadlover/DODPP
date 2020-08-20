@@ -28,7 +28,7 @@ std::vector<VkImageView> swapchain_image_views;
 size_t swapchain_image_count;
 VkExtent2D current_extent;
 VkSurfaceFormatKHR chosen_surface_format;
-VkCommandPool transfer_command_pool;
+VkCommandPool graphics_command_pool;
 VkSampler common_sampler;
 
 VkResult create_instance_debug_utils_messenger (VkInstance instance,
@@ -519,18 +519,18 @@ AGE_RESULT get_device_queues ()
 	return age_result;
 }
 
-AGE_RESULT create_transfer_command_pool ()
+AGE_RESULT create_graphics_command_pool ()
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
-	VkCommandPoolCreateInfo transfer_command_pool_create_info = {
+	VkCommandPoolCreateInfo graphics_command_pool_create_info = {
 		VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
 		NULL,
 		VK_COMMAND_POOL_CREATE_TRANSIENT_BIT,
 		graphics_queue_family_index
 	};
 
-	VkResult vk_result = vkCreateCommandPool (device, &transfer_command_pool_create_info, NULL, &transfer_command_pool);
+	VkResult vk_result = vkCreateCommandPool (device, &graphics_command_pool_create_info, NULL, &graphics_command_pool);
 	if (vk_result != VK_SUCCESS)
 	{
 		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_COMMAND_POOL;
@@ -661,7 +661,7 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 		return age_result;
 	}
 
-	age_result = create_transfer_command_pool ();
+	age_result = create_graphics_command_pool ();
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		return age_result;
@@ -678,9 +678,9 @@ AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
 
 void vulkan_interface_shutdown ()
 {
-	if (transfer_command_pool != VK_NULL_HANDLE)
+	if (graphics_command_pool != VK_NULL_HANDLE)
 	{
-		vkDestroyCommandPool (device, transfer_command_pool, NULL);
+		vkDestroyCommandPool (device, graphics_command_pool, NULL);
 	}
 
 	if (common_sampler != VK_NULL_HANDLE)

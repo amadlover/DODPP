@@ -25,7 +25,7 @@ extern std::vector<VkImageView> swapchain_image_views;
 extern size_t swapchain_image_count;
 extern VkExtent2D current_extent;
 extern VkSurfaceFormatKHR chosen_surface_format;
-extern VkCommandPool transfer_command_pool;
+extern VkCommandPool graphics_command_pool;
 extern VkSampler common_sampler;
 
 AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd);
