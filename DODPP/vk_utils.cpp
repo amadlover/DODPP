@@ -280,7 +280,11 @@ AGE_RESULT vk_change_images_layout (
 	}
 
 	vkQueueWaitIdle (graphics_queue);
-	vkFreeCommandBuffers (device, graphics_command_pool, 1, &cmd_buffer);
+
+	if (cmd_buffer != VK_NULL_HANDLE)
+	{
+		vkFreeCommandBuffers (device, graphics_command_pool, 1, &cmd_buffer);
+	}
 
 exit:
 	utils_free (barriers);
@@ -341,7 +345,98 @@ AGE_RESULT vk_allocate_bind_image_memory (VkImage** images, const size_t images_
 	return AGE_RESULT::SUCCESS;
 }
 
-AGE_RESULT vk_create_image_view (VkImage** images, const size_t images_count)
+AGE_RESULT vk_copy_buffer_to_images (const VkBuffer src_buffer, VkImage** dst_images, const VkExtent3D* images_extents, const VkDeviceSize* buffer_offsets, const size_t images_count)
 {
+	VkCommandBuffer cmd_buffer = VK_NULL_HANDLE;
+	VkOffset3D img_offset = { 0,0,0 };
+
+	VkImageSubresourceLayers subresource_layers = {
+		VK_IMAGE_ASPECT_COLOR_BIT,
+		0,
+		0,
+		1
+	};
+
+	VkBufferImageCopy buffer_image_copy = {
+		0,
+		0,
+		0,
+		subresource_layers,
+		img_offset,
+		{0,0,0}
+	};
+
+	AGE_RESULT age_result = vk_allocate_command_buffers (graphics_command_pool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1, &cmd_buffer);
+	if (age_result != AGE_RESULT::SUCCESS)
+	{
+		goto exit;
+	}
+
+	age_result = vk_begin_cmd_buffer (cmd_buffer, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+	if (age_result != AGE_RESULT::SUCCESS)
+	{
+		goto exit;
+	}
+
+	for (size_t i = 0; i < images_count; ++i)
+	{
+		buffer_image_copy.bufferOffset = buffer_offsets[i];
+		buffer_image_copy.imageExtent = images_extents[i];
+
+		vkCmdCopyBufferToImage (cmd_buffer, src_buffer, **(dst_images + i), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &buffer_image_copy);
+	}
+
+	age_result = vk_end_cmd_buffer (cmd_buffer);
+	if (age_result != AGE_RESULT::SUCCESS)
+	{
+		goto exit;
+	}
+	
+	age_result = vk_submit_cmd_buffer (cmd_buffer, graphics_queue);
+	if (age_result != AGE_RESULT::SUCCESS)
+	{
+		goto exit;
+	}
+
+	if (cmd_buffer != VK_NULL_HANDLE)
+	{
+		vkFreeCommandBuffers (device, graphics_command_pool, 1, &cmd_buffer);
+	}
+
+exit:
+	return age_result;
+}
+
+AGE_RESULT vk_create_image_views (VkImage** images, const size_t images_count, const VkImageViewType type, const VkFormat format, VkImageView** out_image_views)
+{
+	VkImageSubresourceRange subresource_range = {
+		VK_IMAGE_ASPECT_COLOR_BIT,
+		0,
+		1,
+		0,
+		1
+	};
+
+	VkImageViewCreateInfo create_info = {
+		VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+		NULL,
+		0,
+		VK_NULL_HANDLE,
+		type,
+		format,
+		{VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY},
+		subresource_range
+	};
+
+	for (size_t i = 0; i < images_count; ++i)
+	{
+		create_info.image = **(images + i);
+		VkResult vk_result = vkCreateImageView (device, &create_info, NULL, *(out_image_views + i));
+		if (vk_result != VK_SUCCESS)
+		{
+			return AGE_RESULT::ERROR_GRAPHICS_CREATE_IMAGE_VIEW;
+		}
+	}
+
 	return AGE_RESULT::SUCCESS;
 }

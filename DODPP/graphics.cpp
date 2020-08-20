@@ -288,11 +288,11 @@ AGE_RESULT graphics_create_image_buffers ()
 		&bullet_image
 	};
 
-	VkExtent3D extents[] = {
-		{background_image_width, background_image_height, 1},
-		{player_image_width, player_image_height, 1},
-		{asteroid_image_width, asteroid_image_height, 1},
-		{bullet_image_width, bullet_image_height, 1}
+	VkExtent3D images_extents[] = {
+		{(uint32_t)background_image_width, (uint32_t)background_image_height, 1},
+		{(uint32_t)player_image_width, (uint32_t)player_image_height, 1},
+		{(uint32_t)asteroid_image_width, (uint32_t)asteroid_image_height, 1},
+		{(uint32_t)bullet_image_width, (uint32_t)bullet_image_height, 1}
 	};
 
 	age_result = vk_create_images (
@@ -304,7 +304,7 @@ AGE_RESULT graphics_create_image_buffers ()
 		VK_IMAGE_TILING_OPTIMAL,
 		VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
 		4,
-		extents,
+		images_extents,
 		images
 	);
 	if (age_result != AGE_RESULT::SUCCESS)
@@ -335,96 +335,16 @@ AGE_RESULT graphics_create_image_buffers ()
 		goto exit;
 	}
 
-	VkCommandBuffer copy_buffer_to_image_cmd_buffer = VK_NULL_HANDLE;
-	age_result = vk_allocate_command_buffers (graphics_command_pool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, 1, &copy_buffer_to_image_cmd_buffer);
-	if (age_result != AGE_RESULT::SUCCESS)
+	VkDeviceSize buffer_offsets[] =
 	{
-		goto exit;
-	}
-	
-	age_result = vk_begin_cmd_buffer (copy_buffer_to_image_cmd_buffer, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-	if (age_result != AGE_RESULT::SUCCESS)
-	{
-		goto exit;
-	}
-
-	VkImageSubresourceLayers subresource_layers = {
-		VK_IMAGE_ASPECT_COLOR_BIT,
 		0,
-		0,
-		1
+		(VkDeviceSize)background_image_pixels_size,
+		(VkDeviceSize)background_image_pixels_size + (VkDeviceSize)player_image_pixels_size,
+		(VkDeviceSize)background_image_pixels_size + (VkDeviceSize)player_image_pixels_size + (VkDeviceSize)asteroid_image_pixels_size,
+		(VkDeviceSize)background_image_pixels_size + (VkDeviceSize)player_image_pixels_size + (VkDeviceSize)asteroid_image_pixels_size + (VkDeviceSize)bullet_image_pixels_size
 	};
 
-	VkOffset3D img_offset = { 0,0,0 };
-	VkExtent3D img_extent = { (uint32_t)background_image_width, (uint32_t)background_image_height, 1 };
-
-	VkBufferImageCopy background_img_copy = {
-		0,
-		0,
-		0,
-		subresource_layers,
-		img_offset,
-		img_extent
-	};
-
-	vkCmdCopyBufferToImage (
-		copy_buffer_to_image_cmd_buffer,
-		staging_image_buffer,
-		background_image,
-		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		1,
-		&background_img_copy
-	);
-
-	VkBufferImageCopy player_img_copy = background_img_copy;
-	player_img_copy.bufferOffset = (VkDeviceSize)background_image_pixels_size;
-	player_img_copy.imageExtent.width = player_image_width;
-	player_img_copy.imageExtent.height = player_image_height;
-
-	vkCmdCopyBufferToImage (
-		copy_buffer_to_image_cmd_buffer,
-		staging_image_buffer,
-		player_image,
-		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		1,
-		&player_img_copy
-	);
-
-	VkBufferImageCopy asteroid_img_copy = background_img_copy;
-	asteroid_img_copy.bufferOffset = (VkDeviceSize)background_image_pixels_size + (VkDeviceSize)player_image_pixels_size;
-	asteroid_img_copy.imageExtent.width = asteroid_image_width;
-	asteroid_img_copy.imageExtent.height = asteroid_image_height;
-
-	vkCmdCopyBufferToImage (
-		copy_buffer_to_image_cmd_buffer,
-		staging_image_buffer,
-		asteroid_image,
-		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		1,
-		&asteroid_img_copy
-	);
-
-	VkBufferImageCopy bullet_img_copy = background_img_copy;
-	bullet_img_copy.bufferOffset = (VkDeviceSize)background_image_pixels_size + (VkDeviceSize)player_image_pixels_size + (VkDeviceSize)asteroid_image_pixels_size;;
-	bullet_img_copy.imageExtent.width = bullet_image_width;
-	bullet_img_copy.imageExtent.height = bullet_image_height;
-
-	vkCmdCopyBufferToImage (
-		copy_buffer_to_image_cmd_buffer,
-		staging_image_buffer,
-		bullet_image,
-		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		1,
-		&bullet_img_copy
-	);
-
-	age_result = vk_end_cmd_buffer (copy_buffer_to_image_cmd_buffer);
-	if (age_result != AGE_RESULT::SUCCESS)
-	{
-		goto exit;
-	}
-
-	age_result = vk_submit_cmd_buffer (copy_buffer_to_image_cmd_buffer, graphics_queue);
+	age_result = vk_copy_buffer_to_images (staging_image_buffer, images, images_extents, buffer_offsets, 4);
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
 		goto exit;
@@ -447,68 +367,27 @@ AGE_RESULT graphics_create_image_buffers ()
 		goto exit;
 	}
 
-	VkImageSubresourceRange subresource_range = {
-		VK_IMAGE_ASPECT_COLOR_BIT,
-		0,
-		1,
-		0,
-		1
+	VkImageView* image_views[] = {
+		&background_image_view,
+		&player_image_view,
+		&asteroid_image_view,
+		&bullet_image_view
 	};
 
-	VkImageViewCreateInfo background_image_view_create_info = {
-		VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-		NULL,
-		0,
-		background_image,
+	age_result = vk_create_image_views (
+		images,
+		4,
 		VK_IMAGE_VIEW_TYPE_2D,
 		VK_FORMAT_R8G8B8A8_UNORM,
-		{VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY},
-		subresource_range
-	};
+		image_views
+	);
 
-	vk_result = vkCreateImageView (device, &background_image_view_create_info, NULL, &background_image_view);
-	if (vk_result != VK_SUCCESS)
+	if (age_result != AGE_RESULT::SUCCESS)
 	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_IMAGE_VIEW;
-		goto exit;
-	}
-
-	VkImageViewCreateInfo player_image_view_create_info = background_image_view_create_info;
-	player_image_view_create_info.image = player_image;
-
-	vk_result = vkCreateImageView (device, &player_image_view_create_info, NULL, &player_image_view);
-	if (vk_result != VK_SUCCESS)
-	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_IMAGE_VIEW;
-		goto exit;
-	}
-
-	VkImageViewCreateInfo asteroid_image_view_create_info = player_image_view_create_info;
-	asteroid_image_view_create_info.image = asteroid_image;
-
-	vk_result = vkCreateImageView (device, &asteroid_image_view_create_info, NULL, &asteroid_image_view);
-	if (vk_result != VK_SUCCESS)
-	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_IMAGE_VIEW;
-		goto exit;
-	}
-
-	VkImageViewCreateInfo bullet_image_view_create_info = asteroid_image_view_create_info;
-	bullet_image_view_create_info.image = bullet_image;
-
-	vk_result = vkCreateImageView (device, &bullet_image_view_create_info, NULL, &bullet_image_view);
-	if (vk_result != VK_SUCCESS)
-	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_IMAGE_VIEW;
 		goto exit;
 	}
 
 exit:
-	
-	if (copy_buffer_to_image_cmd_buffer != VK_NULL_HANDLE)
-	{
-		vkFreeCommandBuffers (device, graphics_command_pool, 1, &copy_buffer_to_image_cmd_buffer);
-	}
 	
 	if (staging_image_buffer != VK_NULL_HANDLE)
 	{
