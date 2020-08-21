@@ -86,7 +86,7 @@ AGE_RESULT game_init (const HINSTANCE h_instance, const HWND h_wnd)
     game_player_transform_inputs.max_velocity = 0.05f;
     game_player_output_scale = float2 (1, 1);
 
-    srand (time_t (NULL));
+    std::srand (std::time (nullptr));
 
     age_result = game_reserve_memory_for_asteroids_bullets ();
     if (age_result != AGE_RESULT::SUCCESS)
@@ -161,15 +161,15 @@ AGE_RESULT game_large_asteroid_add (float2 position)
         }
     }
 
-    srand (rand ());
+    std::srand (std::rand ());
     
     game_large_asteroids_outputs_positions[game_large_asteroids_live_count] = position;
-    game_large_asteroids_outputs_rotations[game_large_asteroids_live_count] = float2 ((float)rand () / (float)RAND_MAX * 3.14f, 0);
+    game_large_asteroids_outputs_rotations[game_large_asteroids_live_count] = float2 ((float)std::rand () / (float)RAND_MAX * 3.14f, 0);
     game_large_asteroids_outputs_scales[game_large_asteroids_live_count] = float2 (1, 1);
 
-    game_large_asteroids_transform_inputs[game_large_asteroids_live_count].forward_vector = float2 (((float)rand () / (float)RAND_MAX) * 2 - 1, ((float)rand () / (float)RAND_MAX) * 2 - 1);
-    game_large_asteroids_transform_inputs[game_large_asteroids_live_count].forward_speed = ((float)rand () / (float)RAND_MAX) / 1000.f;
-    game_large_asteroids_transform_inputs[game_large_asteroids_live_count].rotation_speed = (((float)rand () / (float)RAND_MAX)) / 100.f;
+    game_large_asteroids_transform_inputs[game_large_asteroids_live_count].forward_vector = float2 (((float)std::rand () / (float)RAND_MAX) * 2 - 1, ((float)std::rand () / (float)RAND_MAX) * 2 - 1);
+    game_large_asteroids_transform_inputs[game_large_asteroids_live_count].forward_speed = ((float)std::rand () / (float)RAND_MAX) / 1000.f;
+    game_large_asteroids_transform_inputs[game_large_asteroids_live_count].rotation_speed = (((float)std::rand () / (float)RAND_MAX)) / 100.f;
 
     ++game_large_asteroids_live_count;
 
@@ -203,15 +203,15 @@ AGE_RESULT game_small_asteroid_add (float2 position)
         }
     }
 
-    srand (rand ());
+    std::srand (std::rand ());
 
     game_small_asteroids_outputs_positions[game_small_asteroids_live_count] = position;
-    game_small_asteroids_outputs_rotations[game_small_asteroids_live_count] = float2 ((float)rand () / (float)RAND_MAX * 3.14f, 0);
+    game_small_asteroids_outputs_rotations[game_small_asteroids_live_count] = float2 ((float)std::rand () / (float)RAND_MAX * 3.14f, 0);
     game_small_asteroids_outputs_scales[game_small_asteroids_live_count] = float2 (0.5f, 0.5f);
 
-    game_small_asteroids_transform_inputs[game_small_asteroids_live_count].forward_vector = float2 (((float)rand () / (float)RAND_MAX) * 2 - 1, ((float)rand () / (float)RAND_MAX) * 2 - 1);
-    game_small_asteroids_transform_inputs[game_small_asteroids_live_count].forward_speed = ((float)rand () / (float)RAND_MAX) / 4000.f;
-    game_small_asteroids_transform_inputs[game_small_asteroids_live_count].rotation_speed = (((float)rand () / (float)RAND_MAX)) / 100.f;
+    game_small_asteroids_transform_inputs[game_small_asteroids_live_count].forward_vector = float2 (((float)std::rand () / (float)RAND_MAX) * 2 - 1, ((float)std::rand () / (float)RAND_MAX) * 2 - 1);
+    game_small_asteroids_transform_inputs[game_small_asteroids_live_count].forward_speed = ((float)std::rand () / (float)RAND_MAX) / 4000.f;
+    game_small_asteroids_transform_inputs[game_small_asteroids_live_count].rotation_speed = (((float)std::rand () / (float)RAND_MAX)) / 100.f;
 
     ++game_small_asteroids_live_count;
 
@@ -224,7 +224,7 @@ AGE_RESULT game_process_left_mouse_click (const int32_t x, const int32_t y)
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
     
-    age_result = game_large_asteroid_add (float2 (((float)rand () / (float)RAND_MAX) * 2 - 1, ((float)rand () / (float)RAND_MAX) * 2 - 1));
+    age_result = game_large_asteroid_add (float2 (((float)std::rand () / (float)RAND_MAX) * 2 - 1, ((float)std::rand () / (float)RAND_MAX) * 2 - 1));
     
     return age_result;
 }
@@ -305,7 +305,7 @@ AGE_RESULT game_process_right_mouse_click (const int32_t x, const int32_t y)
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
-    age_result = game_large_asteroid_remove ((size_t)(((float)rand () / (float)RAND_MAX) * game_large_asteroids_live_count));
+    age_result = game_large_asteroid_remove ((size_t)(((float)std::rand () / (float)RAND_MAX) * game_large_asteroids_live_count));
 
     return age_result;
 }
@@ -342,7 +342,7 @@ AGE_RESULT game_player_increase_speed ()
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
-    if (hypot (game_player_transform_inputs.v.x, game_player_transform_inputs.v.y) > game_player_transform_inputs.max_velocity)
+    if (std::hypotf (game_player_transform_inputs.v.x, game_player_transform_inputs.v.y) > game_player_transform_inputs.max_velocity)
     {
         return age_result;
     }
@@ -364,7 +364,7 @@ AGE_RESULT game_player_decrease_speed ()
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
-    if (hypot (game_player_transform_inputs.v.x, game_player_transform_inputs.v.y) > game_player_transform_inputs.max_velocity)
+    if (std::hypotf (game_player_transform_inputs.v.x, game_player_transform_inputs.v.y) > game_player_transform_inputs.max_velocity)
     {
         return age_result;
     }
