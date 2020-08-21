@@ -447,6 +447,7 @@ AGE_RESULT graphics_create_pipeline ()
 			VK_VERTEX_INPUT_RATE_VERTEX
 		}
 	};
+
 	VkVertexInputAttributeDescription vertex_input_attribute_descriptions[2] = {
 		{
 			0,
@@ -547,7 +548,6 @@ AGE_RESULT graphics_create_pipeline ()
 		&color_blend_attachment_state,
 		{1,1,1,1}
 	};
-
 
 	VkGraphicsPipelineCreateInfo graphics_pipeline_create_info = {
 		VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
