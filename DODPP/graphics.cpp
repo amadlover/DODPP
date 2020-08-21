@@ -413,45 +413,14 @@ AGE_RESULT graphics_create_pipeline ()
 	VkResult vk_result = VK_SUCCESS;
 
 	VkShaderModule vertex_shader_module = VK_NULL_HANDLE;
-	VkShaderModuleCreateInfo vertex_shader_module_create_info = {
-		VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
-		NULL,
-		0,
-		sizeof (actor_vert),
-		actor_vert
-	};
-
-	vk_result = vkCreateShaderModule (device, &vertex_shader_module_create_info, NULL, &vertex_shader_module);
-
-	if (vk_result != VK_SUCCESS)
-	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_SHADER_MODULE;
-		goto exit;
-	}
-
 	VkShaderModule fragment_shader_module = VK_NULL_HANDLE;
-	VkShaderModuleCreateInfo fragment_shader_module_create_info = {
-		VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
-		NULL,
-		0,
-		sizeof (actor_frag),
-		actor_frag
-	};
-
-	vk_result = vkCreateShaderModule (device, &fragment_shader_module_create_info, NULL, &fragment_shader_module);
-	if (vk_result != VK_SUCCESS)
-	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_SHADER_MODULE;
-		goto exit;
-	}
-
 	VkPipelineShaderStageCreateInfo shader_stage_create_infos[2] = {
 		{
 			VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
 			NULL,
 			0,
 			VK_SHADER_STAGE_VERTEX_BIT,
-			vertex_shader_module,
+			VK_NULL_HANDLE,
 			"main",
 			NULL
 		},
@@ -460,11 +429,12 @@ AGE_RESULT graphics_create_pipeline ()
 			NULL,
 			0,
 			VK_SHADER_STAGE_FRAGMENT_BIT,
-			fragment_shader_module,
+			VK_NULL_HANDLE,
 			"main",
 			NULL
 		}
 	};
+
 	VkVertexInputBindingDescription vertex_input_binding_descriptions[2] = {
 		{
 			0,
@@ -578,12 +548,13 @@ AGE_RESULT graphics_create_pipeline ()
 		{1,1,1,1}
 	};
 
+
 	VkGraphicsPipelineCreateInfo graphics_pipeline_create_info = {
 		VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
 		NULL,
 		0,
 		2,
-		shader_stage_create_infos,
+		nullptr,
 		&vertex_input_state_create_info,
 		&vertex_input_assembly_state_create_info,
 		NULL,
@@ -599,6 +570,20 @@ AGE_RESULT graphics_create_pipeline ()
 		VK_NULL_HANDLE,
 		0
 	};
+
+	age_result = vk_create_shader_module (actor_vert, sizeof (actor_vert), VK_SHADER_STAGE_VERTEX_BIT, &shader_stage_create_infos[0], &vertex_shader_module);
+	if (age_result != AGE_RESULT::SUCCESS)
+	{
+		goto exit;
+	}
+
+	age_result = vk_create_shader_module (actor_frag, sizeof (actor_frag), VK_SHADER_STAGE_FRAGMENT_BIT, &shader_stage_create_infos[1], &fragment_shader_module);
+	if (age_result != AGE_RESULT::SUCCESS)
+	{
+		goto exit;
+	}
+
+	graphics_pipeline_create_info.pStages = shader_stage_create_infos;
 
 	vk_result = vkCreateGraphicsPipelines (device, VK_NULL_HANDLE, 1, &graphics_pipeline_create_info, NULL, &graphics_pipeline);
 	if (vk_result)
@@ -621,11 +606,41 @@ exit:
 	return age_result;
 }
 
-AGE_RESULT graphics_create_swapchain_render_pass_framebuffers ()
+AGE_RESULT graphics_create_swapchain_framebuffers ()
 {
-	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
+	swapchain_framebuffers = (VkFramebuffer*)utils_calloc (swapchain_image_count, sizeof (VkFramebuffer));
+
+	VkFramebufferCreateInfo framebuffer_create_info = {
+		VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
+		NULL,
+		0,
+		render_pass,
+		1,
+		NULL,
+		current_extent.width,
+		current_extent.height,
+		1
+	};
+
 	VkResult vk_result = VK_SUCCESS;
 
+	for (size_t i = 0; i < swapchain_image_count; ++i)
+	{
+		framebuffer_create_info.pAttachments = &swapchain_image_views[i];
+
+		vk_result = vkCreateFramebuffer (device, &framebuffer_create_info, NULL, swapchain_framebuffers + i);
+
+		if (vk_result != VK_SUCCESS)
+		{
+			return AGE_RESULT::ERROR_GRAPHICS_CREATE_FRAMEBUFFER;
+		}
+	}
+
+	return AGE_RESULT::SUCCESS;
+}
+
+AGE_RESULT graphics_create_swapchain_render_pass ()
+{
 	VkAttachmentDescription color_attachment_description = {
 	0,
 	chosen_surface_format.format,
@@ -668,84 +683,35 @@ AGE_RESULT graphics_create_swapchain_render_pass_framebuffers ()
 		NULL
 	};
 
-	vk_result = vkCreateRenderPass (device, &render_pass_create_info, NULL, &render_pass);
+	VkResult vk_result = vkCreateRenderPass (device, &render_pass_create_info, NULL, &render_pass);
 
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_RENDER_PASS;
-		goto exit;
+		return AGE_RESULT::ERROR_GRAPHICS_CREATE_RENDER_PASS;
+		
 	}
 
-	swapchain_framebuffers = (VkFramebuffer*)utils_calloc (swapchain_image_count, sizeof (VkFramebuffer));
-
-	VkFramebufferCreateInfo framebuffer_create_info = {
-		VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
-		NULL,
-		0,
-		render_pass,
-		1,
-		NULL,
-		current_extent.width,
-		current_extent.height,
-		1
-	};
-
-	for (size_t i = 0; i < swapchain_image_count; ++i)
-	{
-		framebuffer_create_info.pAttachments = &swapchain_image_views[i];
-
-		vk_result = vkCreateFramebuffer (device, &framebuffer_create_info, NULL, swapchain_framebuffers + i);
-
-		if (vk_result != VK_SUCCESS)
-		{
-			age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_FRAMEBUFFER;
-			goto exit;
-		}
-	}
-
-exit:
-	return age_result;
+	return AGE_RESULT::SUCCESS;
 }
 
-AGE_RESULT graphics_create_swapchain_command_buffers ()
+AGE_RESULT graphics_create_swapchain_command_pool_buffers ()
 {
-	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
-	VkResult vk_result = VK_SUCCESS;
-
-	VkCommandPoolCreateInfo command_pool_create_info = {
+	VkCommandPoolCreateInfo cmd_pool_create_info = {
 		VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-		NULL,
+		nullptr,
 		0,
 		graphics_queue_family_index
 	};
 
-	vk_result = vkCreateCommandPool (device, &command_pool_create_info, NULL, &swapchain_command_pool);
-
+	VkResult vk_result = vkCreateCommandPool (device, &cmd_pool_create_info, nullptr, &swapchain_command_pool);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_COMMAND_POOL;
-		goto exit;
+		return AGE_RESULT::ERROR_GRAPHICS_CREATE_COMMAND_POOL;
 	}
 
-	swapchain_command_buffers = (VkCommandBuffer*)utils_calloc (swapchain_image_count, sizeof (VkCommandBuffer));
-
-	VkCommandBufferAllocateInfo command_buffer_allocate_info = {
-		VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-		NULL,
-		swapchain_command_pool,
-		VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-		swapchain_image_count
-	};
-
-	vk_result = vkAllocateCommandBuffers (device, &command_buffer_allocate_info, swapchain_command_buffers);
-
-	if (vk_result != VK_SUCCESS)
-	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_ALLOCATE_COMMAND_BUFFER;
-		goto exit;
-	}
-
-exit:
+	swapchain_command_buffers = (VkCommandBuffer*)utils_malloc(sizeof (VkCommandBuffer) * swapchain_image_count);
+	AGE_RESULT age_result = vk_allocate_command_buffers (swapchain_command_pool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, swapchain_image_count, swapchain_command_buffers);
+	
 	return age_result;
 }
 
@@ -755,6 +721,12 @@ AGE_RESULT graphics_create_swapchain_semaphores_fences ()
 	VkResult vk_result = VK_SUCCESS;
 
 	VkSemaphoreCreateInfo semaphore_create_info = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO, NULL, 0 };
+	VkFenceCreateInfo fence_create_info = {
+		VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+		NULL,
+		0
+	};
+
 	vk_result = vkCreateSemaphore (device, &semaphore_create_info, NULL, &wait_semaphore);
 
 	if (vk_result != VK_SUCCESS)
@@ -763,7 +735,7 @@ AGE_RESULT graphics_create_swapchain_semaphores_fences ()
 		goto exit;
 	}
 
-	swapchain_signal_semaphores = (VkSemaphore*)utils_calloc (swapchain_image_count, sizeof (VkSemaphore));
+	swapchain_signal_semaphores = (VkSemaphore*)utils_malloc (sizeof (VkSemaphore) * swapchain_image_count);
 	for (size_t i = 0; i < swapchain_image_count; ++i)
 	{
 		vk_result = vkCreateSemaphore (device, &semaphore_create_info, NULL, swapchain_signal_semaphores + i);
@@ -775,12 +747,7 @@ AGE_RESULT graphics_create_swapchain_semaphores_fences ()
 		}
 	}
 
-	swapchain_fences = (VkFence*)utils_calloc (swapchain_image_count, sizeof (VkFence));
-	VkFenceCreateInfo fence_create_info = {
-		VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
-		NULL,
-		0
-	};
+	swapchain_fences = (VkFence*)utils_malloc (sizeof (VkFence) * swapchain_image_count);
 
 	for (size_t i = 0; i < swapchain_image_count; ++i)
 	{
@@ -824,8 +791,7 @@ AGE_RESULT graphics_create_descriptor_sets_pipeline_layout ()
 	vk_result = vkCreateDescriptorPool (device, &descriptor_pool_create_info, NULL, &descriptor_pool);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_DESCRIPTOR_POOL;
-		goto exit;
+		return AGE_RESULT::ERROR_GRAPHICS_CREATE_DESCRIPTOR_POOL;
 	}
 
 	VkDescriptorSetLayoutBinding descriptor_layout_bindings[] = {
@@ -857,8 +823,7 @@ AGE_RESULT graphics_create_descriptor_sets_pipeline_layout ()
 	vk_result = vkCreateDescriptorSetLayout (device, &transform_descriptor_set_layout_create_info, NULL, &transform_descriptor_set_layout);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_DESCRIPTOR_SET_LAYOUT;
-		goto exit;
+		return AGE_RESULT::ERROR_GRAPHICS_CREATE_DESCRIPTOR_SET_LAYOUT;
 	}
 
 	VkDescriptorSetLayoutCreateInfo texture_descriptor_set_layout_create_info = transform_descriptor_set_layout_create_info;
@@ -867,8 +832,7 @@ AGE_RESULT graphics_create_descriptor_sets_pipeline_layout ()
 	vk_result = vkCreateDescriptorSetLayout (device, &texture_descriptor_set_layout_create_info, NULL, &texture_descriptor_set_layout);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_DESCRIPTOR_SET_LAYOUT;
-		goto exit;
+		return AGE_RESULT::ERROR_GRAPHICS_CREATE_DESCRIPTOR_SET_LAYOUT;
 	}
 
 	VkDescriptorSetAllocateInfo transform_descriptor_set_allocate_info = {
@@ -882,8 +846,7 @@ AGE_RESULT graphics_create_descriptor_sets_pipeline_layout ()
 	vk_result = vkAllocateDescriptorSets (device, &transform_descriptor_set_allocate_info, &transform_descriptor_set);
 	if (vk_result)
 	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_ALLOCATE_DESCRIPTOR_SETS;
-		goto exit;
+		return AGE_RESULT::ERROR_GRAPHICS_ALLOCATE_DESCRIPTOR_SETS;
 	}
 
 	VkDescriptorSetAllocateInfo texture_descriptor_set_allocate_info = {
@@ -897,8 +860,7 @@ AGE_RESULT graphics_create_descriptor_sets_pipeline_layout ()
 	vk_result = vkAllocateDescriptorSets (device, &texture_descriptor_set_allocate_info, &texture_descriptor_set);
 	if (vk_result)
 	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_ALLOCATE_DESCRIPTOR_SETS;
-		goto exit;
+		return AGE_RESULT::ERROR_GRAPHICS_ALLOCATE_DESCRIPTOR_SETS;
 	}
 
 	VkDescriptorSetLayout descriptor_set_layouts[] = {
@@ -970,12 +932,10 @@ AGE_RESULT graphics_create_descriptor_sets_pipeline_layout ()
 	vk_result = vkCreatePipelineLayout (device, &pipeline_layout_create_info, NULL, &graphics_pipeline_layout);
 	if (vk_result)
 	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_PIPELINE_LAYOUT;
-		goto exit;
+		return AGE_RESULT::ERROR_GRAPHICS_CREATE_PIPELINE_LAYOUT;
 	}
 
-exit:
-	return age_result;
+	return AGE_RESULT::SUCCESS;
 }
 
 AGE_RESULT graphics_create_transforms_buffer (
@@ -999,7 +959,6 @@ AGE_RESULT graphics_create_transforms_buffer (
 		vkFreeMemory (device, transforms_buffer_memory, NULL);
 	}
 
-	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 	VkResult vk_result = VK_SUCCESS;
 
 	size_t raw_size_per_transform = sizeof (float2) + sizeof (float2) + sizeof (float2);
@@ -1029,8 +988,8 @@ AGE_RESULT graphics_create_transforms_buffer (
 	vk_result = vkCreateBuffer (device, &transforms_buffer_create_info, NULL, &transforms_buffer);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_BUFFER;
-		goto exit;
+		return AGE_RESULT::ERROR_GRAPHICS_CREATE_BUFFER;
+		
 	}
 
 	VkMemoryRequirements memory_requirements;
@@ -1058,22 +1017,19 @@ AGE_RESULT graphics_create_transforms_buffer (
 	vk_result = vkAllocateMemory (device, &memory_allocate_info, NULL, &transforms_buffer_memory);
 	if (vk_result != VK_SUCCESS) 
 	{
-		age_result = AGE_RESULT::ERROR_SYSTEM_ALLOCATE_MEMORY;
-		goto exit;
+		return AGE_RESULT::ERROR_SYSTEM_ALLOCATE_MEMORY;
 	}
 
 	vk_result = vkBindBufferMemory (device, transforms_buffer, transforms_buffer_memory, 0);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_BIND_BUFFER_MEMORY;
-		goto exit;
+		return AGE_RESULT::ERROR_GRAPHICS_BIND_BUFFER_MEMORY;
 	}
 
 	vk_result = vkMapMemory (device, transforms_buffer_memory, 0, memory_requirements.size, 0, &transforms_mapped_data);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_MAP_MEMORY;
-		goto exit;
+		return AGE_RESULT::ERROR_GRAPHICS_MAP_MEMORY;
 	}
 
 	VkDescriptorBufferInfo buffer_info = {
@@ -1097,9 +1053,7 @@ AGE_RESULT graphics_create_transforms_buffer (
 
 	vkUpdateDescriptorSets (device, 1, &descriptor_write, 0, NULL);
 
-exit: // clean up allocations made by the function
-
-	return age_result;
+	return AGE_RESULT::SUCCESS;
 }
 
 AGE_RESULT graphics_update_command_buffers (
@@ -1132,8 +1086,7 @@ AGE_RESULT graphics_update_command_buffers (
 	vk_result = vkResetCommandPool (device, swapchain_command_pool, VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_RESET_COMMAND_POOL;
-		goto exit;
+		return AGE_RESULT::ERROR_GRAPHICS_RESET_COMMAND_POOL;
 	}
 
 	for (size_t i = 0; i < swapchain_image_count; ++i)
@@ -1141,8 +1094,7 @@ AGE_RESULT graphics_update_command_buffers (
 		vk_result = vkBeginCommandBuffer (swapchain_command_buffers[i], &command_buffer_begin_info);
 		if (vk_result != VK_SUCCESS)
 		{
-			age_result = AGE_RESULT::ERROR_GRAPHICS_BEGIN_COMMAND_BUFFER;
-			goto exit;
+			return AGE_RESULT::ERROR_GRAPHICS_BEGIN_COMMAND_BUFFER;
 		}
 
 		render_pass_begin_info.framebuffer = swapchain_framebuffers[i];
@@ -1224,12 +1176,10 @@ AGE_RESULT graphics_update_command_buffers (
 		vk_result = vkEndCommandBuffer (swapchain_command_buffers[i]);
 		if (vk_result != VK_SUCCESS)
 		{
-			age_result = AGE_RESULT::ERROR_GRAPHICS_END_COMMAND_BUFFER;
-			goto exit;
+			return AGE_RESULT::ERROR_GRAPHICS_END_COMMAND_BUFFER;
 		}
 	}
 
-exit:
 	return age_result;
 }
 
@@ -1306,7 +1256,6 @@ AGE_RESULT graphics_update_transforms_buffer_data (
 
 	std::memcpy (transforms_mapped_data, transforms_aligned_data, total_transforms_size);
 
-exit:
 	return age_result;
 }
 
@@ -1321,48 +1270,53 @@ AGE_RESULT graphics_init (
 )
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
-	VkResult vk_result = VK_SUCCESS;
 
 	age_result = graphics_create_geometry_buffers ();
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
-		goto exit;
+		return age_result;
 	}
 
 	age_result = graphics_create_image_buffers ();
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
-		goto exit;
+		return age_result;
 	}
 
 	age_result = graphics_create_descriptor_sets_pipeline_layout ();
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
-		goto exit;
+		return age_result;
 	}
 
-	age_result = graphics_create_swapchain_render_pass_framebuffers ();
+	age_result = graphics_create_swapchain_render_pass ();
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
-		goto exit;
+		return age_result;
+	}
+
+	age_result = graphics_create_swapchain_framebuffers ();
+	if (age_result != AGE_RESULT::SUCCESS)
+	{
+		return age_result;
 	}
 
 	age_result = graphics_create_pipeline ();
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
-		goto exit;
+		return age_result;
 	}
 
-	age_result = graphics_create_swapchain_command_buffers ();
+	age_result = graphics_create_swapchain_command_pool_buffers ();
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
-		goto exit;
+		return age_result;
 	}
 
 	age_result = graphics_create_swapchain_semaphores_fences ();
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
-		goto exit;
+		return age_result;
 	}
 
 	age_result = graphics_create_transforms_buffer (
@@ -1372,7 +1326,7 @@ AGE_RESULT graphics_init (
 	);
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
-		goto exit;
+		return age_result;
 	}
 
 	age_result = graphics_update_command_buffers (
@@ -1383,17 +1337,14 @@ AGE_RESULT graphics_init (
 	);
 	if (age_result != AGE_RESULT::SUCCESS)
 	{
-		goto exit;
+		return age_result;
 	}
 
-exit: // clear function specific allocations before exit
 	return age_result;
 }
 
 AGE_RESULT graphics_submit_present ()
 {
-	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
-
 	size_t image_index = 0;
 	VkResult vk_result = vkAcquireNextImageKHR (device, swapchain, UINT64_MAX, wait_semaphore, VK_NULL_HANDLE, &image_index);
 
@@ -1404,13 +1355,11 @@ AGE_RESULT graphics_submit_present ()
 			vk_result == VK_TIMEOUT ||
 			vk_result == VK_NOT_READY)
 		{
-			age_result = AGE_RESULT::SUCCESS;
-			goto exit;
+			return AGE_RESULT::SUCCESS;
 		}
 		else
 		{
-			age_result = AGE_RESULT::ERROR_GRAPHICS_ACQUIRE_NEXT_IMAGE;
-			goto exit;
+			return AGE_RESULT::ERROR_GRAPHICS_ACQUIRE_NEXT_IMAGE;
 		}
 	}
 
@@ -1432,8 +1381,7 @@ AGE_RESULT graphics_submit_present ()
 
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_QUEUE_SUBMIT;
-		goto exit;
+		return AGE_RESULT::ERROR_GRAPHICS_QUEUE_SUBMIT;
 	}
 
 	VkPresentInfoKHR present_info = {
@@ -1453,27 +1401,23 @@ AGE_RESULT graphics_submit_present ()
 	{
 		if (vk_result == VK_ERROR_OUT_OF_HOST_MEMORY || vk_result == VK_ERROR_OUT_OF_DEVICE_MEMORY)
 		{
-			age_result = AGE_RESULT::ERROR_GRAPHICS_QUEUE_PRESENT;
-			goto exit;
+			return AGE_RESULT::ERROR_GRAPHICS_QUEUE_PRESENT;
 		}
 	}
 
 	vk_result = vkWaitForFences (device, 1, swapchain_fences + image_index, VK_TRUE, UINT64_MAX);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_WAIT_FOR_FENCES;
-		goto exit;
+		return AGE_RESULT::ERROR_GRAPHICS_WAIT_FOR_FENCES;
 	}
 
 	vk_result = vkResetFences (device, 1, swapchain_fences + image_index);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_RESET_FENCES;
-		goto exit;
+		return AGE_RESULT::ERROR_GRAPHICS_RESET_FENCES;
 	}
 
-exit:
-	return age_result;
+	return AGE_RESULT::SUCCESS;
 }
 
 void graphics_shutdown ()

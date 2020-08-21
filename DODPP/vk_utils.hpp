@@ -48,6 +48,26 @@ AGE_RESULT vk_change_images_layout (
 
 AGE_RESULT vk_allocate_bind_image_memory (VkImage** images, const size_t images_count, const uint32_t required_types, VkDeviceMemory* out_memory);
 
-AGE_RESULT vk_copy_buffer_to_images (const VkBuffer src_buffer, VkImage** dst_images, const VkExtent3D* images_extents, const VkDeviceSize* buffer_offsets, const size_t images_count);
+AGE_RESULT vk_copy_buffer_to_images (
+	const VkBuffer src_buffer, 
+	VkImage** dst_images, 
+	const VkExtent3D* images_extents, 
+	const VkDeviceSize* buffer_offsets, 
+	const size_t images_count
+);
 
-AGE_RESULT vk_create_image_views (VkImage** images, const size_t images_count, const VkImageViewType type, const VkFormat format, VkImageView** out_image_views);
+AGE_RESULT vk_create_image_views (
+	VkImage** images, 
+	const size_t images_count, 
+	const VkImageViewType type, 
+	const VkFormat format, 
+	VkImageView** out_image_views
+);
+
+AGE_RESULT vk_create_shader_module (
+	const uint32_t* shader_code, 
+	const uint32_t shader_code_size,
+	const VkShaderStageFlags shader_stage, 
+	VkPipelineShaderStageCreateInfo* out_shader_stage_create_info, 
+	VkShaderModule* out_shader_module
+);
