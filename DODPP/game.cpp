@@ -64,6 +64,8 @@ const size_t game_LARGE_ASTEROID_BATCH_SIZE = 50;
 const size_t game_SMALL_ASTEROID_BATCH_SIZE = 150;
 const size_t game_BULLET_BATCH_SIZE = 20;
 
+bool should_update_command_buffers = false;
+
 RECT scene_rect;
 int32_t last_mouse_x;
 int32_t last_mouse_y;
@@ -192,7 +194,8 @@ AGE_RESULT game_large_asteroid_add (float2 position)
 
     ++game_large_asteroids_live_count;
 
-    age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count, screen_aspect_ratio);
+    should_update_command_buffers = true;
+    //age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count, screen_aspect_ratio);
 
     return age_result;
 }
@@ -232,7 +235,9 @@ AGE_RESULT game_small_asteroid_add (float2 position)
 
     ++game_small_asteroids_live_count;
 
-    age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count, screen_aspect_ratio);
+    should_update_command_buffers = true;
+
+    //age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count, screen_aspect_ratio);
     
     return age_result;
 }
@@ -277,7 +282,9 @@ AGE_RESULT game_large_asteroid_remove (const size_t& index_to_remove)
 
     --game_large_asteroids_live_count;
 
-    age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count, screen_aspect_ratio);
+    should_update_command_buffers = true;
+
+    //age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count, screen_aspect_ratio);
 
     return age_result;
 }
@@ -313,7 +320,9 @@ AGE_RESULT game_small_asteroid_remove (const size_t& index_to_remove)
 
     --game_small_asteroids_live_count;
 
-    age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count, screen_aspect_ratio);
+    should_update_command_buffers = true;
+
+    //age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count, screen_aspect_ratio);
 
     return age_result;
 }
@@ -331,11 +340,8 @@ AGE_RESULT game_update_player_vectors ()
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
-    float new_vector_x = -sinf (game_player_transform_inputs.rotation);
-    float new_vector_y = cosf (game_player_transform_inputs.rotation);
-
-    game_player_transform_inputs.forward_vector.x = new_vector_x;
-    game_player_transform_inputs.forward_vector.y = new_vector_y;
+    game_player_transform_inputs.forward_vector.x = -sinf (game_player_transform_inputs.rotation);
+    game_player_transform_inputs.forward_vector.y = cosf (game_player_transform_inputs.rotation);
 
     return age_result;
 }
@@ -475,7 +481,9 @@ AGE_RESULT game_bullet_add ()
 
     ++game_bullet_live_count;
 
-    age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count, screen_aspect_ratio);
+    should_update_command_buffers = true;
+
+    //age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count, screen_aspect_ratio);
 
     return age_result;
 }
@@ -511,7 +519,9 @@ AGE_RESULT game_bullet_remove (const size_t& index_to_remove)
 
     --game_bullet_live_count;
 
-    age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count, screen_aspect_ratio);
+    should_update_command_buffers = true;
+
+    //age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count, screen_aspect_ratio);
 
     return age_result;
 }
@@ -1051,6 +1061,22 @@ AGE_RESULT game_update (size_t delta_msecs)
     if (age_result != AGE_RESULT::SUCCESS)
     {
         return age_result;
+    }
+
+    if (should_update_command_buffers)
+    {
+        age_result = graphics_update_command_buffers (
+            game_large_asteroids_live_count,
+            game_small_asteroids_live_count,
+            game_bullet_live_count,
+            screen_aspect_ratio
+        );
+        if (age_result != AGE_RESULT::SUCCESS)
+        {
+            return age_result;
+        }
+
+        should_update_command_buffers = false;
     }
 
     return age_result;
