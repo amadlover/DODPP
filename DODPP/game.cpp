@@ -195,7 +195,6 @@ AGE_RESULT game_large_asteroid_add (float2 position)
     ++game_large_asteroids_live_count;
 
     should_update_command_buffers = true;
-    //age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count, screen_aspect_ratio);
 
     return age_result;
 }
@@ -237,8 +236,6 @@ AGE_RESULT game_small_asteroid_add (float2 position)
 
     should_update_command_buffers = true;
 
-    //age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count, screen_aspect_ratio);
-    
     return age_result;
 }
 
@@ -284,8 +281,6 @@ AGE_RESULT game_large_asteroid_remove (const size_t& index_to_remove)
 
     should_update_command_buffers = true;
 
-    //age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count, screen_aspect_ratio);
-
     return age_result;
 }
 
@@ -321,8 +316,6 @@ AGE_RESULT game_small_asteroid_remove (const size_t& index_to_remove)
     --game_small_asteroids_live_count;
 
     should_update_command_buffers = true;
-
-    //age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count, screen_aspect_ratio);
 
     return age_result;
 }
@@ -483,8 +476,6 @@ AGE_RESULT game_bullet_add ()
 
     should_update_command_buffers = true;
 
-    //age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count, screen_aspect_ratio);
-
     return age_result;
 }
 
@@ -520,8 +511,6 @@ AGE_RESULT game_bullet_remove (const size_t& index_to_remove)
     --game_bullet_live_count;
 
     should_update_command_buffers = true;
-
-    //age_result = graphics_update_command_buffers (game_large_asteroids_live_count, game_small_asteroids_live_count, game_bullet_live_count, screen_aspect_ratio);
 
     return age_result;
 }

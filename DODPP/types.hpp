@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef TYPES_HPP
+#define TYPES_HPP
 
 struct float2
 {
@@ -94,3 +94,5 @@ struct asteroid_transform_inputs
 
 float float2_length (const float2* in_vector);
 void float2_unit_vector (float2* in_out_vector);
+
+#endif

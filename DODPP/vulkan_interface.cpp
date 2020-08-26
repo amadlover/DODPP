@@ -25,7 +25,7 @@ VkExtent2D surface_extent;
 VkSwapchainKHR swapchain;
 std::vector<VkImage> swapchain_images;
 std::vector<VkImageView> swapchain_image_views;
-size_t swapchain_image_count;
+uint32_t swapchain_image_count;
 VkExtent2D current_extent;
 VkSurfaceFormatKHR chosen_surface_format;
 VkCommandPool graphics_command_pool;
@@ -83,21 +83,26 @@ AGE_RESULT create_instance ()
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 	VkResult vk_result = VK_SUCCESS;
 
-	char* instance_extensions[256];
-	char* instance_layers[256];
-
-	instance_extensions[0] = VK_KHR_SURFACE_EXTENSION_NAME;
-	instance_extensions[1] = "VK_KHR_win32_surface";
+	std::vector<const char*> instance_extensions;
+	instance_extensions.push_back (VK_KHR_SURFACE_EXTENSION_NAME);
+	instance_extensions.push_back (VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
 
 	VkApplicationInfo application_info = {
 		VK_STRUCTURE_TYPE_APPLICATION_INFO,
-		NULL,
+		nullptr,
 		"Asteroids",
 		VK_MAKE_VERSION (1, 0, 0),
 		"AGE",
 		VK_MAKE_VERSION (1, 0, 0),
 		VK_API_VERSION_1_2
 	};
+
+	std::vector<const char*> instance_layers;
+
+	if (is_validation_needed) {
+		instance_extensions.push_back (VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+		instance_layers.push_back ("VK_LAYER_KHRONOS_validation");
+	}
 
 	if (is_validation_needed)
 	{
@@ -110,11 +115,11 @@ AGE_RESULT create_instance ()
 
 		VkValidationFeaturesEXT features = {
 			VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT,
-			NULL,
+			nullptr,
 			1,
 			enables,
 			0,
-			NULL
+			nullptr
 		};
 
 		VkInstanceCreateInfo instance_create_info = {
@@ -122,13 +127,13 @@ AGE_RESULT create_instance ()
 			&features,
 			0,
 			&application_info,
-			1,
-			instance_layers,
-			3,
-			instance_extensions
+			instance_layers.size (),
+			instance_layers.data (),
+			instance_extensions.size (),
+			instance_extensions.data ()
 		};
 
-		vk_result = vkCreateInstance (&instance_create_info, NULL, &instance);
+		vk_result = vkCreateInstance (&instance_create_info, nullptr, &instance);
 		if (vk_result != VK_SUCCESS)
 		{
 			age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_INSTANCE;
@@ -138,16 +143,16 @@ AGE_RESULT create_instance ()
 	{
 		VkInstanceCreateInfo instance_create_info = {
 			VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-			NULL,
+			nullptr,
 			0,
 			&application_info,
 			0,
 			nullptr,
-			2,
-			instance_extensions
+			instance_extensions.size (),
+			instance_extensions.data ()
 		};
 
-		vk_result = vkCreateInstance (&instance_create_info, NULL, &instance);
+		vk_result = vkCreateInstance (&instance_create_info, nullptr, &instance);
 		if (vk_result != VK_SUCCESS)
 		{
 			age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_INSTANCE;
@@ -159,12 +164,11 @@ AGE_RESULT create_instance ()
 
 AGE_RESULT create_debug_utils_messenger ()
 {
-	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 	VkResult vk_result = VK_SUCCESS;
 
 	VkDebugUtilsMessengerCreateInfoEXT debug_utils_messenger_create_info = {
 		VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
-		NULL,
+		nullptr,
 		0,
 		/*VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |*/
 		VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
@@ -173,18 +177,18 @@ AGE_RESULT create_debug_utils_messenger ()
 		VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
 		VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT |
 		VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT,
-		debug_messenger_callback,
-		NULL
+		&debug_messenger_callback,
+		nullptr
 	};
 
-	vk_result = create_instance_debug_utils_messenger (instance, &debug_utils_messenger_create_info, NULL, &debug_utils_messenger);
+	vk_result = create_instance_debug_utils_messenger (instance, &debug_utils_messenger_create_info, nullptr, &debug_utils_messenger);
 
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_DEBUG_UTILS_MESSENGER;
+		return AGE_RESULT::ERROR_GRAPHICS_CREATE_DEBUG_UTILS_MESSENGER;
 	}
 
-	return age_result;
+	return AGE_RESULT::SUCCESS;
 }
 
 AGE_RESULT create_surface (HINSTANCE h_instance, HWND h_wnd)
@@ -194,13 +198,13 @@ AGE_RESULT create_surface (HINSTANCE h_instance, HWND h_wnd)
 
 	VkWin32SurfaceCreateInfoKHR surface_create_info = { 
 		VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR, 
-		NULL, 
+		nullptr, 
 		0, 
 		h_instance, 
 		h_wnd 
 	};
 
-	vk_result = vkCreateWin32SurfaceKHR (instance, &surface_create_info, NULL, &surface);
+	vk_result = vkCreateWin32SurfaceKHR (instance, &surface_create_info, nullptr, &surface);
 
 	if (vk_result != VK_SUCCESS)
 	{
@@ -212,49 +216,42 @@ AGE_RESULT create_surface (HINSTANCE h_instance, HWND h_wnd)
 
 AGE_RESULT get_physical_device ()
 {
-	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
-
-	size_t physical_device_count = 0;
-	vkEnumeratePhysicalDevices (instance, &physical_device_count, NULL);
+	uint32_t physical_device_count = 0;
+	vkEnumeratePhysicalDevices (instance, &physical_device_count, nullptr);
 
 	if (physical_device_count == 0)
 	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_GET_PHYSICAL_DEVICE;
-		return age_result;
+		return AGE_RESULT::ERROR_GRAPHICS_GET_PHYSICAL_DEVICE;
 	}
 
-	VkPhysicalDevice* physical_devices = (VkPhysicalDevice*)utils_calloc (physical_device_count, sizeof (VkPhysicalDevice));
+	auto physical_devices = (VkPhysicalDevice*)utils_malloc (sizeof (VkPhysicalDevice) * physical_device_count);
 	vkEnumeratePhysicalDevices (instance, &physical_device_count, physical_devices);
 
 	physical_device = physical_devices[0];
 
 	utils_free (physical_devices);
 
-	return age_result;
+	return AGE_RESULT::SUCCESS;
 }
 
 AGE_RESULT check_physical_device_surface_support ()
 {
-	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
-
 	VkBool32 is_surface_supported = false;
 	vkGetPhysicalDeviceSurfaceSupportKHR (physical_device, graphics_queue_family_index, surface, &is_surface_supported);
 
 	if (!is_surface_supported)
 	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_SURFACE_SUPPORT;
+		return AGE_RESULT::ERROR_GRAPHICS_SURFACE_SUPPORT;
 	}
 
-	return age_result;
+	return AGE_RESULT::SUCCESS;
 }
 
 AGE_RESULT get_physical_device_queue_families ()
 {
-	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
-
-	size_t queue_family_count = 0;
-	vkGetPhysicalDeviceQueueFamilyProperties (physical_device, &queue_family_count, NULL);
-	VkQueueFamilyProperties* queue_family_properties = (VkQueueFamilyProperties*)utils_calloc (queue_family_count, sizeof (VkQueueFamilyProperties));
+	uint32_t queue_family_count = 0;
+	vkGetPhysicalDeviceQueueFamilyProperties (physical_device, &queue_family_count, nullptr);
+	auto queue_family_properties = (VkQueueFamilyProperties*)utils_malloc (sizeof (VkQueueFamilyProperties) * queue_family_count);
 	vkGetPhysicalDeviceQueueFamilyProperties (physical_device, &queue_family_count, queue_family_properties);
 
 	for (size_t i = 0; i < queue_family_count; ++i)
@@ -310,13 +307,11 @@ AGE_RESULT get_physical_device_queue_families ()
 
 	utils_free (queue_family_properties);
 
-	return age_result;
+	return AGE_RESULT::SUCCESS;
 }
 
 AGE_RESULT get_physical_device_properties ()
 {
-	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
-
 	vkGetPhysicalDeviceMemoryProperties (physical_device, &physical_device_memory_properties);
 
 	VkPhysicalDeviceProperties device_properties;
@@ -326,10 +321,10 @@ AGE_RESULT get_physical_device_properties ()
 	vkGetPhysicalDeviceSurfaceCapabilitiesKHR (physical_device, surface, &surface_capabilities);
 
 	current_extent = surface_capabilities.currentExtent;
-	size_t surface_format_count = 0;
-	vkGetPhysicalDeviceSurfaceFormatsKHR (physical_device, surface, &surface_format_count, NULL);
+	uint32_t surface_format_count = 0;
+	vkGetPhysicalDeviceSurfaceFormatsKHR (physical_device, surface, &surface_format_count, nullptr);
 
-	VkSurfaceFormatKHR* surface_formats = (VkSurfaceFormatKHR*)utils_calloc (surface_format_count, sizeof (VkSurfaceFormatKHR));
+	auto surface_formats = (VkSurfaceFormatKHR*)utils_malloc (sizeof (VkSurfaceFormatKHR) * surface_format_count);
 	vkGetPhysicalDeviceSurfaceFormatsKHR (physical_device, surface, &surface_format_count, surface_formats);
 
 	for (size_t s = 0; s < surface_format_count; s++)
@@ -341,10 +336,10 @@ AGE_RESULT get_physical_device_properties ()
 		}
 	}
 
-	size_t present_mode_count = 0;
-	vkGetPhysicalDeviceSurfacePresentModesKHR (physical_device, surface, &present_mode_count, NULL);
+	uint32_t present_mode_count = 0;
+	vkGetPhysicalDeviceSurfacePresentModesKHR (physical_device, surface, &present_mode_count, nullptr);
 
-	VkPresentModeKHR* present_modes = (VkPresentModeKHR*)utils_calloc (present_mode_count, sizeof (VkPresentModeKHR));
+	auto present_modes = (VkPresentModeKHR*)utils_malloc (sizeof (VkPresentModeKHR) * present_mode_count);
 	vkGetPhysicalDeviceSurfacePresentModesKHR (physical_device, surface, &present_mode_count, present_modes);
 
 	for (size_t p = 0; p < present_mode_count; p++)
@@ -359,7 +354,7 @@ AGE_RESULT get_physical_device_properties ()
 	utils_free (surface_formats);
 	utils_free (present_modes);
 
-	return age_result;
+	return AGE_RESULT::SUCCESS;
 }
 
 AGE_RESULT create_device ()
@@ -398,7 +393,7 @@ AGE_RESULT create_device ()
 	for (size_t ui = 0; ui < unique_queue_family_index_count; ++ui)
 	{
 		queue_create_infos[ui].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-		queue_create_infos[ui].pNext = NULL;
+		queue_create_infos[ui].pNext = nullptr;
 		queue_create_infos[ui].pQueuePriorities = priorities;
 		queue_create_infos[ui].queueCount = unique_queue_count[ui];
 		queue_create_infos[ui].queueFamilyIndex = unique_queue_family_indices[ui];
@@ -410,19 +405,19 @@ AGE_RESULT create_device ()
 
 	VkDeviceCreateInfo device_create_info = {
 		VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-		NULL,
+		nullptr,
 		0,
 		unique_queue_family_index_count,
 		queue_create_infos,
 		0,
-		NULL,
+		nullptr,
 		1,
 		device_extensions,
 		&device_features
 	};
 
 
-	VkResult vk_result = vkCreateDevice (physical_device, &device_create_info, NULL, &device);
+	VkResult vk_result = vkCreateDevice (physical_device, &device_create_info, nullptr, &device);
 
 	if (vk_result != VK_SUCCESS)
 	{
@@ -438,7 +433,7 @@ AGE_RESULT create_swapchain ()
 
 	VkSwapchainCreateInfoKHR swapchain_create_info = {
 		VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
-		NULL,
+		nullptr,
 		0,
 		surface,
 		surface_capabilities.minImageCount + 1,
@@ -449,7 +444,7 @@ AGE_RESULT create_swapchain ()
 		surface_capabilities.supportedUsageFlags,
 		VK_SHARING_MODE_EXCLUSIVE,
 		0,
-		NULL,
+		nullptr,
 		surface_capabilities.currentTransform,
 		VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
 		chosen_present_mode,
@@ -457,7 +452,7 @@ AGE_RESULT create_swapchain ()
 		VK_NULL_HANDLE
 	};
 
-	VkResult vk_result = vkCreateSwapchainKHR (device, &swapchain_create_info, NULL, &swapchain);
+	VkResult vk_result = vkCreateSwapchainKHR (device, &swapchain_create_info, nullptr, &swapchain);
 
 	if (vk_result != VK_SUCCESS)
 	{
@@ -469,10 +464,9 @@ AGE_RESULT create_swapchain ()
 
 AGE_RESULT create_swapchain_image_views ()
 {
-	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 	VkResult vk_result = VK_SUCCESS;
 
-	vkGetSwapchainImagesKHR (device, swapchain, &swapchain_image_count, NULL);
+	vkGetSwapchainImagesKHR (device, swapchain, &swapchain_image_count, nullptr);
 	swapchain_images.resize (swapchain_image_count);
 	vkGetSwapchainImagesKHR (device, swapchain, &swapchain_image_count, swapchain_images.data ());
 	swapchain_image_views.resize (swapchain_image_count);
@@ -481,7 +475,7 @@ AGE_RESULT create_swapchain_image_views ()
 	VkComponentMapping component_mapping = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
 	VkImageViewCreateInfo image_view_create_info = {
 		VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-		NULL,
+		nullptr,
 		0,
 		VK_NULL_HANDLE,
 		VK_IMAGE_VIEW_TYPE_2D,
@@ -493,21 +487,19 @@ AGE_RESULT create_swapchain_image_views ()
 	for (size_t i = 0; i < swapchain_image_count; ++i)
 	{
 		image_view_create_info.image = swapchain_images[i];
-		vk_result = vkCreateImageView (device, &image_view_create_info, NULL, &swapchain_image_views[i]);
+		vk_result = vkCreateImageView (device, &image_view_create_info, nullptr, &swapchain_image_views[i]);
 
 		if (vk_result != VK_SUCCESS)
 		{
-			age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_IMAGE_VIEW;
+			return AGE_RESULT::ERROR_GRAPHICS_CREATE_IMAGE_VIEW;
 		}
 	}
 
-	return age_result;
+	return AGE_RESULT::SUCCESS;
 }
 
 AGE_RESULT get_device_queues ()
 {
-	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
-
 	size_t graphics_queue_index = 0;
 	size_t compute_queue_index = graphics_queue_family_index == compute_queue_family_index ? 1 : 0;
 	size_t transfer_queue_index = transfer_queue_family_index == compute_queue_family_index ? compute_queue_index + 1 : 0;
@@ -516,36 +508,32 @@ AGE_RESULT get_device_queues ()
 	vkGetDeviceQueue (device, compute_queue_family_index, compute_queue_index, &compute_queue);
 	vkGetDeviceQueue (device, transfer_queue_family_index, transfer_queue_index, &transfer_queue);
 
-	return age_result;
+	return AGE_RESULT::SUCCESS;
 }
 
 AGE_RESULT create_graphics_command_pool ()
 {
-	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
-
 	VkCommandPoolCreateInfo graphics_command_pool_create_info = {
 		VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-		NULL,
+		nullptr,
 		VK_COMMAND_POOL_CREATE_TRANSIENT_BIT,
 		graphics_queue_family_index
 	};
 
-	VkResult vk_result = vkCreateCommandPool (device, &graphics_command_pool_create_info, NULL, &graphics_command_pool);
+	VkResult vk_result = vkCreateCommandPool (device, &graphics_command_pool_create_info, nullptr, &graphics_command_pool);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_COMMAND_POOL;
+		return AGE_RESULT::ERROR_GRAPHICS_CREATE_COMMAND_POOL;
 	}
 
-	return age_result;
+	return AGE_RESULT::SUCCESS;
 }
 
 AGE_RESULT create_common_sampler ()
 {
-	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
-
 	VkSamplerCreateInfo sampler_create_info = {
 		VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
-		NULL,
+		nullptr,
 		0,
 		VK_FILTER_LINEAR,
 		VK_FILTER_LINEAR,
@@ -564,13 +552,13 @@ AGE_RESULT create_common_sampler ()
 		VK_FALSE
 	};
 
-	VkResult vk_result = vkCreateSampler (device, &sampler_create_info, NULL, &common_sampler);
+	VkResult vk_result = vkCreateSampler (device, &sampler_create_info, nullptr, &common_sampler);
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_SAMPLER;
+		return AGE_RESULT::ERROR_GRAPHICS_CREATE_SAMPLER;
 	}
 
-	return age_result;
+	return AGE_RESULT::SUCCESS;
 }
 
 AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd)
@@ -680,50 +668,50 @@ void vulkan_interface_shutdown ()
 {
 	if (graphics_command_pool != VK_NULL_HANDLE)
 	{
-		vkDestroyCommandPool (device, graphics_command_pool, NULL);
+		vkDestroyCommandPool (device, graphics_command_pool, nullptr);
 	}
 
 	if (common_sampler != VK_NULL_HANDLE)
 	{
-		vkDestroySampler (device, common_sampler, NULL);
+		vkDestroySampler (device, common_sampler, nullptr);
 	}
 
 	for (auto& swapchain_image_view : swapchain_image_views)
 	{
 		if (swapchain_image_view != VK_NULL_HANDLE)
 		{
-			vkDestroyImageView (device, swapchain_image_view, NULL);
+			vkDestroyImageView (device, swapchain_image_view, nullptr);
 		}
 	}
 	swapchain_image_views.clear ();
 
 	if (swapchain != VK_NULL_HANDLE)
 	{
-		vkDestroySwapchainKHR (device, swapchain, NULL);
+		vkDestroySwapchainKHR (device, swapchain, nullptr);
 	}
 
 	swapchain_images.clear ();
 
 	if (device != VK_NULL_HANDLE)
 	{
-		vkDestroyDevice (device, NULL);
+		vkDestroyDevice (device, nullptr);
 	}
 
 	if (surface != VK_NULL_HANDLE)
 	{
-		vkDestroySurfaceKHR (instance, surface, NULL);
+		vkDestroySurfaceKHR (instance, surface, nullptr);
 	}
 
 	if (is_validation_needed)
 	{
 		if (debug_utils_messenger != VK_NULL_HANDLE)
 		{
-			destroy_instance_debug_utils_messenger (instance, debug_utils_messenger, NULL);
+			destroy_instance_debug_utils_messenger (instance, debug_utils_messenger, nullptr);
 		}
 	}
 
     if (instance != VK_NULL_HANDLE)
     {
-        vkDestroyInstance (instance, NULL);
+        vkDestroyInstance (instance, nullptr);
     }
 }

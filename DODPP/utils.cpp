@@ -33,11 +33,11 @@ void utils_get_full_file_path (const char* partial_file_path, char* out_file_pat
 	char path[MAX_PATH];
 
 	wchar_t t_path[MAX_PATH];
-	HMODULE module = GetModuleHandle (NULL);
+	HMODULE module = GetModuleHandle (nullptr);
 	GetModuleFileName (module, t_path, MAX_PATH);
 	PathRemoveFileSpec (t_path);
 
-	wcstombs_s (NULL, path, MAX_PATH, t_path, MAX_PATH);
+	wcstombs_s (nullptr, path, MAX_PATH, t_path, MAX_PATH);
 	strcpy (out_file_path, path);
 	strcat (out_file_path, "\\");
 	strcat (out_file_path, partial_file_path);
@@ -64,7 +64,7 @@ void utils_get_files_in_folder (const char* partial_folder_path, file_path** out
 			char file_name[MAX_PATH];
 			wcstombs (file_name, ffd.cFileName, MAX_PATH);
 			char* base_name = strtok (file_name, ".");
-			char* ext = strtok (NULL, ".");
+			char* ext = strtok (nullptr, ".");
 
 			if (strcmp (ext, "glb") == 0 || strcmp (ext, "gltf") == 0)
 			{
@@ -85,7 +85,7 @@ void utils_get_files_in_folder (const char* partial_folder_path, file_path** out
 			char file_name[MAX_PATH];
 			wcstombs (file_name, ffd.cFileName, MAX_PATH);
 			char* base_name = strtok (file_name, ".");
-			char* ext = strtok (NULL, ".");
+			char* ext = strtok (nullptr, ".");
 
 			if (strcmp (ext, "glb") == 0 || strcmp (ext, "gltf") == 0)
 			{
@@ -166,27 +166,27 @@ void* utils_aligned_realloc_zero (void* ptr, size_t alignment, size_t old_size, 
 
 void utils_free (void* ptr)
 {
-	if (ptr != NULL)
+	if (ptr != nullptr)
 	{
 		std::free (ptr);
-		ptr = NULL;
+		ptr = nullptr;
 	}
 }
 
 void utils_aligned_free (void* ptr)
 {
-	if (ptr != NULL)
+	if (ptr != nullptr)
 	{
 		_aligned_free (ptr);
-		ptr = NULL;
+		ptr = nullptr;
 	}
 }
 
 void utils_free_image_data (uint8_t * pixels)
 {
-	if (pixels != NULL)
+	if (pixels != nullptr)
 	{
 		stbi_image_free (pixels);
-		pixels = NULL;
+		pixels = nullptr;
 	}
 }

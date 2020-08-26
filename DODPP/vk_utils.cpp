@@ -9,7 +9,7 @@ AGE_RESULT vk_create_buffer (const size_t size, const VkBufferUsageFlags usage, 
 	create_info.usage = usage;
 	create_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-	VkResult vk_result = vkCreateBuffer (device, &create_info, NULL, out_buffer);
+	VkResult vk_result = vkCreateBuffer (device, &create_info, nullptr, out_buffer);
 	if (vk_result != VK_SUCCESS)
 	{
 		return AGE_RESULT::ERROR_GRAPHICS_CREATE_BUFFER;
@@ -36,12 +36,12 @@ AGE_RESULT vk_allocate_bind_buffer_memory (const VkBuffer buffer, const uint32_t
 
 	VkMemoryAllocateInfo memory_allocate_info = {
 		VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-		NULL,
+		nullptr,
 		memory_requirements.size,
 		required_memory_type_index
 	};
 
-	VkResult vk_result = vkAllocateMemory (device, &memory_allocate_info, NULL, out_buffer_memory);
+	VkResult vk_result = vkAllocateMemory (device, &memory_allocate_info, nullptr, out_buffer_memory);
 	if (vk_result != VK_SUCCESS)
 	{
 		return AGE_RESULT::ERROR_GRAPHICS_ALLOCATE_MEMORY;
@@ -77,7 +77,7 @@ AGE_RESULT vk_allocate_command_buffers (const VkCommandPool cmd_pool, VkCommandB
 {
 	VkCommandBufferAllocateInfo copy_cmd_buffer_allocate_info = {
 		VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-		NULL,
+		nullptr,
 		cmd_pool,
 		level,
 		num_cmd_buffers
@@ -97,9 +97,9 @@ AGE_RESULT vk_begin_cmd_buffer (const VkCommandBuffer cmd_buffer, const VkComman
 
 	VkCommandBufferBeginInfo copy_cmd_buffer_begin_info = {
 		VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-		NULL,
+		nullptr,
 		flags,
-		NULL
+		nullptr
 	};
 
 	VkResult vk_result = vkBeginCommandBuffer (cmd_buffer, &copy_cmd_buffer_begin_info);
@@ -128,14 +128,14 @@ AGE_RESULT vk_submit_cmd_buffer (const VkCommandBuffer cmd_buffer, const VkQueue
 {
 	VkSubmitInfo submit_info = {
 		VK_STRUCTURE_TYPE_SUBMIT_INFO,
-		NULL,
+		nullptr,
 		0,
-		NULL,
+		nullptr,
 		0,
 		1,
 		&cmd_buffer,
 		0,
-		NULL
+		nullptr
 	};
 
 	VkResult vk_result = vkQueueSubmit (graphics_queue, 1, &submit_info, VK_NULL_HANDLE);
@@ -169,7 +169,7 @@ AGE_RESULT vk_create_images (
 {
 	VkImageCreateInfo create_info = {
 		VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-		NULL,
+		nullptr,
 		0,
 		image_type,
 		format,
@@ -181,14 +181,14 @@ AGE_RESULT vk_create_images (
 		usage,
 		VK_SHARING_MODE_EXCLUSIVE,
 		0,
-		NULL,
+		nullptr,
 		VK_IMAGE_LAYOUT_UNDEFINED
 	};
 
 	for (size_t i = 0; i < images_count; ++i)
 	{
 		create_info.extent = extents[i];
-		VkResult vk_result = vkCreateImage (device, &create_info, NULL, *(out_images + i));
+		VkResult vk_result = vkCreateImage (device, &create_info, nullptr, *(out_images + i));
 		if (vk_result != VK_SUCCESS)
 		{
 			return AGE_RESULT::ERROR_GRAPHICS_CREATE_IMAGE;
@@ -221,7 +221,7 @@ AGE_RESULT vk_change_images_layout (
 
 	VkImageMemoryBarrier image_memory_barrier = {
 		VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-		NULL,
+		nullptr,
 		src_access,
 		dst_access,
 		src_layout,
@@ -259,9 +259,9 @@ AGE_RESULT vk_change_images_layout (
 		dst_pipeline_stage,
 		0,
 		0,
-		NULL,
+		nullptr,
 		0,
-		NULL,
+		nullptr,
 		images_count,
 		barriers
 	);
@@ -319,12 +319,12 @@ AGE_RESULT vk_allocate_bind_image_memory (VkImage** images, const size_t images_
 
 	VkMemoryAllocateInfo memory_allocate_info = {
 		VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-		NULL,
+		nullptr,
 		memory_requirements.size,
 		required_memory_type_index
 	};
 
-	VkResult vk_result = vkAllocateMemory (device, &memory_allocate_info, NULL, out_memory);
+	VkResult vk_result = vkAllocateMemory (device, &memory_allocate_info, nullptr, out_memory);
 	if (vk_result != VK_SUCCESS)
 	{
 		return AGE_RESULT::ERROR_GRAPHICS_ALLOCATE_MEMORY;
@@ -423,7 +423,7 @@ AGE_RESULT vk_create_image_views (VkImage** images, const size_t images_count, c
 
 	VkImageViewCreateInfo create_info = {
 		VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-		NULL,
+		nullptr,
 		0,
 		VK_NULL_HANDLE,
 		type,
@@ -435,7 +435,7 @@ AGE_RESULT vk_create_image_views (VkImage** images, const size_t images_count, c
 	for (size_t i = 0; i < images_count; ++i)
 	{
 		create_info.image = **(images + i);
-		VkResult vk_result = vkCreateImageView (device, &create_info, NULL, *(out_image_views + i));
+		VkResult vk_result = vkCreateImageView (device, &create_info, nullptr, *(out_image_views + i));
 		if (vk_result != VK_SUCCESS)
 		{
 			return AGE_RESULT::ERROR_GRAPHICS_CREATE_IMAGE_VIEW;
@@ -455,7 +455,7 @@ AGE_RESULT vk_create_shader_module (
 {
 	VkShaderModuleCreateInfo create_info = {
 		VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
-		NULL,
+		nullptr,
 		0,
 		shader_code_size,
 		shader_code

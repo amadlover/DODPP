@@ -1,4 +1,5 @@
-#pragma once
+#ifndef VULKAN_INTERFACE_HPP
+#define VULKAN_INTERFACE_HPP
 
 #include "error.hpp"
 
@@ -22,7 +23,7 @@ extern VkExtent2D surface_extent;
 extern VkSwapchainKHR swapchain;
 extern std::vector<VkImage> swapchain_images;
 extern std::vector<VkImageView> swapchain_image_views;
-extern size_t swapchain_image_count;
+extern uint32_t swapchain_image_count;
 extern VkExtent2D current_extent;
 extern VkSurfaceFormatKHR chosen_surface_format;
 extern VkCommandPool graphics_command_pool;
@@ -30,3 +31,5 @@ extern VkSampler common_sampler;
 
 AGE_RESULT vulkan_interface_init (HINSTANCE h_instance, HWND h_wnd);
 void vulkan_interface_shutdown ();
+
+#endif

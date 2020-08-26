@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GAME_HPP
+#define GAME_HPP
 
 #include "error.hpp"
 
@@ -14,3 +15,5 @@ AGE_RESULT game_process_key_up (const WPARAM w_param);
 AGE_RESULT game_update (size_t delta_time);
 AGE_RESULT game_submit_present ();
 void game_shutdown ();
+
+#endif

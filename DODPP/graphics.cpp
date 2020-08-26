@@ -14,14 +14,14 @@
 
 
 VkRenderPass render_pass = VK_NULL_HANDLE;
-VkFramebuffer* swapchain_framebuffers = NULL;
+VkFramebuffer* swapchain_framebuffers = nullptr;
 
 VkCommandPool swapchain_command_pool = VK_NULL_HANDLE;
-VkCommandBuffer* swapchain_command_buffers = NULL;
+VkCommandBuffer* swapchain_command_buffers = nullptr;
 
 VkSemaphore wait_semaphore = VK_NULL_HANDLE;
-VkSemaphore* swapchain_signal_semaphores = NULL;
-VkFence* swapchain_fences = NULL;
+VkSemaphore* swapchain_signal_semaphores = nullptr;
+VkFence* swapchain_fences = nullptr;
 
 VkBuffer vertex_index_buffer = VK_NULL_HANDLE;
 VkDeviceMemory vertex_index_buffer_memory = VK_NULL_HANDLE;
@@ -40,8 +40,8 @@ VkDeviceMemory transforms_buffer_memory = VK_NULL_HANDLE;
 size_t aligned_size_per_transform = 0;
 size_t total_transforms_size = 0;
 
-void* transforms_aligned_data = NULL;
-void* transforms_mapped_data = NULL;
+void* transforms_aligned_data = nullptr;
+void* transforms_mapped_data = nullptr;
 
 float background_positions[12] = { -1,-1,0.9f, 1,-1,0.9f, 1,1,0.9f, -1,1,0.9f };
 size_t background_positions_size = sizeof (background_positions);
@@ -104,7 +104,7 @@ AGE_RESULT graphics_create_geometry_buffers ()
 		goto exit;
 	}
 
-	void* mapped_memory_ptr = NULL;
+	void* mapped_memory_ptr = nullptr;
 
 	age_result = vk_map_buffer_memory (
 		staging_vertex_index_memory, 
@@ -185,12 +185,12 @@ AGE_RESULT graphics_create_geometry_buffers ()
 exit:
 	if (staging_vertex_index_buffer != VK_NULL_HANDLE)
 	{
-		vkDestroyBuffer (device, staging_vertex_index_buffer, NULL);
+		vkDestroyBuffer (device, staging_vertex_index_buffer, nullptr);
 	}
 
 	if (staging_vertex_index_memory != VK_NULL_HANDLE)
 	{
-		vkFreeMemory (device, staging_vertex_index_memory, NULL);
+		vkFreeMemory (device, staging_vertex_index_memory, nullptr);
 	}
 
 	if (copy_cmd_buffer != VK_NULL_HANDLE)
@@ -209,7 +209,7 @@ AGE_RESULT graphics_create_image_buffers ()
 	int background_image_width = 0;
 	int background_image_height = 0;
 	int background_image_bpp = 0;
-	uint8_t* background_image_pixels = NULL;
+	uint8_t* background_image_pixels = nullptr;
 	utils_import_texture ("background.png", &background_image_width, &background_image_height, &background_image_bpp, &background_image_pixels);
 
 	background_image_pixels_size = background_image_width * background_image_height * background_image_bpp * sizeof (uint8_t);
@@ -217,7 +217,7 @@ AGE_RESULT graphics_create_image_buffers ()
 	int player_image_width = 0;
 	int player_image_height = 0;
 	int player_image_bpp = 0;
-	uint8_t* player_image_pixels = NULL;
+	uint8_t* player_image_pixels = nullptr;
 	utils_import_texture ("player.png", &player_image_width, &player_image_height, &player_image_bpp, &player_image_pixels);
 
 	player_image_pixels_size = player_image_width * player_image_height * player_image_bpp * sizeof (uint8_t);
@@ -225,7 +225,7 @@ AGE_RESULT graphics_create_image_buffers ()
 	int asteroid_image_width = 0;
 	int asteroid_image_height = 0;
 	int asteroid_image_bpp = 0;
-	uint8_t* asteroid_image_pixels = NULL;
+	uint8_t* asteroid_image_pixels = nullptr;
 	utils_import_texture ("asteroid.png", &asteroid_image_width, &asteroid_image_height, &asteroid_image_bpp, &asteroid_image_pixels);
 
 	asteroid_image_pixels_size = asteroid_image_width * asteroid_image_height * asteroid_image_bpp * sizeof (uint8_t);
@@ -233,7 +233,7 @@ AGE_RESULT graphics_create_image_buffers ()
 	int bullet_image_width = 0;
 	int bullet_image_height = 0;
 	int bullet_image_bpp = 0;
-	uint8_t* bullet_image_pixels = NULL;
+	uint8_t* bullet_image_pixels = nullptr;
 	utils_import_texture ("bullet.png", &bullet_image_width, &bullet_image_height, &bullet_image_bpp, &bullet_image_pixels);
 
 	bullet_image_pixels_size = bullet_image_width * bullet_image_height * bullet_image_bpp * sizeof (uint8_t);
@@ -259,7 +259,7 @@ AGE_RESULT graphics_create_image_buffers ()
 		goto exit;
 	}
 
-	void* mapped_memory_ptr = NULL;
+	void* mapped_memory_ptr = nullptr;
 	age_result = vk_map_buffer_memory (
 		staging_image_memory,
 		0,
@@ -391,12 +391,12 @@ exit:
 	
 	if (staging_image_buffer != VK_NULL_HANDLE)
 	{
-		vkDestroyBuffer (device, staging_image_buffer, NULL);
+		vkDestroyBuffer (device, staging_image_buffer, nullptr);
 	}
 
 	if (staging_image_memory != VK_NULL_HANDLE)
 	{
-		vkFreeMemory (device, staging_image_memory, NULL);
+		vkFreeMemory (device, staging_image_memory, nullptr);
 	}
 
 	stbi_image_free (background_image_pixels);
@@ -417,21 +417,21 @@ AGE_RESULT graphics_create_pipeline ()
 	VkPipelineShaderStageCreateInfo shader_stage_create_infos[2] = {
 		{
 			VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-			NULL,
+			nullptr,
 			0,
 			VK_SHADER_STAGE_VERTEX_BIT,
 			VK_NULL_HANDLE,
 			"main",
-			NULL
+			nullptr
 		},
 		{
 			VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-			NULL,
+			nullptr,
 			0,
 			VK_SHADER_STAGE_FRAGMENT_BIT,
 			VK_NULL_HANDLE,
 			"main",
-			NULL
+			nullptr
 		}
 	};
 
@@ -465,7 +465,7 @@ AGE_RESULT graphics_create_pipeline ()
 
 	VkPipelineVertexInputStateCreateInfo vertex_input_state_create_info = {
 		VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
-		NULL,
+		nullptr,
 		0,
 		2,
 		vertex_input_binding_descriptions,
@@ -475,7 +475,7 @@ AGE_RESULT graphics_create_pipeline ()
 
 	VkPipelineInputAssemblyStateCreateInfo vertex_input_assembly_state_create_info = {
 		VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
-		NULL,
+		nullptr,
 		0,
 		VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
 		VK_FALSE
@@ -496,7 +496,7 @@ AGE_RESULT graphics_create_pipeline ()
 
 	VkPipelineViewportStateCreateInfo viewport_state_create_info = {
 		VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
-		NULL,
+		nullptr,
 		0,
 		1,
 		&viewport,
@@ -506,7 +506,7 @@ AGE_RESULT graphics_create_pipeline ()
 
 	VkPipelineRasterizationStateCreateInfo rasterization_state_create_info = {
 		VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
-		NULL,
+		nullptr,
 		0,
 		VK_FALSE,
 		VK_FALSE,
@@ -522,7 +522,7 @@ AGE_RESULT graphics_create_pipeline ()
 
 	VkPipelineMultisampleStateCreateInfo multisample_state_create_info = {
 		VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
-		NULL,
+		nullptr,
 		0,
 		VK_SAMPLE_COUNT_1_BIT
 	};
@@ -540,7 +540,7 @@ AGE_RESULT graphics_create_pipeline ()
 
 	VkPipelineColorBlendStateCreateInfo color_blend_state_create_info = {
 		VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
-		NULL,
+		nullptr,
 		0,
 		VK_FALSE,
 		VK_LOGIC_OP_NO_OP,
@@ -551,19 +551,19 @@ AGE_RESULT graphics_create_pipeline ()
 
 	VkGraphicsPipelineCreateInfo graphics_pipeline_create_info = {
 		VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
-		NULL,
+		nullptr,
 		0,
 		2,
 		nullptr,
 		&vertex_input_state_create_info,
 		&vertex_input_assembly_state_create_info,
-		NULL,
+		nullptr,
 		&viewport_state_create_info,
 		&rasterization_state_create_info,
 		&multisample_state_create_info,
-		NULL,
+		nullptr,
 		&color_blend_state_create_info,
-		NULL,
+		nullptr,
 		graphics_pipeline_layout,
 		render_pass,
 		0,
@@ -585,7 +585,7 @@ AGE_RESULT graphics_create_pipeline ()
 
 	graphics_pipeline_create_info.pStages = shader_stage_create_infos;
 
-	vk_result = vkCreateGraphicsPipelines (device, VK_NULL_HANDLE, 1, &graphics_pipeline_create_info, NULL, &graphics_pipeline);
+	vk_result = vkCreateGraphicsPipelines (device, VK_NULL_HANDLE, 1, &graphics_pipeline_create_info, nullptr, &graphics_pipeline);
 	if (vk_result)
 	{
 		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_GRAPHICS_PIPELINE;
@@ -595,12 +595,12 @@ AGE_RESULT graphics_create_pipeline ()
 exit:
 	if (vertex_shader_module != VK_NULL_HANDLE)
 	{
-		vkDestroyShaderModule (device, vertex_shader_module, NULL);
+		vkDestroyShaderModule (device, vertex_shader_module, nullptr);
 	}
 
 	if (fragment_shader_module != VK_NULL_HANDLE)
 	{
-		vkDestroyShaderModule (device, fragment_shader_module, NULL);
+		vkDestroyShaderModule (device, fragment_shader_module, nullptr);
 	}
 
 	return age_result;
@@ -612,11 +612,11 @@ AGE_RESULT graphics_create_swapchain_framebuffers ()
 
 	VkFramebufferCreateInfo framebuffer_create_info = {
 		VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
-		NULL,
+		nullptr,
 		0,
 		render_pass,
 		1,
-		NULL,
+		nullptr,
 		current_extent.width,
 		current_extent.height,
 		1
@@ -628,7 +628,7 @@ AGE_RESULT graphics_create_swapchain_framebuffers ()
 	{
 		framebuffer_create_info.pAttachments = &swapchain_image_views[i];
 
-		vk_result = vkCreateFramebuffer (device, &framebuffer_create_info, NULL, swapchain_framebuffers + i);
+		vk_result = vkCreateFramebuffer (device, &framebuffer_create_info, nullptr, swapchain_framebuffers + i);
 
 		if (vk_result != VK_SUCCESS)
 		{
@@ -662,28 +662,28 @@ AGE_RESULT graphics_create_swapchain_render_pass ()
 		0,
 		VK_PIPELINE_BIND_POINT_GRAPHICS,
 		0,
-		NULL,
+		nullptr,
 		1,
 		&color_attachment_reference,
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
 		0,
-		NULL
+		nullptr
 	};
 
 	VkRenderPassCreateInfo render_pass_create_info = {
 		VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
-		NULL,
+		nullptr,
 		0,
 		1,
 		&color_attachment_description,
 		1,
 		&color_subpass_description,
 		0,
-		NULL
+		nullptr
 	};
 
-	VkResult vk_result = vkCreateRenderPass (device, &render_pass_create_info, NULL, &render_pass);
+	VkResult vk_result = vkCreateRenderPass (device, &render_pass_create_info, nullptr, &render_pass);
 
 	if (vk_result != VK_SUCCESS)
 	{
@@ -720,14 +720,14 @@ AGE_RESULT graphics_create_swapchain_semaphores_fences ()
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 	VkResult vk_result = VK_SUCCESS;
 
-	VkSemaphoreCreateInfo semaphore_create_info = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO, NULL, 0 };
+	VkSemaphoreCreateInfo semaphore_create_info = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO, nullptr, 0 };
 	VkFenceCreateInfo fence_create_info = {
 		VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
-		NULL,
+		nullptr,
 		0
 	};
 
-	vk_result = vkCreateSemaphore (device, &semaphore_create_info, NULL, &wait_semaphore);
+	vk_result = vkCreateSemaphore (device, &semaphore_create_info, nullptr, &wait_semaphore);
 
 	if (vk_result != VK_SUCCESS)
 	{
@@ -738,7 +738,7 @@ AGE_RESULT graphics_create_swapchain_semaphores_fences ()
 	swapchain_signal_semaphores = (VkSemaphore*)utils_malloc (sizeof (VkSemaphore) * swapchain_image_count);
 	for (size_t i = 0; i < swapchain_image_count; ++i)
 	{
-		vk_result = vkCreateSemaphore (device, &semaphore_create_info, NULL, swapchain_signal_semaphores + i);
+		vk_result = vkCreateSemaphore (device, &semaphore_create_info, nullptr, swapchain_signal_semaphores + i);
 
 		if (vk_result != VK_SUCCESS)
 		{
@@ -751,7 +751,7 @@ AGE_RESULT graphics_create_swapchain_semaphores_fences ()
 
 	for (size_t i = 0; i < swapchain_image_count; ++i)
 	{
-		vk_result = vkCreateFence (device, &fence_create_info, NULL, swapchain_fences + i);
+		vk_result = vkCreateFence (device, &fence_create_info, nullptr, swapchain_fences + i);
 		
 		if (vk_result != VK_SUCCESS)
 		{
@@ -782,13 +782,13 @@ AGE_RESULT graphics_create_descriptor_sets_pipeline_layout ()
 
 	VkDescriptorPoolCreateInfo descriptor_pool_create_info = {
 		VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-		NULL,
+		nullptr,
 		VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT,
 		2,
 		2,
 		descriptor_pool_sizes
 	};
-	vk_result = vkCreateDescriptorPool (device, &descriptor_pool_create_info, NULL, &descriptor_pool);
+	vk_result = vkCreateDescriptorPool (device, &descriptor_pool_create_info, nullptr, &descriptor_pool);
 	if (vk_result != VK_SUCCESS)
 	{
 		return AGE_RESULT::ERROR_GRAPHICS_CREATE_DESCRIPTOR_POOL;
@@ -800,27 +800,27 @@ AGE_RESULT graphics_create_descriptor_sets_pipeline_layout ()
 			VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
 			1,
 			VK_SHADER_STAGE_VERTEX_BIT,
-			NULL
+			nullptr
 		},
 		{
 			0,
 			VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 			4,
 			VK_SHADER_STAGE_FRAGMENT_BIT,
-			NULL
+			nullptr
 		}
 	};
 
 	VkDescriptorSetLayoutCreateInfo transform_descriptor_set_layout_create_info = {
 		VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-		NULL,
+		nullptr,
 		0,
 		1,
 		descriptor_layout_bindings
 	};
 	transform_descriptor_set_layout_create_info.pBindings = descriptor_layout_bindings;
 
-	vk_result = vkCreateDescriptorSetLayout (device, &transform_descriptor_set_layout_create_info, NULL, &transform_descriptor_set_layout);
+	vk_result = vkCreateDescriptorSetLayout (device, &transform_descriptor_set_layout_create_info, nullptr, &transform_descriptor_set_layout);
 	if (vk_result != VK_SUCCESS)
 	{
 		return AGE_RESULT::ERROR_GRAPHICS_CREATE_DESCRIPTOR_SET_LAYOUT;
@@ -829,7 +829,7 @@ AGE_RESULT graphics_create_descriptor_sets_pipeline_layout ()
 	VkDescriptorSetLayoutCreateInfo texture_descriptor_set_layout_create_info = transform_descriptor_set_layout_create_info;
 	texture_descriptor_set_layout_create_info.pBindings = descriptor_layout_bindings + 1;
 
-	vk_result = vkCreateDescriptorSetLayout (device, &texture_descriptor_set_layout_create_info, NULL, &texture_descriptor_set_layout);
+	vk_result = vkCreateDescriptorSetLayout (device, &texture_descriptor_set_layout_create_info, nullptr, &texture_descriptor_set_layout);
 	if (vk_result != VK_SUCCESS)
 	{
 		return AGE_RESULT::ERROR_GRAPHICS_CREATE_DESCRIPTOR_SET_LAYOUT;
@@ -837,7 +837,7 @@ AGE_RESULT graphics_create_descriptor_sets_pipeline_layout ()
 
 	VkDescriptorSetAllocateInfo transform_descriptor_set_allocate_info = {
 		VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-		NULL,
+		nullptr,
 		descriptor_pool,
 		1,
 		&transform_descriptor_set_layout
@@ -851,7 +851,7 @@ AGE_RESULT graphics_create_descriptor_sets_pipeline_layout ()
 
 	VkDescriptorSetAllocateInfo texture_descriptor_set_allocate_info = {
 		VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-		NULL,
+		nullptr,
 		descriptor_pool,
 		1,
 		&texture_descriptor_set_layout
@@ -893,18 +893,18 @@ AGE_RESULT graphics_create_descriptor_sets_pipeline_layout ()
 
 	VkWriteDescriptorSet texture_descriptor_set_write = {
 		VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-		NULL,
+		nullptr,
 		texture_descriptor_set,
 		0,
 		0,
 		4,
 		VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
 		image_infos,
-		NULL,
-		NULL
+		nullptr,
+		nullptr
 	};
 
-	vkUpdateDescriptorSets (device, 1, &texture_descriptor_set_write, 0, NULL);
+	vkUpdateDescriptorSets (device, 1, &texture_descriptor_set_write, 0, nullptr);
 
 	VkPushConstantRange push_constant_ranges[] = {
 		{
@@ -921,7 +921,7 @@ AGE_RESULT graphics_create_descriptor_sets_pipeline_layout ()
 
 	VkPipelineLayoutCreateInfo pipeline_layout_create_info = {
 		VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-		NULL,
+		nullptr,
 		0,
 		2,
 		descriptor_set_layouts,
@@ -929,7 +929,7 @@ AGE_RESULT graphics_create_descriptor_sets_pipeline_layout ()
 		push_constant_ranges
 	};
 
-	vk_result = vkCreatePipelineLayout (device, &pipeline_layout_create_info, NULL, &graphics_pipeline_layout);
+	vk_result = vkCreatePipelineLayout (device, &pipeline_layout_create_info, nullptr, &graphics_pipeline_layout);
 	if (vk_result)
 	{
 		return AGE_RESULT::ERROR_GRAPHICS_CREATE_PIPELINE_LAYOUT;
@@ -944,19 +944,19 @@ AGE_RESULT graphics_create_transforms_buffer (
 	const size_t game_bullet_current_max_count
 )
 {
-	if (transforms_mapped_data != NULL)
+	if (transforms_mapped_data != nullptr)
 	{
 		vkUnmapMemory (device, transforms_buffer_memory);
 	}
 
 	if (transforms_buffer != VK_NULL_HANDLE)
 	{
-		vkDestroyBuffer (device, transforms_buffer, NULL);
+		vkDestroyBuffer (device, transforms_buffer, nullptr);
 	}
 
 	if (transforms_buffer_memory != VK_NULL_HANDLE)
 	{
-		vkFreeMemory (device, transforms_buffer_memory, NULL);
+		vkFreeMemory (device, transforms_buffer_memory, nullptr);
 	}
 
 	VkResult vk_result = VK_SUCCESS;
@@ -965,7 +965,7 @@ AGE_RESULT graphics_create_transforms_buffer (
 	aligned_size_per_transform = (raw_size_per_transform + (size_t)physical_device_limits.minUniformBufferOffsetAlignment - 1) & ~((size_t)physical_device_limits.minUniformBufferOffsetAlignment - 1);
 
 	total_transforms_size = aligned_size_per_transform * (game_large_asteroids_current_max_count + game_small_asteroids_current_max_count + game_bullet_current_max_count + 2);
-	if (transforms_aligned_data == NULL)
+	if (transforms_aligned_data == nullptr)
 	{
 		transforms_aligned_data = utils_malloc (total_transforms_size);
 	}
@@ -976,16 +976,16 @@ AGE_RESULT graphics_create_transforms_buffer (
 
 	VkBufferCreateInfo transforms_buffer_create_info = {
 		VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-		NULL,
+		nullptr,
 		0,
 		total_transforms_size,
 		VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 		VK_SHARING_MODE_EXCLUSIVE,
 		0,
-		NULL
+		nullptr
 	};
 
-	vk_result = vkCreateBuffer (device, &transforms_buffer_create_info, NULL, &transforms_buffer);
+	vk_result = vkCreateBuffer (device, &transforms_buffer_create_info, nullptr, &transforms_buffer);
 	if (vk_result != VK_SUCCESS)
 	{
 		return AGE_RESULT::ERROR_GRAPHICS_CREATE_BUFFER;
@@ -1009,12 +1009,12 @@ AGE_RESULT graphics_create_transforms_buffer (
 
 	VkMemoryAllocateInfo memory_allocate_info = {
 		VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-		NULL,
+		nullptr,
 		memory_requirements.size,
 		required_memory_type_index
 	};
 
-	vk_result = vkAllocateMemory (device, &memory_allocate_info, NULL, &transforms_buffer_memory);
+	vk_result = vkAllocateMemory (device, &memory_allocate_info, nullptr, &transforms_buffer_memory);
 	if (vk_result != VK_SUCCESS) 
 	{
 		return AGE_RESULT::ERROR_SYSTEM_ALLOCATE_MEMORY;
@@ -1040,18 +1040,18 @@ AGE_RESULT graphics_create_transforms_buffer (
 
 	VkWriteDescriptorSet descriptor_write = {
 		VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-		NULL,
+		nullptr,
 		transform_descriptor_set,
 		0,
 		0,
 		1,
 		VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-		NULL,
+		nullptr,
 		&buffer_info,
-		NULL
+		nullptr
 	};
 
-	vkUpdateDescriptorSets (device, 1, &descriptor_write, 0, NULL);
+	vkUpdateDescriptorSets (device, 1, &descriptor_write, 0, nullptr);
 
 	return AGE_RESULT::SUCCESS;
 }
@@ -1068,19 +1068,19 @@ AGE_RESULT graphics_update_command_buffers (
 
 	VkCommandBufferBeginInfo command_buffer_begin_info = {
 		VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-		NULL,
+		nullptr,
 		0,
-		NULL
+		nullptr
 	};
 
 	VkRenderPassBeginInfo render_pass_begin_info = {
 		VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-		NULL,
+		nullptr,
 		render_pass,
 		VK_NULL_HANDLE,
 		{ {0,0}, current_extent },
 		0,
-		NULL
+		nullptr
 	};
 
 	vk_result = vkResetCommandPool (device, swapchain_command_pool, VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT);
@@ -1116,7 +1116,7 @@ AGE_RESULT graphics_update_command_buffers (
 
 		uint32_t dynamic_offset = 0;
 		vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 0, 1, &transform_descriptor_set, 1, &dynamic_offset);
-		vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 1, 1, &texture_descriptor_set, 0, NULL);
+		vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 1, 1, &texture_descriptor_set, 0, nullptr);
 		uint32_t texture_index = 0;
 		vkCmdPushConstants (swapchain_command_buffers[i], graphics_pipeline_layout, VK_SHADER_STAGE_FRAGMENT_BIT, sizeof (float), sizeof (uint32_t), &texture_index);
 		vkCmdBindVertexBuffers (swapchain_command_buffers[i], 0, 1, &vertex_index_buffer, &vertex_index_buffer_offsets[0]);
@@ -1126,7 +1126,7 @@ AGE_RESULT graphics_update_command_buffers (
 
 		dynamic_offset = aligned_size_per_transform;
 		vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 0, 1, &transform_descriptor_set, 1, &dynamic_offset);
-		vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 1, 1, &texture_descriptor_set, 0, NULL); texture_index = 1;
+		vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 1, 1, &texture_descriptor_set, 0, nullptr); texture_index = 1;
 		vkCmdPushConstants (swapchain_command_buffers[i], graphics_pipeline_layout, VK_SHADER_STAGE_FRAGMENT_BIT, sizeof (float), sizeof (uint32_t), &texture_index);
 		vkCmdBindVertexBuffers (swapchain_command_buffers[i], 0, 1, &vertex_index_buffer, &vertex_index_buffer_offsets[3]);
 		vkCmdBindVertexBuffers (swapchain_command_buffers[i], 1, 1, &vertex_index_buffer, &vertex_index_buffer_offsets[4]);
@@ -1140,7 +1140,7 @@ AGE_RESULT graphics_update_command_buffers (
 		{
 			dynamic_offset = aligned_size_per_transform * (a + 2);
 			vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 0, 1, &transform_descriptor_set, 1, &dynamic_offset);
-			vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 1, 1, &texture_descriptor_set, 0, NULL); 
+			vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 1, 1, &texture_descriptor_set, 0, nullptr); 
 			vkCmdBindVertexBuffers (swapchain_command_buffers[i], 0, 1, &vertex_index_buffer, &vertex_index_buffer_offsets[3]);
 			vkCmdBindVertexBuffers (swapchain_command_buffers[i], 1, 1, &vertex_index_buffer, &vertex_index_buffer_offsets[4]);
 			vkCmdBindIndexBuffer (swapchain_command_buffers[i], vertex_index_buffer, vertex_index_buffer_offsets[5], VK_INDEX_TYPE_UINT32);
@@ -1151,7 +1151,7 @@ AGE_RESULT graphics_update_command_buffers (
 		{
 			dynamic_offset = aligned_size_per_transform * (game_large_asteroids_live_count + a + 2);
 			vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 0, 1, &transform_descriptor_set, 1, &dynamic_offset);
-			vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 1, 1, &texture_descriptor_set, 0, NULL); 
+			vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 1, 1, &texture_descriptor_set, 0, nullptr); 
 			vkCmdBindVertexBuffers (swapchain_command_buffers[i], 0, 1, &vertex_index_buffer, &vertex_index_buffer_offsets[3]);
 			vkCmdBindVertexBuffers (swapchain_command_buffers[i], 1, 1, &vertex_index_buffer, &vertex_index_buffer_offsets[4]);
 			vkCmdBindIndexBuffer (swapchain_command_buffers[i], vertex_index_buffer, vertex_index_buffer_offsets[5], VK_INDEX_TYPE_UINT32);
@@ -1164,7 +1164,7 @@ AGE_RESULT graphics_update_command_buffers (
 		{
 			dynamic_offset = aligned_size_per_transform * (game_large_asteroids_live_count + game_small_asteroids_live_count + b + 2);
 			vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 0, 1, &transform_descriptor_set, 1, &dynamic_offset);
-			vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 1, 1, &texture_descriptor_set, 0, NULL);
+			vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 1, 1, &texture_descriptor_set, 0, nullptr);
 			vkCmdBindVertexBuffers (swapchain_command_buffers[i], 0, 1, &vertex_index_buffer, &vertex_index_buffer_offsets[3]);
 			vkCmdBindVertexBuffers (swapchain_command_buffers[i], 1, 1, &vertex_index_buffer, &vertex_index_buffer_offsets[4]);
 			vkCmdBindIndexBuffer (swapchain_command_buffers[i], vertex_index_buffer, vertex_index_buffer_offsets[5], VK_INDEX_TYPE_UINT32);
@@ -1367,7 +1367,7 @@ AGE_RESULT graphics_submit_present ()
 
 	VkSubmitInfo submit_info = {
 		VK_STRUCTURE_TYPE_SUBMIT_INFO,
-		NULL,
+		nullptr,
 		1,
 		&wait_semaphore,
 		&wait_stage_mask,
@@ -1386,13 +1386,13 @@ AGE_RESULT graphics_submit_present ()
 
 	VkPresentInfoKHR present_info = {
 		VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
-		NULL,
+		nullptr,
 		1,
 		swapchain_signal_semaphores + image_index,
 		1,
 		&swapchain,
 		&image_index,
-		NULL
+		nullptr
 	};
 
 	vk_result = vkQueuePresentKHR (graphics_queue, &present_info);
@@ -1427,7 +1427,7 @@ void graphics_shutdown ()
 		vkQueueWaitIdle (graphics_queue);
 	}
 
-	if (transforms_mapped_data != NULL && transforms_buffer_memory != VK_NULL_HANDLE)
+	if (transforms_mapped_data != nullptr && transforms_buffer_memory != VK_NULL_HANDLE)
 	{
 		vkUnmapMemory (device, transforms_buffer_memory);
 	}
@@ -1446,24 +1446,24 @@ void graphics_shutdown ()
 
 	if (transform_descriptor_set_layout != VK_NULL_HANDLE)
 	{
-		vkDestroyDescriptorSetLayout (device, transform_descriptor_set_layout, NULL);
+		vkDestroyDescriptorSetLayout (device, transform_descriptor_set_layout, nullptr);
 	}
 	
 	if (texture_descriptor_set_layout != VK_NULL_HANDLE)
 	{
-		vkDestroyDescriptorSetLayout (device, texture_descriptor_set_layout, NULL);
+		vkDestroyDescriptorSetLayout (device, texture_descriptor_set_layout, nullptr);
 	}
 
 	if (descriptor_pool != VK_NULL_HANDLE)
 	{
-		vkDestroyDescriptorPool (device, descriptor_pool, NULL);
+		vkDestroyDescriptorPool (device, descriptor_pool, nullptr);
 	}
 
 	if (swapchain_fences)
 	{
 		for (size_t i = 0; i < swapchain_image_count; ++i)
 		{
-			vkDestroyFence (device, swapchain_fences[i], NULL);
+			vkDestroyFence (device, swapchain_fences[i], nullptr);
 		}
 
 		utils_free (swapchain_fences);
@@ -1471,88 +1471,88 @@ void graphics_shutdown ()
 
 	if (graphics_pipeline_layout != VK_NULL_HANDLE)
 	{
-		vkDestroyPipelineLayout (device, graphics_pipeline_layout, NULL);
+		vkDestroyPipelineLayout (device, graphics_pipeline_layout, nullptr);
 	}
 
 	if (graphics_pipeline != VK_NULL_HANDLE)
 	{
-		vkDestroyPipeline (device, graphics_pipeline, NULL);
+		vkDestroyPipeline (device, graphics_pipeline, nullptr);
 	}
 
 	if (vertex_index_buffer != VK_NULL_HANDLE)
 	{
-		vkDestroyBuffer (device, vertex_index_buffer, NULL);
+		vkDestroyBuffer (device, vertex_index_buffer, nullptr);
 	}
 
 	if (vertex_index_buffer_memory != VK_NULL_HANDLE)
 	{
-		vkFreeMemory (device, vertex_index_buffer_memory, NULL);
+		vkFreeMemory (device, vertex_index_buffer_memory, nullptr);
 	}
 
 	if (background_image != VK_NULL_HANDLE)
 	{
-		vkDestroyImage (device, background_image, NULL);
+		vkDestroyImage (device, background_image, nullptr);
 	}
 
 	if (background_image_view != VK_NULL_HANDLE)
 	{
-		vkDestroyImageView (device, background_image_view, NULL);
+		vkDestroyImageView (device, background_image_view, nullptr);
 	}
 
 	if (player_image != VK_NULL_HANDLE)
 	{
-		vkDestroyImage (device, player_image, NULL);
+		vkDestroyImage (device, player_image, nullptr);
 	}
 
 	if (player_image_view != VK_NULL_HANDLE)
 	{
-		vkDestroyImageView (device, player_image_view, NULL);
+		vkDestroyImageView (device, player_image_view, nullptr);
 	}
 
 	if (asteroid_image != VK_NULL_HANDLE)
 	{
-		vkDestroyImage (device, asteroid_image, NULL);
+		vkDestroyImage (device, asteroid_image, nullptr);
 	}
 
 	if (asteroid_image_view != VK_NULL_HANDLE)
 	{
-		vkDestroyImageView (device, asteroid_image_view, NULL);
+		vkDestroyImageView (device, asteroid_image_view, nullptr);
 	}
 
 	if (bullet_image != VK_NULL_HANDLE)
 	{
-		vkDestroyImage (device, bullet_image, NULL);
+		vkDestroyImage (device, bullet_image, nullptr);
 	}
 
 	if (bullet_image_view != VK_NULL_HANDLE)
 	{
-		vkDestroyImageView (device, bullet_image_view, NULL);
+		vkDestroyImageView (device, bullet_image_view, nullptr);
 	}
 
 	if (images_memory != VK_NULL_HANDLE)
 	{
-		vkFreeMemory (device, images_memory, NULL);
+		vkFreeMemory (device, images_memory, nullptr);
 	}
 
 	if (transforms_buffer != VK_NULL_HANDLE) {
-		vkDestroyBuffer (device, transforms_buffer, NULL);
+		vkDestroyBuffer (device, transforms_buffer, nullptr);
 	}
 
 	if (transforms_buffer_memory != VK_NULL_HANDLE)
 	{
-		vkFreeMemory (device, transforms_buffer_memory, NULL);
+		vkFreeMemory (device, transforms_buffer_memory, nullptr);
 	}
 
 	if (wait_semaphore != VK_NULL_HANDLE)
 	{
-		vkDestroySemaphore (device, wait_semaphore, NULL);
+		vkDestroySemaphore (device, wait_semaphore, nullptr);
 	}
 
 	if (swapchain_signal_semaphores)
 	{
 		for (size_t i = 0; i < swapchain_image_count; ++i)
 		{
-			vkDestroySemaphore (device, swapchain_signal_semaphores[i], NULL);
+			vkDestroySemaphore (device, swapchain_signal_semaphores[i], nullptr);
 		}
 		
 		utils_free (swapchain_signal_semaphores);
@@ -1567,12 +1567,12 @@ void graphics_shutdown ()
 
 	if (swapchain_command_pool != VK_NULL_HANDLE)
 	{
-		vkDestroyCommandPool (device, swapchain_command_pool, NULL);
+		vkDestroyCommandPool (device, swapchain_command_pool, nullptr);
 	}
 
 	if (render_pass != VK_NULL_HANDLE)
 	{
-		vkDestroyRenderPass (device, render_pass, NULL);
+		vkDestroyRenderPass (device, render_pass, nullptr);
 	}
 	
 	if (swapchain_framebuffers)
@@ -1581,7 +1581,7 @@ void graphics_shutdown ()
 		{
 			if (swapchain_framebuffers[i] != VK_NULL_HANDLE)
 			{
-				vkDestroyFramebuffer (device, swapchain_framebuffers[i], NULL);
+				vkDestroyFramebuffer (device, swapchain_framebuffers[i], nullptr);
 			}
 		}
 

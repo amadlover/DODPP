@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ERROR_HPP
+#define ERROR_HPP
 
 enum class AGE_RESULT
 {
@@ -59,3 +60,5 @@ enum class AGE_RESULT
 	ERROR_SYSTEM_TMP_FILE
 
 };
+
+#endif

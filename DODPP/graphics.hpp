@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GRAPHICS_HPP
+#define GRAPHICS_HPP
 
 #include "error.hpp"
 #include "types.hpp"
@@ -36,3 +37,5 @@ AGE_RESULT graphics_update_transforms_buffer_data (
 );
 AGE_RESULT graphics_submit_present ();
 void graphics_shutdown ();
+
+#endif

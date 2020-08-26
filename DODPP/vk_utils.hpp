@@ -1,4 +1,5 @@
-#pragma once
+#ifndef VK_UTILS_HPP
+#define VK_UTILS_HPP
 
 #include "vulkan_interface.hpp"
 
@@ -71,3 +72,5 @@ AGE_RESULT vk_create_shader_module (
 	VkPipelineShaderStageCreateInfo* out_shader_stage_create_info, 
 	VkShaderModule* out_shader_module
 );
+
+#endif

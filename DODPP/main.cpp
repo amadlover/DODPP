@@ -142,10 +142,10 @@ int WINAPI wWinMain (_In_ HINSTANCE h_instance, _In_opt_ HINSTANCE previous_inst
         CW_USEDEFAULT,
         1280,
         720, 
-        NULL,
-        NULL,
+        nullptr,
+        nullptr,
         h_instance,
-        NULL
+        nullptr
     );
 
     if (!h_wnd)
@@ -165,7 +165,7 @@ int WINAPI wWinMain (_In_ HINSTANCE h_instance, _In_opt_ HINSTANCE previous_inst
 
     last_tick_count = GetTickCount64 ();
 
-    SetTimer (h_wnd, ID_GAME_TICK, 15, NULL);
+    SetTimer (h_wnd, ID_GAME_TICK, 15, nullptr);
 
     MSG msg;
     ZeroMemory (&msg, sizeof (msg));
@@ -176,7 +176,7 @@ int WINAPI wWinMain (_In_ HINSTANCE h_instance, _In_opt_ HINSTANCE previous_inst
         msg.message != WM_DESTROY
     )
     {
-        if (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE))
+        if (PeekMessage (&msg, nullptr, 0, 0, PM_REMOVE))
         {
             TranslateMessage (&msg);
             DispatchMessage (&msg);
