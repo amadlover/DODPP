@@ -1,6 +1,5 @@
 #include "graphics.hpp"
 #include "utils.hpp"
-#include "error.hpp"
 #include "actor_vert.hpp"
 #include "actor_frag.hpp"
 #include "vulkan_interface.hpp"

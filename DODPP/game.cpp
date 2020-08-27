@@ -12,7 +12,6 @@
 
 #include <random>
 
-bool use_mouse_for_look_at = false;
 bool is_w_pressed = false;
 bool is_s_pressed = false;
 bool is_d_pressed = false;
@@ -23,15 +22,15 @@ bool is_down_arrow_pressed = false;
 bool is_right_arrow_pressed = false;
 bool is_left_arrow_pressed = false;
 
-float screen_aspect_ratio = 1;
+float window_aspect_ratio = 1;
 
-player_transform_inputs game_player_transform_inputs = {};
+player_transform_inputs game_player_transform_inputs;
 float2 game_player_output_position;
 float2 game_player_output_rotation;
 float2 game_player_output_scale;
 
-float game_player_shooting_interval_msecs = 100.f;
-float game_secs_since_last_shot = 0;
+size_t game_player_shooting_interval_msecs = 100;
+size_t game_secs_since_last_shot = 0;
 
 bullet_transform_inputs* game_bullets_transform_inputs;
 
@@ -66,7 +65,7 @@ const size_t game_BULLET_BATCH_SIZE = 20;
 
 bool should_update_command_buffers = false;
 
-RECT scene_rect;
+RECT window_rect;
 int32_t last_mouse_x;
 int32_t last_mouse_y;
 
@@ -89,8 +88,8 @@ AGE_RESULT game_init (const HINSTANCE h_instance, const HWND h_wnd)
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
-    GetClientRect (h_wnd, &scene_rect);
-    screen_aspect_ratio = (float)scene_rect.right / (float)scene_rect.bottom;
+    GetClientRect (h_wnd, &window_rect);
+    window_aspect_ratio = (float)window_rect.right / (float)window_rect.bottom;
 
     game_player_transform_inputs.time_msecs_to_come_to_rest = 500.f;
     game_player_transform_inputs.forward_vector.x = 0;
@@ -127,7 +126,7 @@ AGE_RESULT game_init (const HINSTANCE h_instance, const HWND h_wnd)
         game_large_asteroids_current_max_count, game_large_asteroids_live_count, 
         game_small_asteroids_current_max_count, game_small_asteroids_live_count, 
         game_bullets_current_max_count, game_bullet_live_count,
-        screen_aspect_ratio
+        window_aspect_ratio
     );
 
     return age_result;
@@ -427,8 +426,8 @@ AGE_RESULT game_player_look_at_mouse ()
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
     float2 transformed_mouse_pos = float2 (
-        (float)last_mouse_x / (float)scene_rect.right * 2 - 1,
-        (float)last_mouse_y / (float)scene_rect.bottom * 2 - 1
+        (float)last_mouse_x / (float)window_rect.right * 2 - 1,
+        (float)last_mouse_y / (float)window_rect.bottom * 2 - 1
     );
 
     float2 look_at_mouse = float2 (transformed_mouse_pos.x - game_player_output_position.x, transformed_mouse_pos.y - game_player_output_position.y);
@@ -824,7 +823,7 @@ AGE_RESULT game_process_player_input ()
             return age_result;
         }
     }
-    
+
     if (is_s_pressed)
     {
         age_result = game_player_decrease_speed ();
@@ -843,49 +842,39 @@ AGE_RESULT game_process_player_input ()
         }
     }
 
-    if (use_mouse_for_look_at)
+    if (is_d_pressed)
     {
-        age_result = game_player_look_at_mouse ();
-        if (age_result != AGE_RESULT::SUCCESS) {
+        age_result = game_player_turn_right ();
+        if (age_result != AGE_RESULT::SUCCESS)
+        {
             return age_result;
         }
     }
-    else
+
+    if (is_right_arrow_pressed)
     {
-        if (is_d_pressed)
+        age_result = game_player_turn_right ();
+        if (age_result != AGE_RESULT::SUCCESS)
         {
-            age_result = game_player_turn_right ();
-            if (age_result != AGE_RESULT::SUCCESS)
-            {
-                return age_result;
-            }
+            return age_result;
         }
+    }
 
-        if (is_right_arrow_pressed)
+    if (is_a_pressed)
+    {
+        age_result = game_player_turn_left ();
+        if (age_result != AGE_RESULT::SUCCESS)
         {
-            age_result = game_player_turn_right ();
-            if (age_result != AGE_RESULT::SUCCESS)
-            {
-                return age_result;
-            }
+            return age_result;
         }
+    }
 
-        if (is_a_pressed)
+    if (is_left_arrow_pressed)
+    {
+        age_result = game_player_turn_left ();
+        if (age_result != AGE_RESULT::SUCCESS)
         {
-            age_result = game_player_turn_left ();
-            if (age_result != AGE_RESULT::SUCCESS)
-            {
-                return age_result;
-            }
-        }
-
-        if (is_left_arrow_pressed)
-        {
-            age_result = game_player_turn_left ();
-            if (age_result != AGE_RESULT::SUCCESS)
-            {
-                return age_result;
-            }
+            return age_result;
         }
     }
 
@@ -1058,7 +1047,7 @@ AGE_RESULT game_update (size_t delta_msecs)
             game_large_asteroids_live_count,
             game_small_asteroids_live_count,
             game_bullet_live_count,
-            screen_aspect_ratio
+            window_aspect_ratio
         );
         if (age_result != AGE_RESULT::SUCCESS)
         {

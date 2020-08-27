@@ -8,7 +8,7 @@ bool is_validation_needed = false;
 VkDebugUtilsMessengerEXT debug_utils_messenger = VK_NULL_HANDLE;
 VkSurfaceKHR surface = VK_NULL_HANDLE;
 VkSurfaceCapabilitiesKHR surface_capabilities = { 0 };
-VkPresentModeKHR chosen_present_mode;
+VkPresentModeKHR chosen_present_mode = VK_PRESENT_MODE_FIFO_KHR;
 
 VkInstance instance;
 VkPhysicalDevice physical_device;
@@ -64,7 +64,7 @@ void destroy_instance_debug_utils_messenger (VkInstance instance,
 	}
 }
 
-VKAPI_ATTR VkBool32 VKAPI_CALL debug_messenger_callback (
+VKAPI_ATTR VkBool32 VKAPI_CALL debug_utils_messenger_callback (
 	VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
 	VkDebugUtilsMessageTypeFlagsEXT message_types,
 	const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
@@ -177,7 +177,7 @@ AGE_RESULT create_debug_utils_messenger ()
 		VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
 		VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT |
 		VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT,
-		&debug_messenger_callback,
+		&debug_utils_messenger_callback,
 		nullptr
 	};
 
@@ -327,14 +327,7 @@ AGE_RESULT get_physical_device_properties ()
 	auto surface_formats = (VkSurfaceFormatKHR*)utils_malloc (sizeof (VkSurfaceFormatKHR) * surface_format_count);
 	vkGetPhysicalDeviceSurfaceFormatsKHR (physical_device, surface, &surface_format_count, surface_formats);
 
-	for (size_t s = 0; s < surface_format_count; s++)
-	{
-		if (surface_formats[s].format == VK_FORMAT_B8G8R8A8_UNORM)
-		{
-			chosen_surface_format = surface_formats[s];
-			break;
-		}
-	}
+	chosen_surface_format = surface_formats[0];
 
 	uint32_t present_mode_count = 0;
 	vkGetPhysicalDeviceSurfacePresentModesKHR (physical_device, surface, &present_mode_count, nullptr);
