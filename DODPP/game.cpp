@@ -662,14 +662,14 @@ AGE_RESULT game_update_player_asteroids_bullets_output_positions ()
     game_player_output_position.x += game_player_transform_inputs.v.x;
     game_player_output_position.y += game_player_transform_inputs.v.y;
 
-    if (game_player_output_position.x > 1.f)
+    if (game_player_output_position.x > window_aspect_ratio)
     {
-        game_player_output_position.x = -1.f;
+        game_player_output_position.x = -window_aspect_ratio;
     }
     
-    if (game_player_output_position.x < -1.f)
+    if (game_player_output_position.x < -window_aspect_ratio)
     {
-        game_player_output_position.x = 1.f;
+        game_player_output_position.x = window_aspect_ratio;
     }
 
     if (game_player_output_position.y > 1.f)
@@ -687,13 +687,13 @@ AGE_RESULT game_update_player_asteroids_bullets_output_positions ()
         game_large_asteroids_outputs_positions[a].x += (game_large_asteroids_transform_inputs[a].forward_vector.x * game_large_asteroids_transform_inputs[a].forward_speed * game_delta_time);
         game_large_asteroids_outputs_positions[a].y += (game_large_asteroids_transform_inputs[a].forward_vector.y * game_large_asteroids_transform_inputs[a].forward_speed * game_delta_time);
 
-        if (game_large_asteroids_outputs_positions[a].x > 1.f)
+        if (game_large_asteroids_outputs_positions[a].x > window_aspect_ratio)
         {
-            game_large_asteroids_outputs_positions[a].x = -1.f;
+            game_large_asteroids_outputs_positions[a].x = -window_aspect_ratio;
         }
-        else if (game_large_asteroids_outputs_positions[a].x < -1.f)
+        else if (game_large_asteroids_outputs_positions[a].x < -window_aspect_ratio)
         {
-            game_large_asteroids_outputs_positions[a].x = 1.f;
+            game_large_asteroids_outputs_positions[a].x = window_aspect_ratio;
         }
         else if (game_large_asteroids_outputs_positions[a].y > 1.f)
         {
@@ -712,13 +712,13 @@ AGE_RESULT game_update_player_asteroids_bullets_output_positions ()
         game_small_asteroids_outputs_positions[a].x += (game_small_asteroids_transform_inputs[a].forward_vector.x * game_small_asteroids_transform_inputs[a].forward_speed * game_delta_time);
         game_small_asteroids_outputs_positions[a].y += (game_small_asteroids_transform_inputs[a].forward_vector.y * game_small_asteroids_transform_inputs[a].forward_speed * game_delta_time);
 
-        if (game_small_asteroids_outputs_positions[a].x > 1.f)
+        if (game_small_asteroids_outputs_positions[a].x > window_aspect_ratio)
         {
-            game_small_asteroids_outputs_positions[a].x = -1.f;
+            game_small_asteroids_outputs_positions[a].x = -window_aspect_ratio;
         }
-        else if (game_small_asteroids_outputs_positions[a].x < -1.f)
+        else if (game_small_asteroids_outputs_positions[a].x < -window_aspect_ratio)
         {
-            game_small_asteroids_outputs_positions[a].x = 1.f;
+            game_small_asteroids_outputs_positions[a].x = window_aspect_ratio;
         }
         else if (game_small_asteroids_outputs_positions[a].y > 1.f)
         {
@@ -737,7 +737,7 @@ AGE_RESULT game_update_player_asteroids_bullets_output_positions ()
         game_bullets_outputs_positions[b].x += (game_bullets_transform_inputs[b].forward_vector.x * (game_bullets_transform_inputs[b].speed * game_delta_time));
         game_bullets_outputs_positions[b].y += (game_bullets_transform_inputs[b].forward_vector.y * (game_bullets_transform_inputs[b].speed * game_delta_time));
 
-        if (game_bullets_outputs_positions[b].x < -1)
+        if (game_bullets_outputs_positions[b].x < -window_aspect_ratio)
         {
             age_result = game_bullet_remove (b);
             if (age_result != AGE_RESULT::SUCCESS)
@@ -747,7 +747,7 @@ AGE_RESULT game_update_player_asteroids_bullets_output_positions ()
 
             break;
         }
-        else if (game_bullets_outputs_positions[b].x > 1)
+        else if (game_bullets_outputs_positions[b].x > window_aspect_ratio)
         {
             age_result = game_bullet_remove (b);
             if (age_result != AGE_RESULT::SUCCESS)
@@ -1034,7 +1034,8 @@ AGE_RESULT game_update (size_t delta_msecs)
         game_bullets_outputs_rotations,
         game_bullets_outputs_scales,
         game_bullet_live_count,
-        game_bullets_current_max_count
+        game_bullets_current_max_count,
+        window_aspect_ratio
     );
     if (age_result != AGE_RESULT::SUCCESS)
     {

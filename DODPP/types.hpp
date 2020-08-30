@@ -92,6 +92,13 @@ struct asteroid_transform_inputs
     float rotation_speed;
 };
 
+struct transform_outputs 
+{
+    float2 position;
+    float2 rotaion;
+    float2 scale;
+};
+
 float float2_length (const float2* in_vector);
 void float2_unit_vector (float2* in_out_vector);
 

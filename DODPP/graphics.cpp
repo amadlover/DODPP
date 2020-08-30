@@ -1189,12 +1189,13 @@ AGE_RESULT graphics_update_transforms_buffer_data (
 	const float2* game_small_asteroids_outputs_positions, const float2* game_small_asteroids_outputs_rotations, const float2* game_small_asteroids_outputs_scales,
 	const size_t game_small_asteroids_live_count, const size_t game_small_asteroids_current_max_count, 
 	const float2* game_bullets_outputs_positions, const float2* game_bullets_outputs_rotations, const float2* game_bullets_outputs_scales, 
-	const size_t game_bullet_live_count, const size_t game_bullets_current_max_count
+	const size_t game_bullet_live_count, const size_t game_bullets_current_max_count,
+	const float background_scale
 )
 {
 	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
-	float background_transform[] = { 0,0,0,0,1,1 };
+	float background_transform[] = { 0,0,0,0,background_scale,background_scale };
 	std::memcpy (transforms_aligned_data, background_transform, sizeof (background_transform));
 
 	float player_transform[] = {
