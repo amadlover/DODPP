@@ -209,33 +209,73 @@ AGE_RESULT graphics_create_image_buffers ()
 	int background_image_height = 0;
 	int background_image_bpp = 0;
 	uint8_t* background_image_pixels = nullptr;
-	utils_import_texture ("background.png", &background_image_width, &background_image_height, &background_image_bpp, &background_image_pixels);
+	utils_import_texture (
+		"background.png", 
+		&background_image_width, 
+		&background_image_height, 
+		&background_image_bpp, 
+		&background_image_pixels
+	);
 
-	background_image_pixels_size = background_image_width * background_image_height * background_image_bpp * sizeof (uint8_t);
+	background_image_pixels_size = 
+		background_image_width * 
+		background_image_height * 
+		background_image_bpp * 
+		sizeof (uint8_t);
 
 	int player_image_width = 0;
 	int player_image_height = 0;
 	int player_image_bpp = 0;
 	uint8_t* player_image_pixels = nullptr;
-	utils_import_texture ("player.png", &player_image_width, &player_image_height, &player_image_bpp, &player_image_pixels);
+	utils_import_texture (
+		"player.png", 
+		&player_image_width, 
+		&player_image_height, 
+		&player_image_bpp, 
+		&player_image_pixels
+	);
 
-	player_image_pixels_size = player_image_width * player_image_height * player_image_bpp * sizeof (uint8_t);
+	player_image_pixels_size = 
+		player_image_width * 
+		player_image_height * 
+		player_image_bpp * 
+		sizeof (uint8_t);
 
 	int asteroid_image_width = 0;
 	int asteroid_image_height = 0;
 	int asteroid_image_bpp = 0;
 	uint8_t* asteroid_image_pixels = nullptr;
-	utils_import_texture ("asteroid.png", &asteroid_image_width, &asteroid_image_height, &asteroid_image_bpp, &asteroid_image_pixels);
+	utils_import_texture (
+		"asteroid.png", 
+		&asteroid_image_width, 
+		&asteroid_image_height, 
+		&asteroid_image_bpp, 
+		&asteroid_image_pixels
+	);
 
-	asteroid_image_pixels_size = asteroid_image_width * asteroid_image_height * asteroid_image_bpp * sizeof (uint8_t);
+	asteroid_image_pixels_size = 
+		asteroid_image_width * 
+		asteroid_image_height * 
+		asteroid_image_bpp * 
+		sizeof (uint8_t);
 
 	int bullet_image_width = 0;
 	int bullet_image_height = 0;
 	int bullet_image_bpp = 0;
 	uint8_t* bullet_image_pixels = nullptr;
-	utils_import_texture ("bullet.png", &bullet_image_width, &bullet_image_height, &bullet_image_bpp, &bullet_image_pixels);
+	utils_import_texture (
+		"bullet.png", 
+		&bullet_image_width, 
+		&bullet_image_height, 
+		&bullet_image_bpp, 
+		&bullet_image_pixels
+	);
 
-	bullet_image_pixels_size = bullet_image_width * bullet_image_height * bullet_image_bpp * sizeof (uint8_t);
+	bullet_image_pixels_size = 
+		bullet_image_width * 
+		bullet_image_height * 
+		bullet_image_bpp * 
+		sizeof (uint8_t);
 
 	VkBuffer staging_image_buffer = VK_NULL_HANDLE;
 	age_result = vk_create_buffer (
@@ -1057,7 +1097,6 @@ AGE_RESULT graphics_update_command_buffers (
 	const float screen_aspect_ratio
 )
 {
-	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 	VkResult vk_result = VK_SUCCESS;
 
 	VkCommandBufferBeginInfo command_buffer_begin_info = {
@@ -1120,7 +1159,8 @@ AGE_RESULT graphics_update_command_buffers (
 
 		dynamic_offset = aligned_size_per_transform;
 		vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 0, 1, &transform_descriptor_set, 1, &dynamic_offset);
-		vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 1, 1, &texture_descriptor_set, 0, nullptr); texture_index = 1;
+		vkCmdBindDescriptorSets (swapchain_command_buffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline_layout, 1, 1, &texture_descriptor_set, 0, nullptr);
+		texture_index = 1;
 		vkCmdPushConstants (swapchain_command_buffers[i], graphics_pipeline_layout, VK_SHADER_STAGE_FRAGMENT_BIT, sizeof (float), sizeof (uint32_t), &texture_index);
 		vkCmdBindVertexBuffers (swapchain_command_buffers[i], 0, 1, &vertex_index_buffer, &vertex_index_buffer_offsets[3]);
 		vkCmdBindVertexBuffers (swapchain_command_buffers[i], 1, 1, &vertex_index_buffer, &vertex_index_buffer_offsets[4]);
@@ -1174,7 +1214,7 @@ AGE_RESULT graphics_update_command_buffers (
 		}
 	}
 
-	return age_result;
+	return AGE_RESULT::SUCCESS;
 }
 
 AGE_RESULT graphics_update_transforms_buffer_data (
@@ -1188,8 +1228,6 @@ AGE_RESULT graphics_update_transforms_buffer_data (
 	const float background_scale
 )
 {
-	AGE_RESULT age_result = AGE_RESULT::SUCCESS;
-
 	float background_transform[] = { 0,0,0,0,background_scale,background_scale };
 	std::memcpy (transforms_aligned_data, background_transform, sizeof (background_transform));
 
@@ -1251,7 +1289,7 @@ AGE_RESULT graphics_update_transforms_buffer_data (
 
 	std::memcpy (transforms_mapped_data, transforms_aligned_data, total_transforms_size);
 
-	return age_result;
+	return AGE_RESULT::SUCCESS;
 }
 
 AGE_RESULT graphics_init (

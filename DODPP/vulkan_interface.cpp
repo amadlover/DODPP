@@ -95,7 +95,7 @@ AGE_RESULT create_instance ()
 		VK_MAKE_VERSION (1, 0, 0),
 		"AGE",
 		VK_MAKE_VERSION (1, 0, 0),
-		VK_API_VERSION_1_2
+		VK_API_VERSION_1_1
 	};
 
 	std::vector<const char*> instance_layers;
