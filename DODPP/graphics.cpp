@@ -607,7 +607,7 @@ exit:
 
 AGE_RESULT graphics_create_swapchain_framebuffers ()
 {
-	swapchain_framebuffers = (VkFramebuffer*)utils_calloc (swapchain_image_count, sizeof (VkFramebuffer));
+	swapchain_framebuffers = (VkFramebuffer*)utils_malloc (sizeof (VkFramebuffer) * swapchain_image_count);
 
 	VkFramebufferCreateInfo framebuffer_create_info = {
 		VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
@@ -708,10 +708,9 @@ AGE_RESULT graphics_create_swapchain_command_pool_buffers ()
 		return AGE_RESULT::ERROR_GRAPHICS_CREATE_COMMAND_POOL;
 	}
 
-	swapchain_command_buffers = (VkCommandBuffer*)utils_malloc(sizeof (VkCommandBuffer) * swapchain_image_count);
-	AGE_RESULT age_result = vk_allocate_command_buffers (swapchain_command_pool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, swapchain_image_count, swapchain_command_buffers);
-	
-	return age_result;
+	swapchain_command_buffers = (VkCommandBuffer*)utils_malloc (sizeof (VkCommandBuffer) * swapchain_image_count);
+
+	return vk_allocate_command_buffers (swapchain_command_pool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, swapchain_image_count, swapchain_command_buffers);
 }
 
 AGE_RESULT graphics_create_swapchain_semaphores_fences ()
@@ -730,8 +729,7 @@ AGE_RESULT graphics_create_swapchain_semaphores_fences ()
 
 	if (vk_result != VK_SUCCESS)
 	{
-		age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_SEMAPHORE;
-		goto exit;
+		return AGE_RESULT::ERROR_GRAPHICS_CREATE_SEMAPHORE;
 	}
 
 	swapchain_signal_semaphores = (VkSemaphore*)utils_malloc (sizeof (VkSemaphore) * swapchain_image_count);
@@ -741,8 +739,7 @@ AGE_RESULT graphics_create_swapchain_semaphores_fences ()
 
 		if (vk_result != VK_SUCCESS)
 		{
-			age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_SEMAPHORE;
-			goto exit;
+			return AGE_RESULT::ERROR_GRAPHICS_CREATE_SEMAPHORE;
 		}
 	}
 
@@ -754,13 +751,11 @@ AGE_RESULT graphics_create_swapchain_semaphores_fences ()
 		
 		if (vk_result != VK_SUCCESS)
 		{
-			age_result = AGE_RESULT::ERROR_GRAPHICS_CREATE_FENCE;
-			goto exit;
+			return AGE_RESULT::ERROR_GRAPHICS_CREATE_FENCE;
 		}
 	}
 
-exit:
-	return age_result;
+	return AGE_RESULT::SUCCESS;
 }
 
 AGE_RESULT graphics_create_descriptor_sets_pipeline_layout ()

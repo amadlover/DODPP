@@ -74,7 +74,7 @@ void utils_get_files_in_folder (const char* partial_folder_path, file_path** out
 	} while (FindNextFile (find_handle, &ffd) != 0);
 
 	*num_out_files = num_files;
-	*out_file_paths = (file_path*)utils_calloc (num_files, sizeof (file_path));
+	*out_file_paths = (file_path*)utils_malloc (sizeof (file_path) * num_files);
 
 	find_handle = FindFirstFile (folder_path, &ffd);
 	size_t current_file_index = 0;
