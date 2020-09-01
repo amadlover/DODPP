@@ -57,7 +57,7 @@ LRESULT CALLBACK WindowProc (HWND h_wnd, UINT msg, WPARAM w_param, LPARAM l_para
 
         try
         {
-            age_result = game_update ((size_t)(current_tick_count - last_tick_count));
+            age_result = game_update ((uint32_t)(current_tick_count - last_tick_count));
         }
         catch (std::exception ex)
         {

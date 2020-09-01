@@ -29,8 +29,8 @@ float2 game_player_output_position;
 float2 game_player_output_rotation;
 float2 game_player_output_scale;
 
-size_t game_player_shooting_interval_msecs = 100;
-size_t game_secs_since_last_shot = 0;
+uint32_t game_player_shooting_interval_msecs = 100;
+uint32_t game_secs_since_last_shot = 0;
 
 bullet_transform_inputs* game_bullets_transform_inputs;
 
@@ -50,18 +50,18 @@ float2* game_small_asteroids_outputs_positions;
 float2* game_small_asteroids_outputs_rotations;
 float2* game_small_asteroids_outputs_scales;
 
-size_t game_large_asteroids_current_max_count = 0;
-size_t game_large_asteroids_live_count = 0;
+uint32_t game_large_asteroids_current_max_count = 0;
+uint32_t game_large_asteroids_live_count = 0;
 
-size_t game_small_asteroids_current_max_count = 0;
-size_t game_small_asteroids_live_count = 0;
+uint32_t game_small_asteroids_current_max_count = 0;
+uint32_t game_small_asteroids_live_count = 0;
 
-size_t game_bullets_current_max_count = 0;
-size_t game_bullet_live_count = 0;
+uint32_t game_bullets_current_max_count = 0;
+uint32_t game_bullet_live_count = 0;
 
-const size_t game_LARGE_ASTEROID_BATCH_SIZE = 50;
-const size_t game_SMALL_ASTEROID_BATCH_SIZE = 150;
-const size_t game_BULLET_BATCH_SIZE = 20;
+const uint32_t game_LARGE_ASTEROID_BATCH_SIZE = 50;
+const uint32_t game_SMALL_ASTEROID_BATCH_SIZE = 150;
+const uint32_t game_BULLET_BATCH_SIZE = 20;
 
 bool should_update_command_buffers = false;
 
@@ -69,7 +69,7 @@ RECT window_rect;
 int32_t last_mouse_x;
 int32_t last_mouse_y;
 
-size_t game_delta_time = 0;
+uint32_t game_delta_time = 0;
 
 std::mt19937 generator;
 
@@ -250,7 +250,7 @@ AGE_RESULT game_process_left_mouse_click (const int32_t x, const int32_t y)
     return age_result;
 }
 
-AGE_RESULT game_large_asteroid_remove (const size_t& index_to_remove)
+AGE_RESULT game_large_asteroid_remove (const uint32_t& index_to_remove)
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
@@ -259,22 +259,22 @@ AGE_RESULT game_large_asteroid_remove (const size_t& index_to_remove)
         return age_result;
     }
 
-    for (size_t a = index_to_remove; a < game_large_asteroids_live_count; ++a)
+    for (uint32_t a = index_to_remove; a < game_large_asteroids_live_count; ++a)
     {
         game_large_asteroids_transform_inputs[a] = game_large_asteroids_transform_inputs[a + 1];
     }
 
-    for (size_t a = index_to_remove; a < game_large_asteroids_live_count; ++a)
+    for (uint32_t a = index_to_remove; a < game_large_asteroids_live_count; ++a)
     {
         game_large_asteroids_outputs_positions[a] = game_large_asteroids_outputs_positions[a + 1];
     }
 
-    for (size_t a = index_to_remove; a < game_large_asteroids_live_count; ++a)
+    for (uint32_t a = index_to_remove; a < game_large_asteroids_live_count; ++a)
     {
         game_large_asteroids_outputs_rotations[a] = game_large_asteroids_outputs_rotations[a + 1];
     }
 
-    for (size_t a = index_to_remove; a < game_large_asteroids_live_count; ++a)
+    for (uint32_t a = index_to_remove; a < game_large_asteroids_live_count; ++a)
     {
         game_large_asteroids_outputs_scales[a] = game_large_asteroids_outputs_scales[a + 1];
     }
@@ -286,7 +286,7 @@ AGE_RESULT game_large_asteroid_remove (const size_t& index_to_remove)
     return age_result;
 }
 
-AGE_RESULT game_small_asteroid_remove (const size_t& index_to_remove)
+AGE_RESULT game_small_asteroid_remove (const uint32_t& index_to_remove)
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
@@ -295,22 +295,22 @@ AGE_RESULT game_small_asteroid_remove (const size_t& index_to_remove)
         return age_result;
     }
 
-    for (size_t a = index_to_remove; a < game_small_asteroids_live_count; ++a)
+    for (uint32_t a = index_to_remove; a < game_small_asteroids_live_count; ++a)
     {
         game_small_asteroids_transform_inputs[a] = game_small_asteroids_transform_inputs[a + 1];
     }
 
-    for (size_t a = index_to_remove; a < game_small_asteroids_live_count; ++a)
+    for (uint32_t a = index_to_remove; a < game_small_asteroids_live_count; ++a)
     {
         game_small_asteroids_outputs_positions[a] = game_small_asteroids_outputs_positions[a + 1];
     }
 
-    for (size_t a = index_to_remove; a < game_small_asteroids_live_count; ++a)
+    for (uint32_t a = index_to_remove; a < game_small_asteroids_live_count; ++a)
     {
         game_small_asteroids_outputs_rotations[a] = game_small_asteroids_outputs_rotations[a + 1];
     }
 
-    for (size_t a = index_to_remove; a < game_small_asteroids_live_count; ++a)
+    for (uint32_t a = index_to_remove; a < game_small_asteroids_live_count; ++a)
     {
         game_small_asteroids_outputs_scales[a] = game_small_asteroids_outputs_scales[a + 1];
     }
@@ -326,7 +326,7 @@ AGE_RESULT game_process_right_mouse_click (const int32_t x, const int32_t y)
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
-    age_result = game_large_asteroid_remove ((size_t)(((float)std::rand () / (float)RAND_MAX) * game_large_asteroids_live_count));
+    age_result = game_large_asteroid_remove ((uint32_t)(((float)std::rand () / (float)RAND_MAX) * game_large_asteroids_live_count));
 
     return age_result;
 }
@@ -481,7 +481,7 @@ AGE_RESULT game_bullet_add ()
     return age_result;
 }
 
-AGE_RESULT game_bullet_remove (const size_t& index_to_remove)
+AGE_RESULT game_bullet_remove (const uint32_t& index_to_remove)
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
@@ -490,22 +490,22 @@ AGE_RESULT game_bullet_remove (const size_t& index_to_remove)
         return age_result;
     }
 
-    for (size_t b = index_to_remove; b < game_bullet_live_count; ++b)
+    for (uint32_t b = index_to_remove; b < game_bullet_live_count; ++b)
     {
         game_bullets_transform_inputs[b] = game_bullets_transform_inputs[b + 1];
     }
     
-    for (size_t b = index_to_remove; b < game_bullet_live_count; ++b)
+    for (uint32_t b = index_to_remove; b < game_bullet_live_count; ++b)
     {
         game_bullets_outputs_positions[b] = game_bullets_outputs_positions[b + 1];
     }
 
-    for (size_t b = index_to_remove; b < game_bullet_live_count; ++b)
+    for (uint32_t b = index_to_remove; b < game_bullet_live_count; ++b)
     {
         game_bullets_outputs_rotations[b] = game_bullets_outputs_rotations[b + 1];
     }
 
-    for (size_t b = index_to_remove; b < game_bullet_live_count; ++b)
+    for (uint32_t b = index_to_remove; b < game_bullet_live_count; ++b)
     {
         game_bullets_outputs_scales[b] = game_bullets_outputs_scales[b + 1];
     }
@@ -539,12 +539,12 @@ AGE_RESULT game_player_attempt_to_shoot ()
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
-    for (size_t b = 0; b < game_bullet_live_count; ++b)
+    for (uint32_t b = 0; b < game_bullet_live_count; ++b)
     {
         game_bullets_current_lifetimes_msecs[b] += game_delta_time;
     }
 
-    for (size_t b = 0; b < game_bullet_live_count; ++b)
+    for (uint32_t b = 0; b < game_bullet_live_count; ++b)
     {
         if (game_bullets_current_lifetimes_msecs[b] > game_bullets_max_lifetime_msecs)
         {
@@ -685,7 +685,7 @@ AGE_RESULT game_update_player_asteroids_bullets_output_positions ()
         game_player_output_position.y = 1.f;
     }
 
-    for (size_t a = 0; a < game_large_asteroids_live_count; ++a)
+    for (uint32_t a = 0; a < game_large_asteroids_live_count; ++a)
     {
         game_large_asteroids_outputs_positions[a].x += (game_large_asteroids_transform_inputs[a].forward_vector.x * game_large_asteroids_transform_inputs[a].forward_speed * game_delta_time);
         game_large_asteroids_outputs_positions[a].y += (game_large_asteroids_transform_inputs[a].forward_vector.y * game_large_asteroids_transform_inputs[a].forward_speed * game_delta_time);
@@ -710,7 +710,7 @@ AGE_RESULT game_update_player_asteroids_bullets_output_positions ()
         game_large_asteroids_outputs_rotations[a].x += (game_large_asteroids_transform_inputs[a].rotation_speed) * game_delta_time;
     }
 
-    for (size_t a = 0; a < game_small_asteroids_live_count; ++a)
+    for (uint32_t a = 0; a < game_small_asteroids_live_count; ++a)
     {
         game_small_asteroids_outputs_positions[a].x += (game_small_asteroids_transform_inputs[a].forward_vector.x * game_small_asteroids_transform_inputs[a].forward_speed * game_delta_time);
         game_small_asteroids_outputs_positions[a].y += (game_small_asteroids_transform_inputs[a].forward_vector.y * game_small_asteroids_transform_inputs[a].forward_speed * game_delta_time);
@@ -735,7 +735,7 @@ AGE_RESULT game_update_player_asteroids_bullets_output_positions ()
         game_small_asteroids_outputs_rotations[a].x += (game_small_asteroids_transform_inputs[a].rotation_speed) * game_delta_time;
     }
 
-    for (size_t b = 0; b < game_bullet_live_count; ++b)
+    for (uint32_t b = 0; b < game_bullet_live_count; ++b)
     {
         game_bullets_outputs_positions[b].x += (game_bullets_transform_inputs[b].forward_vector.x * (game_bullets_transform_inputs[b].speed * game_delta_time));
         game_bullets_outputs_positions[b].y += (game_bullets_transform_inputs[b].forward_vector.y * (game_bullets_transform_inputs[b].speed * game_delta_time));
@@ -897,9 +897,9 @@ AGE_RESULT game_bullets_large_asteroids_collision_checks ()
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
-    for (size_t b = 0; b < game_bullet_live_count; ++b)
+    for (uint32_t b = 0; b < game_bullet_live_count; ++b)
     {
-        for (size_t a = 0; a < game_large_asteroids_live_count; ++a)
+        for (uint32_t a = 0; a < game_large_asteroids_live_count; ++a)
         {
             float2 diff = {
                 game_large_asteroids_outputs_positions[a].x - game_bullets_outputs_positions[b].x,
@@ -923,7 +923,7 @@ AGE_RESULT game_bullets_large_asteroids_collision_checks ()
                     return age_result;
                 }
 
-                for (size_t a = 0; a < 3; ++a)
+                for (uint32_t a = 0; a < 3; ++a)
                 {
                     age_result = game_small_asteroid_add (position);
                     if (age_result != AGE_RESULT::SUCCESS)
@@ -944,9 +944,9 @@ AGE_RESULT game_bullets_small_asteroids_collision_checks ()
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 
-    for (size_t b = 0; b < game_bullet_live_count; ++b)
+    for (uint32_t b = 0; b < game_bullet_live_count; ++b)
     {
-        for (size_t a = 0; a < game_small_asteroids_live_count; ++a)
+        for (uint32_t a = 0; a < game_small_asteroids_live_count; ++a)
         {
             float2 diff = {
                 game_small_asteroids_outputs_positions[a].x - game_bullets_outputs_positions[b].x,
@@ -975,7 +975,7 @@ AGE_RESULT game_bullets_small_asteroids_collision_checks ()
     return age_result;
 }
 
-AGE_RESULT game_update (size_t delta_msecs)
+AGE_RESULT game_update (uint32_t delta_msecs)
 {
     AGE_RESULT age_result = AGE_RESULT::SUCCESS;
 

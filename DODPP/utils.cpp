@@ -43,7 +43,7 @@ void utils_get_full_file_path (const char* partial_file_path, char* out_file_pat
 	strcat (out_file_path, partial_file_path);
 }
 
-void utils_get_files_in_folder (const char* partial_folder_path, file_path** out_file_paths, size_t* num_out_files)
+void utils_get_files_in_folder (const char* partial_folder_path, file_path** out_file_paths, uint32_t* num_out_files)
 {
 	char full_folder_path[MAX_PATH];
 	utils_get_full_file_path (partial_folder_path, full_folder_path);
@@ -56,7 +56,7 @@ void utils_get_files_in_folder (const char* partial_folder_path, file_path** out
 	HANDLE find_handle = INVALID_HANDLE_VALUE;
 
 	find_handle = FindFirstFile (folder_path, &ffd);
-	size_t num_files = 0;
+	uint32_t num_files = 0;
 	do
 	{
 		if (!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
@@ -77,7 +77,7 @@ void utils_get_files_in_folder (const char* partial_folder_path, file_path** out
 	*out_file_paths = (file_path*)utils_malloc (sizeof (file_path) * num_files);
 
 	find_handle = FindFirstFile (folder_path, &ffd);
-	size_t current_file_index = 0;
+	uint32_t current_file_index = 0;
 	do
 	{
 		if (!(ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
@@ -106,24 +106,24 @@ void utils_import_texture (const char* texture_path, int* width, int* height, in
 	*pixels = stbi_load (full_path, width, height, bpp, 4);
 }
 
-void* utils_malloc (const size_t size)
+void* utils_malloc (const uint32_t size)
 {
 	return std::malloc (size);
 }
 
-void* utils_malloc_zero (const size_t size)
+void* utils_malloc_zero (const uint32_t size)
 {
 	void* ptr = std::malloc (size);
 	memset (ptr, 0, size);
 	return ptr;
 }
 
-void* utils_aligned_malloc (const size_t size, const size_t alignment)
+void* utils_aligned_malloc (const uint32_t size, const uint32_t alignment)
 {
 	return _aligned_malloc (size, alignment);
 }
 
-void* utils_aligned_malloc_zero (const size_t size, const size_t alignment)
+void* utils_aligned_malloc_zero (const uint32_t size, const uint32_t alignment)
 {
 	void* ptr = _aligned_malloc (size, alignment);
 	memset (ptr, 0, size);
@@ -131,12 +131,12 @@ void* utils_aligned_malloc_zero (const size_t size, const size_t alignment)
 	return ptr;
 }
 
-void* utils_calloc (const size_t count, const size_t size)
+void* utils_calloc (const uint32_t count, const uint32_t size)
 {
 	return std::calloc (count, size);
 }
 
-void* utils_aligned_calloc (const size_t count, const size_t size, const size_t alignment)
+void* utils_aligned_calloc (const uint32_t count, const uint32_t size, const uint32_t alignment)
 {
 	void* ptr = _aligned_malloc (size * count, alignment);
 	memset (ptr, 0, size * count);
@@ -144,20 +144,20 @@ void* utils_aligned_calloc (const size_t count, const size_t size, const size_t 
 	return ptr;
 }
 
-void* utils_realloc (void* ptr, size_t new_size)
+void* utils_realloc (void* ptr, uint32_t new_size)
 {
 	void* new_ptr = std::realloc (ptr, new_size);
 	return new_ptr;
 }
 
-void* utils_realloc_zero (void* ptr, size_t old_size, size_t new_size)
+void* utils_realloc_zero (void* ptr, uint32_t old_size, uint32_t new_size)
 {
 	void* new_ptr = std::realloc (ptr, new_size);
 	memset ((char*)new_ptr + old_size, 0, new_size - old_size);
 	return new_ptr;
 }
 
-void* utils_aligned_realloc_zero (void* ptr, size_t alignment, size_t old_size, size_t new_size)
+void* utils_aligned_realloc_zero (void* ptr, uint32_t alignment, uint32_t old_size, uint32_t new_size)
 {
 	void* new_ptr = _aligned_realloc (ptr, new_size, alignment);
 	memset ((char*)new_ptr + old_size, 0, new_size - old_size);

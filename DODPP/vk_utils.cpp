@@ -1,7 +1,7 @@
 #include "vk_utils.hpp"
 #include "utils.hpp"
 
-AGE_RESULT vk_create_buffer (const size_t size, const VkBufferUsageFlags usage, VkBuffer* out_buffer)
+AGE_RESULT vk_create_buffer (const uint32_t size, const VkBufferUsageFlags usage, VkBuffer* out_buffer)
 {
 	VkBufferCreateInfo create_info = {};
 	create_info.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -56,7 +56,7 @@ AGE_RESULT vk_allocate_bind_buffer_memory (const VkBuffer buffer, const uint32_t
 	return AGE_RESULT::SUCCESS;
 }
 
-AGE_RESULT vk_map_buffer_memory (const VkDeviceMemory memory, const size_t offset, const size_t size, void** mapped_memory_ptr)
+AGE_RESULT vk_map_buffer_memory (const VkDeviceMemory memory, const uint32_t offset, const uint32_t size, void** mapped_memory_ptr)
 {
 	VkResult vk_result = vkMapMemory (device, memory, offset, size, 0, mapped_memory_ptr);
 
@@ -68,12 +68,12 @@ AGE_RESULT vk_map_buffer_memory (const VkDeviceMemory memory, const size_t offse
 	return AGE_RESULT::SUCCESS;
 }
 
-void vk_copy_data_to_memory_mapped_ptr (size_t offset, void* data, size_t size, void* mapped_memory_ptr)
+void vk_copy_data_to_memory_mapped_ptr (uint32_t offset, void* data, uint32_t size, void* mapped_memory_ptr)
 {
 	std::memcpy ((char*)mapped_memory_ptr + offset, data, size);
 }
 
-AGE_RESULT vk_allocate_command_buffers (const VkCommandPool cmd_pool, VkCommandBufferLevel level, size_t num_cmd_buffers, VkCommandBuffer* out_cmd_buffers)
+AGE_RESULT vk_allocate_command_buffers (const VkCommandPool cmd_pool, VkCommandBufferLevel level, uint32_t num_cmd_buffers, VkCommandBuffer* out_cmd_buffers)
 {
 	VkCommandBufferAllocateInfo copy_cmd_buffer_allocate_info = {
 		VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
@@ -149,7 +149,7 @@ AGE_RESULT vk_submit_cmd_buffer (const VkCommandBuffer cmd_buffer, const VkQueue
 	return AGE_RESULT::SUCCESS;
 }
 
-AGE_RESULT vk_copy_buffer_to_buffer (const VkBuffer src_buffer, const VkBuffer dst_buffer, const size_t offste, const size_t size)
+AGE_RESULT vk_copy_buffer_to_buffer (const VkBuffer src_buffer, const VkBuffer dst_buffer, const uint32_t offste, const uint32_t size)
 {
 	return AGE_RESULT::SUCCESS;
 }
@@ -162,7 +162,7 @@ AGE_RESULT vk_create_images (
 	const VkSampleCountFlagBits samples,
 	const VkImageTiling tiling,
 	const VkImageUsageFlags usage,
-	const size_t images_count,
+	const uint32_t images_count,
 	const VkExtent3D* extents,
 	VkImage** out_images
 )
@@ -185,7 +185,7 @@ AGE_RESULT vk_create_images (
 		VK_IMAGE_LAYOUT_UNDEFINED
 	};
 
-	for (size_t i = 0; i < images_count; ++i)
+	for (uint32_t i = 0; i < images_count; ++i)
 	{
 		create_info.extent = extents[i];
 		VkResult vk_result = vkCreateImage (device, &create_info, nullptr, *(out_images + i));
@@ -200,7 +200,7 @@ AGE_RESULT vk_create_images (
 
 AGE_RESULT vk_change_images_layout (
 	VkImage** images,
-	const size_t images_count,
+	const uint32_t images_count,
 	const VkAccessFlags src_access,
 	const VkAccessFlags dst_access,
 	const VkImageLayout src_layout,
@@ -247,7 +247,7 @@ AGE_RESULT vk_change_images_layout (
 
 	VkImageMemoryBarrier* barriers = (VkImageMemoryBarrier*)utils_malloc (sizeof (VkImageMemoryBarrier) * images_count);
 
-	for (size_t i = 0; i < images_count; ++i)
+	for (uint32_t i = 0; i < images_count; ++i)
 	{
 		image_memory_barrier.image = **(images + i);
 		barriers[i] = image_memory_barrier;
@@ -291,14 +291,14 @@ exit:
 	return AGE_RESULT::SUCCESS;
 }
 
-AGE_RESULT vk_allocate_bind_image_memory (VkImage** images, const size_t images_count, const uint32_t required_types, VkDeviceMemory* out_memory)
+AGE_RESULT vk_allocate_bind_image_memory (VkImage** images, const uint32_t images_count, const uint32_t required_types, VkDeviceMemory* out_memory)
 {
 	VkDeviceSize total_vk_images_size = 0;
 	VkMemoryRequirements memory_requirements = { 0 };
 
 	VkDeviceSize* image_data_offsets = (VkDeviceSize*)utils_malloc (sizeof (VkDeviceSize) * images_count);
 
-	for (size_t i = 0; i < images_count; ++i)
+	for (uint32_t i = 0; i < images_count; ++i)
 	{
 		image_data_offsets[i] = total_vk_images_size;
 		vkGetImageMemoryRequirements (device, **(images + i), &memory_requirements);
@@ -330,7 +330,7 @@ AGE_RESULT vk_allocate_bind_image_memory (VkImage** images, const size_t images_
 		return AGE_RESULT::ERROR_GRAPHICS_ALLOCATE_MEMORY;
 	}
 
-	for (size_t i = 0; i < images_count; ++i)
+	for (uint32_t i = 0; i < images_count; ++i)
 	{
 		vk_result = vkBindImageMemory (device, **(images + i), *out_memory, image_data_offsets[i]);
 		if (vk_result != VK_SUCCESS)
@@ -349,7 +349,7 @@ AGE_RESULT vk_copy_buffer_to_images (
 	VkImage** dst_images, 
 	const VkExtent3D* images_extents, 
 	const VkDeviceSize* buffer_offsets, 
-	const size_t images_count)
+	const uint32_t images_count)
 {
 	VkCommandBuffer cmd_buffer = VK_NULL_HANDLE;
 	VkOffset3D img_offset = { 0,0,0 };
@@ -382,7 +382,7 @@ AGE_RESULT vk_copy_buffer_to_images (
 		goto exit;
 	}
 
-	for (size_t i = 0; i < images_count; ++i)
+	for (uint32_t i = 0; i < images_count; ++i)
 	{
 		buffer_image_copy.bufferOffset = buffer_offsets[i];
 		buffer_image_copy.imageExtent = images_extents[i];
@@ -411,7 +411,7 @@ exit:
 	return age_result;
 }
 
-AGE_RESULT vk_create_image_views (VkImage** images, const size_t images_count, const VkImageViewType type, const VkFormat format, VkImageView** out_image_views)
+AGE_RESULT vk_create_image_views (VkImage** images, const uint32_t images_count, const VkImageViewType type, const VkFormat format, VkImageView** out_image_views)
 {
 	VkImageSubresourceRange subresource_range = {
 		VK_IMAGE_ASPECT_COLOR_BIT,
@@ -432,7 +432,7 @@ AGE_RESULT vk_create_image_views (VkImage** images, const size_t images_count, c
 		subresource_range
 	};
 
-	for (size_t i = 0; i < images_count; ++i)
+	for (uint32_t i = 0; i < images_count; ++i)
 	{
 		create_info.image = **(images + i);
 		VkResult vk_result = vkCreateImageView (device, &create_info, nullptr, *(out_image_views + i));
