@@ -55,22 +55,15 @@ LRESULT CALLBACK WindowProc (HWND h_wnd, UINT msg, WPARAM w_param, LPARAM l_para
     case WM_TIMER:
         current_tick_count = GetTickCount ();
 
-        try
-        {
-            age_result = game_update ((uint32_t)(current_tick_count - last_tick_count));
-        }
-        catch (std::exception ex)
-        {
-            printf ("exception: %s\n", ex.what ());
-        }
-
-        last_tick_count = current_tick_count;
+        age_result = game_update ((uint32_t)(current_tick_count - last_tick_count));
 
         if (age_result != AGE_RESULT::SUCCESS)
         {
             log_error (age_result);
             PostQuitMessage (0);
         }
+
+        last_tick_count = current_tick_count;
 
         break;
 
